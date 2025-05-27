@@ -60,13 +60,13 @@ Plataforma para locação de produtos para eventos no modelo **"Pegue e Monte"**
 1. Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/Allaaxx/fest.git
 ```
 
 2. Acesse o diretório:
 
 ```bash
-cd seu-repositorio
+cd fest
 ```
 
 3. Instale as dependências:
