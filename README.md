@@ -1,43 +1,104 @@
-# 🎪 Fest - Plataforma de Locação no Modelo Pegue e Monte  
 
-Plataforma de locação de produtos para eventos no modelo **"Pegue e Monte"**, onde clientes podem escolher itens de decoração, selecionar as datas, retirar, montar por conta própria e devolver após o evento.  
+# 🎪 Fest - Plataforma de Locação no Modelo Pegue e Monte
 
-## 🚀 Funcionalidades  
-- 🏠 **Página Inicial:**  
-  - Carrossel full screen  
-  - Menu transparente que fixa no topo ao rolar  
-  - Sessão de produtos em destaque da semana  
+Plataforma para locação de produtos para eventos no modelo **"Pegue e Monte"**, onde os clientes escolhem os itens, selecionam as datas, retiram, montam por conta própria e devolvem após o evento.
 
-- 🛍️ **Página de Produto (Locação):**  
-  - Carrossel de imagens à esquerda e informações à direita  
-  - Calendário para selecionar data de retirada e devolução  
-  - Exibição de disponibilidade com bloqueio de datas já reservadas  
-  - Botão para adicionar ao carrinho de locação  
-  - Avaliações de clientes com nota e comentários  
+---
 
-- 📦 **Gestão de Estoque:**  
-  - Controle de estoque integrado  
-  - Geração de etiquetas com QR Code ou código de barras para cada item  
-  - Gestão de disponibilidade dos itens por data  
+## 🚀 Funcionalidades Principais
 
-- ⭐ **Sistema de Avaliação:**  
-  - Avaliação por estrelas e comentários  
-  - Exibição da média das avaliações nos produtos  
+- 🛍️ **Página de Produto (Locação)**
+  - Carrossel de imagens dos produtos
+  - Calendário para selecionar datas de retirada e devolução
+  - Bloqueio automático de datas indisponíveis
+  - Adicionar ao carrinho de locação
+  - Área de avaliações com estrelas e comentários
 
-- 🛒 **Carrinho de Locação:**  
-  - Cálculo automático de preço baseado nas datas escolhidas  
-  - Opção de retirada pelo cliente ou entrega via API de transporte (opcional)  
+- 📦 **Gestão de Estoque**
+  - Controle de disponibilidade por datas
+  - Geração de etiquetas com QR Code ou código de barras
+  - Visualização e gestão de status dos itens
 
-## 💻 **Tecnologias Sugeridas:**  
-- Front-end: HTML, CSS, JavaScript, React, ou Vue  
-- Back-end: Laravel, Node.js ou Django  
-- Banco de Dados: MySQL, PostgreSQL ou MongoDB  
-- API de Transporte (opcional): Lalamove, Loggi, etc.  
+- ⭐ **Avaliações de Produto**
+  - Sistema de reviews com estrelas e comentários
+  - Média de avaliações visível no produto
 
-## 📜 **Licença**  
-Este projeto está sob licença [MIT](LICENSE).  
+- 🛒 **Carrinho de Locação**
+  - Cálculo automático com base nas datas selecionadas
+  - Opções de retirada ou entrega via transportadora (API opcional)
 
----  
+---
 
-### 👨‍💻 Contribuições são bem-vindas!  
-Sinta-se livre para abrir issues, enviar sugestões ou fazer pull requests.  
+## 🎨 Paleta de Cores
+
+- `--color-black2: #051922`
+- `--color-primary: #f0739f`
+- `--color-white: #ffffff`
+- `--color-black: #000000`
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Next.js** – Full Stack React Framework
+- **React 19**
+- **TailwindCSS** + **tailwindcss-animate**
+- **Radix UI** – Componentes acessíveis e sofisticados
+- **Lucide React** – Ícones
+- **Zustand** – Gerenciamento de estado global
+- **React Hook Form** + **Zod** – Formulários e validações
+- **Embla Carousel** – Carrossel de imagens
+- **React Day Picker** – Seleção de datas
+- **Date-fns** – Manipulação de datas
+- **Sonner** – Toast/Notificações modernas
+- **Recharts** – Gráficos (gestão interna)
+
+---
+
+## 🚧 Instalação e Execução Local
+
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/seu-usuario/seu-repositorio.git
+```
+
+2. Acesse o diretório:
+
+```bash
+cd seu-repositorio
+```
+
+3. Instale as dependências:
+
+```bash
+npm install
+```
+
+4. Execute o projeto:
+
+```bash
+npm run dev
+```
+
+5. Acesse em: [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 📜 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas!
+
+- 🔧 Abra uma **issue**
+- 🚀 Envie um **pull request**
+- 💡 Sugira melhorias ou novas funcionalidades
+
+---
+
+Desenvolvido com 💖 usando Next.js + TailwindCSS + Radix UI.
