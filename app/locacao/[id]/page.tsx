@@ -62,7 +62,7 @@ const theme = createTheme({
   palette: {
     primary: {
       main: "#051922",
-      contrastText: "#fff",
+      contrastText: "#F0739F",
     },
   },
   components: {
@@ -71,11 +71,11 @@ const theme = createTheme({
         root: {
           "&.Mui-selected": {
             backgroundColor: "#051922",
-            color: "#fff",
+            color: "#F0739F",
           },
           "&.Mui-selected:hover, &.Mui-selected:focus": {
             backgroundColor: "#051922",
-            color: "#fff",
+            color: "#F0739F !important",
           },
         },
       },
@@ -228,15 +228,6 @@ export default function LocacaoProductPage() {
               <p className="mb-2 px-3 break-words font-normal text-2xl card-title">
                 {product.name}
               </p>
-              <div className="flex flex-wrap items-center gap-2 px-3 mb-2">
-                <span className="text-sm text-gray-500">Fornecedor:</span>
-                <span className="font-medium text-black">
-                  {product.vendor.name}
-                </span>
-                <span className="text-xs text-gray-400">
-                  ({product.vendor.location})
-                </span>
-              </div>
             </div>
             <div className="flex flex-wrap mb-4 items-end justify-start gap-4 card-price">
               <h3 className="mb-2 px-3 break-words font-normal text-2xl text-fest-primary">
@@ -266,7 +257,23 @@ export default function LocacaoProductPage() {
                   value={startDate}
                   views={["day", "month", "year"]}
                   onChange={setStartDate}
+                  yearsOrder="desc"
                   disablePast
+                  timezone="America/Sao_Paulo"
+                  showDaysOutsideCurrentMonth
+                  localeText={{
+                    previousMonth: "Mês anterior",
+                    nextMonth: "Próximo mês",
+                    openPreviousView: "Abrir visualização anterior",
+                    openNextView: "Abrir próxima visualização",
+                    cancelButtonLabel: "Cancelar",
+                    clearButtonLabel: "Limpar",
+                    todayButtonLabel: "Hoje",
+                    okButtonLabel: "OK",
+                    start: "Início",
+                    end: "Fim",
+                    toolbarTitle: "Selecionar data",
+                  }}
                   slotProps={{
                     textField: { size: "small", fullWidth: true },
                     day: {
@@ -300,14 +307,16 @@ export default function LocacaoProductPage() {
                         "& .MuiPickersArrowSwitcher-spacer": {
                           display: "none",
                         },
-                        "& .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:focus, .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:hover": {
-                          backgroundColor: "#f0739f",
-                          color: "#fff",
-                        },
-                        "& .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:hover": {
-                          backgroundColor: "#f0739f",
-                          color: "#fff",
-                        },
+                        "& .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:focus, .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:hover":
+                          {
+                            backgroundColor: "#f0739f",
+                            color: "#fff",
+                          },
+                        "& .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:hover":
+                          {
+                            backgroundColor: "#f0739f",
+                            color: "#fff",
+                          },
                         "& .MuiPickersCalendarHeader-labelContainer": {
                           flex: 1,
                           display: "flex",
@@ -440,7 +449,7 @@ export default function LocacaoProductPage() {
         </div>
       </section>
       {/* Tabs com Informações Detalhadas */}
-      <div className="w-full lg:w-1/2 mt-6 lg:mt-0 px-5 mx-auto">
+      <div className="w-full lg:w-1/2 mt-6 lg:mt-0 px-5 mx-auto mb-12">
         <Tabs defaultValue="description" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="description">Descrição</TabsTrigger>
@@ -448,8 +457,8 @@ export default function LocacaoProductPage() {
             <TabsTrigger value="reviews">Avaliações</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
+            <Card className="shadow-none border-none p-0 bg-white">
+              <CardContent className="p-0">
                 <p className="text-gray-600 leading-relaxed">
                   {product.description}
                 </p>
@@ -457,8 +466,8 @@ export default function LocacaoProductPage() {
             </Card>
           </TabsContent>
           <TabsContent value="features" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
+            <Card className="shadow-none border-none p-0 bg-white">
+              <CardContent className="p-0">
                 <h3 className="font-semibold mb-4">O que está incluso:</h3>
                 <ul className="space-y-2">
                   {product.features.map((feature, index) => (
@@ -472,8 +481,8 @@ export default function LocacaoProductPage() {
             </Card>
           </TabsContent>
           <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
+            <Card className="shadow-none border-none p-0 bg-white">
+              <CardContent className="p-0">
                 <div className="text-center py-8">
                   <p className="text-gray-600">
                     Sistema de avaliações em desenvolvimento
