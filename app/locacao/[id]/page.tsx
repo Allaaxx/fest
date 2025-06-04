@@ -5,8 +5,6 @@ import {
   Star,
   Heart,
   Share2,
-  Plus,
-  Minus,
   ArrowLeft,
   ArrowRight,
   CheckSquare,
@@ -14,7 +12,6 @@ import {
   Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/components/providers/cart-provider";
@@ -22,13 +19,12 @@ import { useWishlist } from "@/components/providers/wishlist-provider";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
 import "swiper/css";
-import TextField from "@mui/material/TextField";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { ptBR } from "date-fns/locale/pt-BR";
 import "@/styles/locacao-responsive.css";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 // Dados simulados do produto de locação
 const product = {
@@ -61,6 +57,31 @@ const product = {
     "Itens de iluminação",
   ],
 };
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#051922",
+      contrastText: "#fff",
+    },
+  },
+  components: {
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          "&.Mui-selected": {
+            backgroundColor: "#051922",
+            color: "#fff",
+          },
+          "&.Mui-selected:hover, &.Mui-selected:focus": {
+            backgroundColor: "#051922",
+            color: "#fff",
+          },
+        },
+      },
+    },
+  },
+});
 
 export default function LocacaoProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -115,7 +136,7 @@ export default function LocacaoProductPage() {
   }
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <section className="container mx-auto my-4 mt-16 flex flex-col lg:flex-row">
         <div className="flex flex-col items-center w-full lg:w-1/2 mb-5 mt-5 p-5">
           {/* Carrossel principal */}
@@ -207,7 +228,7 @@ export default function LocacaoProductPage() {
               <p className="mb-2 px-3 break-words font-normal text-2xl card-title">
                 {product.name}
               </p>
-              <div className="flex items-center gap-2 px-3 mb-2">
+              <div className="flex flex-wrap items-center gap-2 px-3 mb-2">
                 <span className="text-sm text-gray-500">Fornecedor:</span>
                 <span className="font-medium text-black">
                   {product.vendor.name}
@@ -250,62 +271,70 @@ export default function LocacaoProductPage() {
                     textField: { size: "small", fullWidth: true },
                     day: {
                       sx: {
-                        '&.Mui-selected': {
-                          backgroundColor: '#051922',
-                          color: '#fff',
+                        "&.Mui-selected": {
+                          backgroundColor: "#051922",
+                          color: "#fff",
                         },
-                        '&:hover': {
-                          backgroundColor: '#f0739f',
-                          color: '#fff',
+                        "&:hover": {
+                          backgroundColor: "#f0739f",
+                          color: "#fff",
                         },
-                        '&.Mui-selected:focus': {
-                          backgroundColor: '#051922',
-                          color: '#fff',
+                        "&.Mui-selected:focus": {
+                          backgroundColor: "#051922",
+                          color: "#fff",
                         },
-                        '&.MuiPickersDay-today': {
-                          borderColor: '#f0739f',
+                        "&.MuiPickersDay-today": {
+                          borderColor: "#f0739f",
                         },
                       },
                     },
                     popper: {
                       sx: {
-                        '& .MuiPickersArrowSwitcher-root': {
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          width: '100%',
+                        "& .MuiPickersArrowSwitcher-root": {
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          width: "40%",
                           gap: 0,
                         },
-                        '& .MuiPickersArrowSwitcher-spacer': {
-                          display: 'none',
+                        "& .MuiPickersArrowSwitcher-spacer": {
+                          display: "none",
                         },
-                        '& .MuiPickersCalendarHeader-labelContainer': {
+                        "& .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:focus, .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:hover": {
+                          backgroundColor: "#f0739f",
+                          color: "#fff",
+                        },
+                        "& .css-1jyby0c-MuiMonthCalendar-button.Mui-selected:hover": {
+                          backgroundColor: "#f0739f",
+                          color: "#fff",
+                        },
+                        "& .MuiPickersCalendarHeader-labelContainer": {
                           flex: 1,
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
                           minWidth: 120,
                         },
-                        '& .MuiPickersCalendarHeader-label': {
-                          color: '#051922',
+                        "& .MuiPickersCalendarHeader-label": {
+                          color: "#051922",
                           fontWeight: 600,
-                          textAlign: 'center',
-                          width: '100%',
+                          textAlign: "center",
+                          width: "100%",
                           minWidth: 120,
-                          position: 'relative',
+                          position: "relative",
                           zIndex: 1,
                         },
-                        '& .MuiPickersArrowSwitcher-button': {
-                          color: '#f0739f',
-                          background: '#051922',
-                          borderRadius: '50px',
+                        "& .MuiPickersArrowSwitcher-button": {
+                          color: "#f0739f",
+                          background: "#051922",
+                          borderRadius: "50px",
                           width: 48,
                           height: 32,
-                          margin: '0 8px',
-                          transition: 'background 0.2s',
-                          '&:hover': {
-                            background: '#f0739f',
-                            color: '#fff',
+                          margin: "0 8px",
+                          transition: "background 0.2s",
+                          "&:hover": {
+                            background: "#f0739f",
+                            color: "#fff",
                           },
                         },
                       },
@@ -313,11 +342,11 @@ export default function LocacaoProductPage() {
                   }}
                   sx={{
                     width: {
-                      xs: '100%', // 100% em telas pequenas
-                      md: '50%',  // 50% em telas médias/grandes
+                      xs: "100%", // 100% em telas pequenas
+                      md: "50%", // 50% em telas médias/grandes
                     },
                     minWidth: 200,
-                    maxWidth: 400,
+                    maxWidth: 350,
                   }}
                 />
               </div>
@@ -455,6 +484,6 @@ export default function LocacaoProductPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </>
+    </ThemeProvider>
   );
 }
