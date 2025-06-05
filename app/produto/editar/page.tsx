@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import "swiper/css";
@@ -83,6 +83,16 @@ export default function EditProductPage() {
       maximumFractionDigits: 2,
     });
   };
+
+  useEffect(() => {
+    const main = document.querySelector(".product-edit-panel");
+    if (main) {
+      main.classList.add("animate-fade-in-up");
+    }
+    return () => {
+      if (main) main.classList.remove("animate-fade-in-up");
+    };
+  }, []);
 
   return (
     <>

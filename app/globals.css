@@ -268,3 +268,9 @@ body[data-scroll-locked] {
   cursor: pointer;
   border: none;
 }
+
+/* Edit Product */
+
+.tiptap *:focus-visible {
+  outline: none !important;
+}

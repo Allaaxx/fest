@@ -1,9 +1,9 @@
-import { Pencil, X as Close } from "lucide-react";
+import { X as Close } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, ExternalLink, Upload } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+
 import {
   Select,
   SelectContent,
@@ -42,7 +42,7 @@ export default function ProductPreviewPanelEdit({
   onRemoveImage: (index: number) => void;
   onSave: () => void;
 }) {
-  const [loading, setLoading] = useState(false);
+
 
   const editor = useEditor({
     extensions: [
@@ -56,14 +56,6 @@ export default function ProductPreviewPanelEdit({
       onFieldEdit("description", editor.getHTML());
     },
   });
-
-  const handleEditClick = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onToggleEdit();
-    }, 700); // tempo da animação
-  };
 
   // Toolbar fixa para o tiptap
   function TiptapToolbar({ editor }: { editor: any }) {
@@ -207,13 +199,13 @@ export default function ProductPreviewPanelEdit({
                 </Select>
               </h5>
               <h5 className="flex items-center px-4 font-light text-fest-black2">
-                Tipo de produto:
+                Tipo:
                 <div className="ml-3">
                   <Select
                     value={productData.type}
                     onValueChange={(value) => onFieldEdit("type", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="m-1 bg-transparent">
                       <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -225,20 +217,23 @@ export default function ProductPreviewPanelEdit({
                 </div>
               </h5>
             </div>
-            <p className="mb-2 px-3 break-words font-normal text-2xl ">
+            <div className="mb-2 px-3 break-words font-normal text-2xl ">
               <Input
                 className="my-3 font-normal text-2xl"
                 value={productData.name}
                 onChange={(e) => onFieldEdit("name", e.target.value)}
                 placeholder="Nome do produto"
               />
-            </p>
-            <p className="px-3 mb-2 text-gray-600">
-              <div className="border rounded bg-white min-h-[120px] p-2 focus-within:ring-2 ">
+            </div>
+            <div className="px-3 mb-2 text-gray-600">
+              <div className="border rounded bg-white min-h-[120px] p-2 focus-within:ring-2 focus-within:ring-fest-black2">
                 <TiptapToolbar editor={editor} />
-                <EditorContent editor={editor} />
+                <EditorContent
+                  editor={editor}
+                  className="outline-none focus:outline-none focus:ring-0 focus-visible:border-transparent tiptap"
+                />
               </div>
-            </p>
+            </div>
           </div>
           <div className="flex flex-wrap mb-4 items-end justify-start gap-4 ">
             <h3 className="mb-2 px-3 break-words font-normal text-2xl ">
@@ -355,21 +350,32 @@ export default function ProductPreviewPanelEdit({
             <label className="block text-fest-black2 font-semibold mb-1">
               Imagens do Produto
             </label>
-            <div className="border-2 border-dashed border-fest-primary rounded-lg p-6 text-center hover:border-fest-primary transition-colors">
+            <div className="border-2 border-dashed border-fest-primary rounded-lg p-6 text-center hover:border-fest-primary transition-colors mb-10">
               <Upload className="w-8 h-8 text-fest-primary mx-auto mb-2" />
               <p className="text-sm text-fest-gray mb-2">
                 Arraste suas imagens aqui ou clique para selecionar
               </p>
               <p className="text-xs text-fest-gray mb-4">
-                Máximo 5 imagens, até 5MB cada (JPG, PNG)
+                Máximo 4 imagens, até 5MB cada (JPG, PNG)
               </p>
               <input
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={(e) =>
-                  e.target.files && onImageUpload(e.target.files)
-                }
+                onChange={(e) => {
+                  if (e.target.files) {
+                    const files = Array.from(e.target.files).slice(
+                      0,
+                      4 - productData.images.length
+                    );
+                    if (files.length > 0) {
+                      // Cria um novo DataTransfer para limitar o número de arquivos
+                      const dt = new DataTransfer();
+                      files.forEach((file) => dt.items.add(file));
+                      onImageUpload(dt.files);
+                    }
+                  }
+                }}
                 className="hidden"
                 id="image-upload-form"
               />
@@ -380,31 +386,132 @@ export default function ProductPreviewPanelEdit({
                 Selecionar Imagens
               </label>
             </div>
-            {productData.images.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                {productData.images.map((image: File, index: number) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={URL.createObjectURL(image) || "/placeholder.svg"}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+            {productData.images.length > 0 &&
+              productData.images.length <= 3 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                  {productData.images.map((image: File, index: number) => (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square w-full h-full bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                        <img
+                          src={URL.createObjectURL(image) || "/placeholder.svg"}
+                          alt={`Preview ${index + 1}`}
+                          className="object-cover w-full h-full transition duration-300 group-hover:brightness-50"
+                          style={{ aspectRatio: "1 / 1" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => onRemoveImage(index)}
+                          className="z-30 absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                          style={{ background: "rgba(0,0,0,0.0)" }}
+                          aria-label="Remover imagem"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-8 h-8 text-white drop-shadow-lg trash-icon"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <g>
+                              <rect
+                                x="9"
+                                y="3"
+                                width="6"
+                                height="2"
+                                rx="1"
+                                className="transition-all duration-300 origin-center trash-lid"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M10 11v6m4-6v6"
+                              />
+                              <rect x="1" y="7" width="22" height="1" />
+                            </g>
+                          </svg>
+                        </button>
+                      </div>
+                      {index === 0 && (
+                        <Badge className="absolute bottom-2 left-2 bg-fest-primary text-white text-xs">
+                          Principal
+                        </Badge>
+                      )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Close className="w-3 h-3" />
-                    </button>
-                    {index === 0 && (
-                      <Badge className="absolute bottom-2 left-2 bg-fest-primary text-white text-xs">
-                        Principal
-                      </Badge>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            {productData.images.length > 3 && (
+              <div className="w-full mt-4 overflow-x-auto">
+                <div className="flex gap-4 min-w-[400px]">
+                  {productData.images
+                    .slice(0, 4)
+                    .map((image: File, index: number) => (
+                      <div
+                        key={index}
+                        className="relative group min-w-[140px] max-w-[180px]"
+                      >
+                        <div className="aspect-square w-full h-full bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                          <img
+                            src={
+                              URL.createObjectURL(image) || "/placeholder.svg"
+                            }
+                            alt={`Preview ${index + 1}`}
+                            className="object-cover w-full h-full transition duration-300 group-hover:brightness-50"
+                            style={{ aspectRatio: "1 / 1" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => onRemoveImage(index)}
+                            className="z-30 absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                            style={{ background: "rgba(0,0,0,0.0)" }}
+                            aria-label="Remover imagem"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-8 h-8 text-white drop-shadow-lg trash-icon"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <g>
+                                <rect
+                                  x="9"
+                                  y="3"
+                                  width="6"
+                                  height="2"
+                                  rx="1"
+                                  className="transition-all duration-300 origin-center trash-lid"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M10 11v6m4-6v6"
+                                />
+                                <rect x="1" y="7" width="22" height="1" />
+                              </g>
+                            </svg>
+                          </button>
+                        </div>
+                        {index === 0 && (
+                          <Badge className="absolute bottom-2 left-2 bg-fest-primary text-black2 text-xs">
+                            Principal
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                </div>
               </div>
             )}
           </div>
