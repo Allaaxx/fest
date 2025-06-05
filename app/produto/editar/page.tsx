@@ -16,14 +16,12 @@ export default function EditProductPage() {
     category: "decoracao-infantil",
     type: "venda",
     price: "199.90",
-    dailyPrice: "",
-    weeklyPrice: "",
     stock: "1",
     images: [] as File[],
     features: ["Kit completo para 8 pessoas"],
     tags: "festa, infantil, decoração",
     availability: true,
-    delivery: false,
+    delivery: true,
     pickup: true,
     vendor: { name: "Fornecedor Exemplo", location: "São Paulo" },
     rating: 4.5,
@@ -120,9 +118,7 @@ export default function EditProductPage() {
               <TabsContent value="description" className="mt-6">
                 <Card>
                   <CardContent className="p-6">
-                    <p className="text-gray-600 leading-relaxed">
-                      {productData.description}
-                    </p>
+                    <div className="text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: productData.description }} />
                   </CardContent>
                 </Card>
               </TabsContent>
