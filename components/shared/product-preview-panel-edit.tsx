@@ -1,4 +1,4 @@
-import { X as Close } from "lucide-react";
+import { BookmarkPlus, X as Close, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, ExternalLink, Upload } from "lucide-react";
 import { Button } from "../ui/button";
@@ -149,7 +149,9 @@ export default function ProductPreviewPanelEdit({
   return (
     <div className="w-full lg:w-1/2 flex flex-col gap-6 sm:p-5 product-edit-panel">
       <div className="flex flex-col gap-4 mt-5">
-        <div className="flex flex-row justify-around sm:gap-0 sm:items-center sm:justify-between card-component">
+        
+        <div className="shadow-lg p-4 bg-white rounded-lg flex flex-col ">
+          <div className="flex flex-row justify-around sm:gap-0 sm:items-center sm:justify-between card-component">
           <a
             href="#"
             className="text-black flex items-center gap-3 mb-2 sm:mb-0"
@@ -158,27 +160,18 @@ export default function ProductPreviewPanelEdit({
             <h4 className="m-0 font-light">Voltar a dashboard</h4>
           </a>
           <div className="flex items-center gap-3">
-            <Button
-              variant="default"
-              type="button"
-              onClick={onSave}
-              className="px-4 py-1 rounded border border-fest-black2 text-fest-primary bg-fest-black2 hover:text-fest-black2 hover:border-fest-primary transition-colors font-semibold text-sm flex items-center gap-2"
-              aria-label="Salvar"
-            >
-              Salvar
-            </Button>
+           <BookmarkPlus className="h-8 w-8 text-fest-primary" />
           </div>
         </div>
-        <div className="shadow-lg p-4 bg-white rounded-lg flex flex-col ">
           <div className="mt-5 flex flex-col gap-4">
-            <div className="flex flex-col md:flex-row md:items-center md:gap-8 w-full">
-              <h5 className="flex items-center px-4 font-light text-fest-black2 mb-2 md:mb-0">
+            <div className="flex flex-col xl:flex-row md:items-center md:gap-8 w-full">
+              <h5 className="flex items-center w-full px-4 font-light text-fest-black2 mb-2 md:mb-0">
                 Categoria:
                 <Select
                   value={productData.category}
                   onValueChange={(v) => onFieldEdit("category", v)}
                 >
-                  <SelectTrigger className="w-48 ml-3 bg-transparent ">
+                  <SelectTrigger className="w-full ml-3 bg-transparent ">
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,14 +189,14 @@ export default function ProductPreviewPanelEdit({
                   </SelectContent>
                 </Select>
               </h5>
-              <h5 className="flex items-center px-4 font-light text-fest-black2">
+              <h5 className="flex items-center w-full px-4 font-light text-fest-black2">
                 Tipo:
-                <div className="ml-3">
+                <div className="ml-3 w-full">
                   <Select
                     value={productData.type}
                     onValueChange={(value) => onFieldEdit("type", value)}
                   >
-                    <SelectTrigger className="m-1 bg-transparent">
+                    <SelectTrigger className="w-full m-1 bg-transparent">
                       <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -215,16 +208,20 @@ export default function ProductPreviewPanelEdit({
                 </div>
               </h5>
             </div>
-            <div className="mb-2 px-3 break-words font-normal text-2xl ">
-              <Input
-                className="my-3 font-normal text-2xl"
-                value={productData.name}
-                onChange={(e) => onFieldEdit("name", e.target.value)}
-                placeholder="Nome do produto"
-              />
+            <div className="mb-1 px-4">
+              <h5 className="w-full font-light text-fest-black2">Produto:</h5>
+              <div className="break-words font-normal text-2xl ">
+                <Input
+                  className="my-2 font-normal text-2xl"
+                  value={productData.name}
+                  onChange={(e) => onFieldEdit("name", e.target.value)}
+                  placeholder="Nome do produto"
+                />
+              </div>
             </div>
-            <div className="px-3 mb-2 text-gray-600">
-              <div className="border rounded bg-white min-h-[120px] p-2 focus-within:ring-2 focus-within:ring-fest-black2">
+            <div className="px-3 mb-1 ">
+              <h5 className="w-full font-light text-fest-black2">Descrição:</h5>
+              <div className="border rounded text-gray-600 bg-white min-h-[120px] p-2 focus-within:ring-2 focus-within:ring-fest-black2">
                 <TiptapToolbar editor={editor} />
                 <EditorContent
                   editor={editor}
@@ -233,45 +230,55 @@ export default function ProductPreviewPanelEdit({
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap mb-4 items-end justify-start gap-4 ">
-            <h3 className="mb-2 px-3 break-words font-normal text-2xl ">
-              <CurrencyInput
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm my-3 font-normal text-2xl"
-                value={productData.price}
-                decimalsLimit={2}
-                decimalSeparator=","
-                groupSeparator="."
-                prefix="R$ "
-                onValueChange={(value) => onFieldEdit("price", value || "")}
-                placeholder="0,00"
-                disableAbbreviations={true}
-                allowDecimals
-                allowNegativeValue={false}
-                defaultValue={undefined}
-                intlConfig={{ locale: "pt-BR", currency: "BRL" }}
-              />
-            </h3>
-            <h4 className="mb-2 px-3 break-words text-gray-500 line-through font-light text-xl">
-              <CurrencyInput
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm my-3 text-2xl text-gray-500 font-light"
-                value={productData.originalPrice}
-                decimalsLimit={2}
-                decimalSeparator=","
-                groupSeparator="."
-                prefix="R$ "
-                disableAbbreviations={true}
-                onValueChange={(value) =>
-                  onFieldEdit("originalPrice", value || "")
-                }
-                placeholder="0,00"
-                allowDecimals
-                allowNegativeValue={false}
-                defaultValue={undefined}
-                intlConfig={{ locale: "pt-BR", currency: "BRL" }}
-              />
-            </h4>
+          <div className="mb-4 px-3">
+            <div className="flex gap-4">
+              <h3 className="font-light w-full md:w-1/2 mb-1">
+                Preço
+              </h3>
+              <h3 className="font-light  text-gray-500 line-through w-full md:w-1/2 mb-1">
+                Preço Original
+              </h3>
+            </div>
+            <div className="flex gap-4 flex-col md:flex-row">
+              <div className="w-full md:w-1/2">
+                <CurrencyInput
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm my-1 font-normal text-2xl"
+                  value={productData.price}
+                  decimalsLimit={2}
+                  decimalSeparator=","
+                  groupSeparator="."
+                  prefix="R$ "
+                  onValueChange={(value) => onFieldEdit("price", value || "")}
+                  placeholder="0,00"
+                  disableAbbreviations={true}
+                  allowDecimals
+                  allowNegativeValue={false}
+                  defaultValue={undefined}
+                  intlConfig={{ locale: "pt-BR", currency: "BRL" }}
+                />
+              </div>
+              <div className="w-full md:w-1/2">
+                <CurrencyInput
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm my-1 text-2xl text-gray-500 font-light line-through"
+                  value={productData.originalPrice}
+                  decimalsLimit={2}
+                  decimalSeparator=","
+                  groupSeparator="."
+                  prefix="R$ "
+                  disableAbbreviations={true}
+                  onValueChange={(value) =>
+                    onFieldEdit("originalPrice", value || "")
+                  }
+                  placeholder="0,00"
+                  allowDecimals
+                  allowNegativeValue={false}
+                  defaultValue={undefined}
+                  intlConfig={{ locale: "pt-BR", currency: "BRL" }}
+                />
+              </div>
+            </div>
           </div>
-          <div className="mb-5 flex items-center justify-start px-3 gap-5 flex-wrap">
+          <div className="mb-5 flex items-center justify-start px-3 gap-4 flex-wrap">
             <div className="font-light flex items-end gap-2">
               <h4 className="m-0 font-light  text-gray-500 text-base">
                 Código do produto:
@@ -314,7 +321,7 @@ export default function ProductPreviewPanelEdit({
           </div>
 
           {/* Características */}
-          <div>
+          <div className="gap-4 px-3">
             <label className="block text-fest-black2 font-semibold mb-1">
               Características
             </label>
@@ -377,7 +384,7 @@ export default function ProductPreviewPanelEdit({
               </div>
             </div>
           </div>
-          <div>
+          <div className="gap-4 px-3 mt-6">
             <label className="block text-fest-black2 font-semibold mb-1">
               Imagens do Produto
             </label>
@@ -545,6 +552,19 @@ export default function ProductPreviewPanelEdit({
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="flex items-center w-full gap-3">
+            <Button
+              variant="default"
+              type="button"
+              onClick={onSave}
+              className="px-4 py-1 w-full rounded border border-fest-black2 text-fest-primary bg-fest-black2 hover:text-fest-black2 hover:border-fest-primary transition-colors font-semibold text-sm flex items-center gap-2"
+              aria-label="Salvar"
+            >
+              <Save className="w-4 h-4" />
+              Salvar
+            </Button>
           </div>
         </div>
       </div>
