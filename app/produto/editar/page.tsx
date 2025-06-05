@@ -1,41 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  CheckSquare,
-  ExternalLink,
-  Calendar,
-  Star,
-  Heart,
-  Share2,
-  ArrowLeft,
-  ArrowRight,
-  Package,
-  DollarSign,
-  Upload,
-  X,
-} from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore from "swiper";
 import "swiper/css";
-import { Badge } from "@/components/ui/badge";
-import CurrencyInput from "react-currency-input-field";
 import ProductImageCarousel from "@/components/shared/product-image-carousel";
-import ProductPreviewPanel from "@/components/shared/product-preview-panel";
-import ProductForm from "@/components/shared/product-form";
+import ProductPreviewPanelEdit from "@/components/shared/product-preview-panel-edit";
 
 export default function EditProductPage() {
   // Aqui você pode buscar os dados do produto para edição via API ou props
@@ -48,7 +18,7 @@ export default function EditProductPage() {
     price: "199.90",
     dailyPrice: "",
     weeklyPrice: "",
-    stock: "10",
+    stock: "1",
     images: [] as File[],
     features: ["Kit completo para 8 pessoas"],
     tags: "festa, infantil, decoração",
@@ -62,8 +32,7 @@ export default function EditProductPage() {
     id: "1232451",
   });
   const [selectedImage, setSelectedImage] = useState(0);
-  const swiperRef = useRef<SwiperCore | null>(null);
-  const router = useRouter();
+  const [editMode, setEditMode] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
     setProductData((prev) => ({ ...prev, [field]: value }));
@@ -117,65 +86,72 @@ export default function EditProductPage() {
 
   return (
     <>
-      <section className="container mx-auto my-4 mt-16 flex flex-col lg:flex-row">
+      <section className="container mx-auto my-4 mt-16 flex flex-col lg:flex-row min-h-screen">
         {/* Painel esquerdo: carrossel funcional */}
-        <div className="flex flex-col items-center w-full lg:w-1/2 mb-5 mt-5 p-5">
+        <div className="flex flex-col items-center w-full lg:w-1/2 mb-5 mt-5 sm:p-5">
           <ProductImageCarousel
             images={productData.images}
             selectedImage={selectedImage}
             setSelectedImage={setSelectedImage}
             productName={productData.name}
           />
+
+          {/* Tabs com Informações Detalhadas */}
+          <div className="w-full lg:w-2/2 mt-6 lg:mt-10 sm:px-10 mx-auto mb-12 "> 
+            <Tabs
+              defaultValue="description"
+              className="w-full"
+              orientation={typeof window !== "undefined" && window.innerWidth < 1024 ? "vertical" : "horizontal"}
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="description">Descrição</TabsTrigger>
+                <TabsTrigger value="features">Características</TabsTrigger>
+              </TabsList>
+              <TabsContent value="description" className="mt-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 leading-relaxed">
+                      {productData.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="features" className="mt-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold mb-4">O que está incluso:</h3>
+                    <ul className="space-y-2">
+                      {productData.features.map((feature, index) => (
+                        <li key={index} className="flex items-center">
+                          <span className="w-2 h-2 bg-fest-primary rounded-full mr-3"></span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
         {/* Painel direito: preview puro, sem inputs */}
-        <ProductPreviewPanel
+        <ProductPreviewPanelEdit
           productData={productData}
+          onSave={() => {
+            // Aqui você pode implementar a lógica de salvar as alterações
+            console.log("Salvar produto:", productData);
+          }}
           formatCurrency={formatCurrency}
+          onToggleEdit={() => setEditMode((v) => !v)}
+          onFieldEdit={handleInputChange}
+          onVendorEdit={handleVendorChange}
+          onFeatureEdit={handleFeatureChange}
+          onRemoveFeature={removeFeature}
+          onAddFeature={addFeature}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={removeImage}
         />
       </section>
-      {/* Tabs com Informações Detalhadas */}
-      <div className="w-full lg:w-1/2 mt-6 lg:mt-0 px-5 mx-auto mb-12">
-        <Tabs defaultValue="description" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="description">Descrição</TabsTrigger>
-            <TabsTrigger value="features">Características</TabsTrigger>
-          </TabsList>
-          <TabsContent value="description" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-gray-600 leading-relaxed">
-                  {productData.description}
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="features" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">O que está incluso:</h3>
-                <ul className="space-y-2">
-                  {productData.features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <span className="w-2 h-2 bg-fest-primary rounded-full mr-3"></span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-      <ProductForm
-        productData={productData}
-        handleInputChange={handleInputChange}
-        handleFeatureChange={handleFeatureChange}
-        addFeature={addFeature}
-        removeFeature={removeFeature}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-        formatCurrency={formatCurrency}
-      />
     </>
   );
 }
