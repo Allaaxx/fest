@@ -42,8 +42,6 @@ export default function ProductPreviewPanelEdit({
   onRemoveImage: (index: number) => void;
   onSave: () => void;
 }) {
-
-
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -345,6 +343,39 @@ export default function ProductPreviewPanelEdit({
             >
               Adicionar Característica
             </Button>
+            {/* Checkbox de opções de entrega */}
+            <div className="flex gap-6 mt-4">
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="delivery"
+                  type="checkbox"
+                  checked={productData.delivery}
+                  onChange={(e) => onFieldEdit("delivery", e.target.checked)}
+                  className="w-4"
+                />
+                <label
+                  htmlFor="delivery"
+                  className="text-sm text-fest-black2 cursor-pointer"
+                >
+                  Entrega disponível
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="pickup"
+                  type="checkbox"
+                  checked={productData.pickup}
+                  onChange={(e) => onFieldEdit("pickup", e.target.checked)}
+                  className="w-4"
+                />
+                <label
+                  htmlFor="pickup"
+                  className="text-sm text-fest-black2 cursor-pointer"
+                >
+                  Retirada no local
+                </label>
+              </div>
+            </div>
           </div>
           <div>
             <label className="block text-fest-black2 font-semibold mb-1">
