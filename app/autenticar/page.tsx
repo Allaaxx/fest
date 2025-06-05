@@ -152,7 +152,7 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white relative overflow-hidden">
       {/* Elementos geométricos do Hero */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-20">
         <div className="absolute top-20 right-20 w-2 h-2 bg-fest-primary rounded-full opacity-60"></div>
         <div className="absolute top-40 left-16 w-1 h-1 bg-fest-primary rounded-full opacity-40"></div>
         <div className="absolute bottom-32 right-1/3 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-50"></div>
@@ -163,7 +163,6 @@ export default function LoginPage() {
         <div className="absolute top-1/4 right-1/4 w-2.5 h-2.5 bg-fest-primary rounded-full opacity-25"></div>
         <div className="absolute bottom-10 right-10 w-2 h-2 bg-fest-primary rounded-full opacity-35"></div>
         <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-fest-primary rounded-full opacity-50"></div>
-        <div className="absolute bottom-1/2 right-1/4 w-2 h-2 bg-fest-primary rounded-full opacity-30"></div>
         <div className="absolute top-1/2 right-1/2 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-20"></div>
         <div className="absolute top-28 left-1/2 w-2 h-2 bg-fest-primary rounded-full opacity-45"></div>
         <div className="absolute bottom-1/3 left-1/5 w-2.5 h-2.5 bg-fest-primary rounded-full opacity-25"></div>
@@ -175,7 +174,7 @@ export default function LoginPage() {
       {/* Formulário de autenticação */}
       <div className="auth-container relative z-10">
         <div className="form-box flex justify-center login">
-          <form action="#">
+          <form action="#" className="z-30">
             <h1>Login</h1>
             <div className="input-box">
               <input type="text" placeholder="Username" required />
@@ -209,7 +208,7 @@ export default function LoginPage() {
           </form>
         </div>
         <div className="form-box flex justify-center register">
-          <form action="#">
+          <form action="#" className="w-full max-w-md">
             <h1>Registration</h1>
             <div className="input-box">
               <input type="text" placeholder="Username" required />
@@ -249,6 +248,7 @@ export default function LoginPage() {
             <p>Don't have an account?</p>
             <button className="btn register-btn">Register</button>
           </div>
+
           <div className="toggle-panel toggle-right">
             <h1>Welcome Back!</h1>
             <p>Already have an account?</p>
