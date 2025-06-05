@@ -1,9 +1,8 @@
-import { BookmarkPlus, X as Close, Save } from "lucide-react";
+import { X as Close, CreativeCommonsIcon, PlusSquareIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, ExternalLink, Upload } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-
 import {
   Select,
   SelectContent,
@@ -12,16 +11,14 @@ import {
   SelectValue,
 } from "../ui/select";
 import CurrencyInput from "react-currency-input-field";
-import { useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 
-export default function ProductPreviewPanelEdit({
+export default function ProductPreviewPanelAdd({
   productData,
-  onToggleEdit,
   onFieldEdit,
   onFeatureEdit,
   onRemoveFeature,
@@ -32,9 +29,7 @@ export default function ProductPreviewPanelEdit({
 }: {
   productData: any;
   formatCurrency: (value: string) => string;
-  onToggleEdit: () => void;
   onFieldEdit: (field: string, value: any) => void;
-  onVendorEdit: (field: string, value: any) => void;
   onFeatureEdit: (index: number, value: string) => void;
   onRemoveFeature: (index: number) => void;
   onAddFeature: () => void;
@@ -55,7 +50,6 @@ export default function ProductPreviewPanelEdit({
     },
   });
 
-  // Toolbar fixa para o tiptap
   function TiptapToolbar({ editor }: { editor: any }) {
     if (!editor) return null;
     return (
@@ -149,7 +143,6 @@ export default function ProductPreviewPanelEdit({
   return (
     <div className="w-full lg:w-1/2 flex flex-col gap-6 sm:p-5 product-edit-panel">
       <div className="flex flex-col gap-4 mt-5">
-        
         <div className="shadow-lg p-4 bg-white rounded-lg flex flex-col ">
           <div className="flex flex-row justify-around sm:gap-0 sm:items-center sm:justify-between card-component">
           <a
@@ -160,8 +153,8 @@ export default function ProductPreviewPanelEdit({
             <h4 className="m-0 font-light">Voltar a dashboard</h4>
           </a>
           <div className="flex items-center gap-3">
-            Editar Produto
-           <BookmarkPlus className="h-8 w-8 text-fest-primary" />
+            Criar Produto
+           <PlusSquareIcon className="h-8 w-8 text-fest-primary" />
           </div>
         </div>
           <div className="mt-5 flex flex-col gap-4">
@@ -249,9 +242,7 @@ export default function ProductPreviewPanelEdit({
           </div>
           <div className="mb-4 px-3">
             <div className="flex gap-4">
-              <h3 className="font-light w-full md:w-1/2 mb-1">
-                Preço
-              </h3>
+              <h3 className="font-light w-full md:w-1/2 mb-1">Preço</h3>
               <h3 className="font-light  text-gray-500 line-through w-full md:w-1/2 mb-1">
                 Preço Original
               </h3>
@@ -336,8 +327,6 @@ export default function ProductPreviewPanelEdit({
               </h6>
             </div>
           </div>
-
-          {/* Características */}
           <div className="gap-4 px-3">
             <label className="block text-fest-black2 font-semibold mb-1">
               Características
@@ -367,7 +356,6 @@ export default function ProductPreviewPanelEdit({
             >
               Adicionar Característica
             </Button>
-            {/* Checkbox de opções de entrega */}
             <div className="flex gap-6 mt-4">
               <div className="flex items-center space-x-2">
                 <Input
@@ -424,7 +412,6 @@ export default function ProductPreviewPanelEdit({
                       4 - productData.images.length
                     );
                     if (files.length > 0) {
-                      // Cria um novo DataTransfer para limitar o número de arquivos
                       const dt = new DataTransfer();
                       files.forEach((file) => dt.items.add(file));
                       onImageUpload(dt.files);
@@ -570,8 +557,7 @@ export default function ProductPreviewPanelEdit({
               </div>
             )}
           </div>
-
-          <div className="flex items-center w-full gap-3">
+          <div className="flex items-center w-full gap-3 mt-6">
             <Button
               variant="default"
               type="button"
@@ -579,8 +565,7 @@ export default function ProductPreviewPanelEdit({
               className="px-4 py-1 w-full rounded border border-fest-black2 text-fest-primary bg-fest-black2 hover:text-fest-black2 hover:border-fest-primary transition-colors font-semibold text-sm flex items-center gap-2"
               aria-label="Salvar"
             >
-              <Save className="w-4 h-4" />
-              Salvar
+              Criar
             </Button>
           </div>
         </div>
