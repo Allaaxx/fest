@@ -7,7 +7,6 @@ import SwiperCore from "swiper";
 import "swiper/css";
 import ProductImageCarousel from "@/components/shared/product-image-carousel";
 import ProductPreviewPanelAdd from "@/components/shared/product-preview-panel-add";
-import ProductForm from "@/components/shared/product-form";
 
 export default function NewProductPreviewEditable() {
   const [productData, setProductData] = useState({
