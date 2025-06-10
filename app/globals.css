@@ -393,7 +393,7 @@ form {
 .toggle-box {
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: 99%;
 }
 
 .toggle-box::before {
@@ -469,7 +469,7 @@ form {
 
   .auth-container.active .form-box {
     right: 0;
-    bottom: 30%;
+    bottom: 26.5%;
   }
 
   .toggle-box::before {
@@ -482,7 +482,7 @@ form {
 
   .auth-container.active .toggle-box::before {
     left: 0;
-    top: 70%;
+    top: 88%;
   }
 
   .auth-container.active .toggle-panel.toggle-left {
@@ -504,6 +504,43 @@ form {
 
   .auth-container.active .toggle-panel.toggle-right {
     bottom: 0;
+  }
+
+  .form-box form {
+    width: 100% !important;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .toggle-panel h1,
+  .toggle-panel .text-4xl,
+  .toggle-panel .md\:text-6xl,
+  .toggle-panel .md\:text-xl,
+  .toggle-panel .text-lg {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .toggle-panel .text-5xl,
+  .toggle-panel .md\:text-7xl,
+  .toggle-panel .lg\:text-8xl {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+  }
+  .toggle-panel p,
+  .toggle-panel .text-gray-600 {
+    font-size: 0.95rem !important;
+  }
+
+  .toggle-panel .mb-8.mt-16,
+  .toggle-panel .mb-8.mt-16, /* fallback for possible class order */
+  .toggle-panel .mt-16 {
+    margin-top: 2rem !important; /* mt-8 */
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .toggle-panel p {
+    display: none !important;
   }
 }
 

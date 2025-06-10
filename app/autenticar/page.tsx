@@ -3,8 +3,17 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Facebook,
+  Github,
+  Linkedin,
+  Lock,
+  Mail,
+  Sparkles,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/components/providers/auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -42,7 +52,10 @@ export default function LoginPage() {
     toast.info(`Login com ${provider} em desenvolvimento`);
   };
 
+  const [isLoaded, setIsLoaded] = useState(false);
+
   useEffect(() => {
+    setIsLoaded(true);
     // MENU USER: Toggle submenu e active
     const menuUserItems = document.querySelectorAll(".menu-user > ul > li > a");
     menuUserItems.forEach((anchor) => {
@@ -172,87 +185,346 @@ export default function LoginPage() {
         <div className="absolute bottom-1/6 right-1/6 w-2 h-2 bg-fest-primary rounded-full opacity-30"></div>
       </div>
       {/* Formulário de autenticação */}
-      <div className="auth-container relative z-10">
-        <div className="form-box flex justify-center login">
-          <form action="#" className="z-30">
-            <h1>Login</h1>
-            <div className="input-box">
-              <input type="text" placeholder="Username" required />
-              <i className="bx bxs-user"></i>
+      <div className="auth-container  relative z-10">
+        <div
+          className={`form-box flex justify-center login transition-all duration-[1500ms] delay-100 ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
+          <form action="#" className="z-30" onSubmit={handleSubmit}>
+            <div className="mb-8">
+              <div
+                className={`flex items-center justify-center mb-4 transition-all duration-1000 delay-200 ${
+                  isLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }`}
+              >
+                <Sparkles className="h-6 w-6 text-fest-primary mr-2" />
+                <span className="text-fest-primary font-medium tracking-wide uppercase text-sm">
+                  Marketplace de Eventos
+                </span>
+              </div>
+              <h1
+                className={`text-4xl text-center md:text-6xl font-bold text-black mb-6 leading-tight transition-all duration-1000 delay-300 ${
+                  isLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }`}
+              >
+                Entrar
+              </h1>
+              <p
+                className={`text-lg text-center text-gray-600 mb-8 leading-relaxed transition-all duration-1000 delay-500 ${
+                  isLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }`}
+              >
+                Acesse sua conta e aproveite todos os recursos do nosso
+                marketplace.
+              </p>
             </div>
-            <div className="input-box">
-              <input type="password" placeholder="Password" required />
-              <i className="bx bxs-lock-alt"></i>
+            <div className="input-box flex items-center gap-2">
+              <User className="w-6 h-6" />
+              <Input
+                type="text"
+                placeholder="Usuário"
+                required
+                className="flex-1"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+            </div>
+            <div className="input-box flex items-center gap-2">
+              <Lock className="w-6 h-6" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Senha"
+                required
+                className="flex-1"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+              />
             </div>
             <div className="forgot-link">
-              <a href="#">Forgot Password?</a>
+              <a href="#">Esqueceu a senha?</a>
             </div>
-            <button type="submit" className="btn">
-              Login
+            <button
+              type="submit"
+              className=" bg-fest-primary hover:bg-fest-black2  hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Carregando..." : "Entrar"}
             </button>
-            <p>or login with social platforms</p>
+            <p>ou entre com redes sociais</p>
             <div className="social-icons">
-              <a href="#">
-                <i className="bx bxl-google"></i>
+              <a
+                href="#"
+                aria-label="Login com Google"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSocialLogin("Google");
+                }}
+              >
+                <Mail className="w-6 h-6 " />
               </a>
-              <a href="#">
-                <i className="bx bxl-facebook"></i>
+              <a
+                href="#"
+                aria-label="Login com Facebook"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSocialLogin("Facebook");
+                }}
+              >
+                <Facebook className="w-6 h-6 " />
               </a>
-              <a href="#">
-                <i className="bx bxl-github"></i>
+              <a
+                href="#"
+                aria-label="Login com GitHub"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSocialLogin("GitHub");
+                }}
+              >
+                <Github className="w-6 h-6 " />
               </a>
-              <a href="#">
-                <i className="bx bxl-linkedin"></i>
+              <a
+                href="#"
+                aria-label="Login com LinkedIn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSocialLogin("LinkedIn");
+                }}
+              >
+                <Linkedin className="w-6 h-6 " />
               </a>
             </div>
           </form>
         </div>
-        <div className="form-box flex justify-center register">
+        <div
+          className={`form-box flex justify-center register transition-all duration-[1500ms] delay-100 ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
           <form action="#" className="w-full max-w-md">
-            <h1>Registration</h1>
-            <div className="input-box">
-              <input type="text" placeholder="Username" required />
-              <i className="bx bxs-user"></i>
+            <div className="mb-8">
+              <div
+                className={`flex items-center justify-center mb-4 transition-all duration-1000 delay-200 ${
+                  isLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }`}
+              >
+                <Sparkles className="h-6 w-6 text-fest-primary mr-2" />
+                <span className="text-fest-primary font-medium tracking-wide uppercase text-sm">
+                  Marketplace de Eventos
+                </span>
+              </div>
+              <h1
+                className={`text-4xl text-center md:text-6xl font-bold text-black mb-6 leading-tight transition-all duration-1000 delay-300 ${
+                  isLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }`}
+              >
+                Registrar
+              </h1>
+              <p
+                className={`text-lg text-center text-gray-600 mb-8 leading-relaxed transition-all duration-1000 delay-500 ${
+                  isLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }`}
+              >
+                Crie sua conta e comece a transformar seus eventos hoje mesmo.
+              </p>
             </div>
-            <div className="input-box">
-              <input type="email" placeholder="Email" required />
-              <i className="bx bxs-envelope"></i>
+            <div className="input-box flex items-center gap-2">
+              <User className="w-6 h-6" />
+              <Input
+                type="text"
+                placeholder="Username"
+                required
+                className="flex-1"
+              />
             </div>
-            <div className="input-box">
-              <input type="password" placeholder="Password" required />
-              <i className="bx bxs-lock-alt"></i>
+            <div className="input-box flex items-center gap-2">
+              <Mail className="w-6 h-6" />
+              <Input
+                type="email"
+                placeholder="Email"
+                required
+                className="flex-1"
+              />
             </div>
-            <button type="submit" className="btn">
+            <div className="input-box flex items-center gap-2">
+              <Lock className="w-6 h-6" />
+              <Input
+                type="password"
+                placeholder="Password"
+                required
+                className="flex-1"
+              />
+            </div>
+            <button
+              type="submit"
+              className=" bg-fest-primary hover:bg-fest-black2  hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full"
+            >
               Register
             </button>
             <p>or register with social platforms</p>
-            <div className="social-icons">
-              <a href="#">
-                <i className="bx bxl-google"></i>
+            <div className="social-icons flex gap-2">
+              <a href="#" aria-label="Login com Google">
+                <Mail className="w-6 h-6" />
               </a>
-              <a href="#">
-                <i className="bx bxl-facebook"></i>
+              <a href="#" aria-label="Login com Facebook">
+                <Facebook className="w-6 h-6" />
               </a>
-              <a href="#">
-                <i className="bx bxl-github"></i>
+              <a href="#" aria-label="Login com GitHub">
+                <Github className="w-6 h-6" />
               </a>
-              <a href="#">
-                <i className="bx bxl-linkedin"></i>
+              <a href="#" aria-label="Login com LinkedIn">
+                <Linkedin className="w-6 h-6" />
               </a>
             </div>
           </form>
         </div>
         <div className="toggle-box">
           <div className="toggle-panel toggle-left">
-            <h1>Hello, Welcome!</h1>
-            <p>Don't have an account?</p>
-            <button className="btn register-btn">Register</button>
+            <div
+              className={`transition-all duration-[1500ms] delay-100 ${
+                isLoaded
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
+              <div className="mb-8 mt-16">
+                <div
+                  className={`flex items-center justify-center mb-4 transition-all duration-1000 delay-200 ${
+                    isLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                >
+                  <Sparkles className="h-6 w-6 text-fest-primary mr-2" />
+                  <span className="text-fest-primary font-medium tracking-wide uppercase text-sm">
+                    Marketplace de Eventos
+                  </span>
+                </div>
+                <h1
+                  className={`text-4xl text-center md:text-6xl font-bold text-black mb-6 leading-tight transition-all duration-1000 delay-300 ${
+                    isLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                >
+                  Novo por aqui?
+                  <span className="block text-fest-primary">
+                    Crie sua conta!
+                  </span>
+                </h1>
+                <p
+                  className={`text-lg text-center md:text-xl text-gray-600 mb-8 max-w-xl mx-auto leading-relaxed transition-all duration-1000 delay-500 ${
+                    isLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                >
+                  Clique no botão abaixo para se cadastrar e aproveitar todos os
+                  benefícios do nosso marketplace de eventos. É rápido, fácil e
+                  gratuito!
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  className="bg-fest-primary hover:bg-fest-black2 hover:text-fest-primary text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const container = document.querySelector(".auth-container");
+                    if (container) {
+                      container.classList.add("active");
+                    }
+                  }}
+                  type="button"
+                  aria-label="Mostrar formulário de cadastro"
+                >
+                  Registrar
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            </div>
           </div>
 
           <div className="toggle-panel toggle-right">
-            <h1>Welcome Back!</h1>
-            <p>Already have an account?</p>
-            <button className="btn login-btn">Login</button>
+            <div
+              className={`transition-all duration-[1500ms] delay-100 ${
+                isLoaded
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
+              <div className="mb-8 mt-16">
+                <div
+                  className={`flex items-center justify-center mb-4 transition-all duration-1000 delay-200 ${
+                    isLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                >
+                  <Sparkles className="h-6 w-6 text-fest-primary mr-2" />
+                  <span className="text-fest-primary font-medium tracking-wide uppercase text-sm">
+                    Marketplace de Eventos
+                  </span>
+                </div>
+                <h1
+                  className={`text-4xl text-center md:text-6xl font-bold text-black mb-6 leading-tight transition-all duration-1000 delay-300 ${
+                    isLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                >
+                  Já tem uma conta?
+                  <span className="block text-fest-primary">
+                    Faça seu login!
+                  </span>
+                </h1>
+                <p
+                  className={`text-lg text-center md:text-xl text-gray-600 mb-8 max-w-xl mx-auto leading-relaxed transition-all duration-1000 delay-500 ${
+                    isLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                >
+                  Se você já possui cadastro, clique no botão abaixo para
+                  acessar sua conta e aproveitar todos os recursos do nosso
+                  marketplace.
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  className="bg-fest-primary hover:bg-fest-black2 hover:text-fest-primary text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const container = document.querySelector(".auth-container");
+                    if (container) {
+                      container.classList.remove("active");
+                    }
+                  }}
+                  type="button"
+                  aria-label="Mostrar formulário de login"
+                >
+                  Entrar
+                  <ArrowLeft className="ml-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

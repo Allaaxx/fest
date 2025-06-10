@@ -227,7 +227,7 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login">
+                <Link href="/autenticar">
                   <Button
                     variant="ghost"
                     size="icon"
