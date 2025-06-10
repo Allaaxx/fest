@@ -28,21 +28,39 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const [registerData, setRegisterData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       await login(formData.email, formData.password);
       toast.success("Login realizado com sucesso!");
       router.push("/cliente/dashboard");
     } catch (error) {
       toast.error("Erro ao fazer login. Verifique suas credenciais.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await register(registerData);
+      toast.success("Cadastro realizado com sucesso!");
+      // Você pode redirecionar ou trocar para o painel de login aqui
+    } catch (error) {
+      toast.error("Erro ao cadastrar. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -311,7 +329,7 @@ export default function LoginPage() {
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          <form action="#" className="w-full max-w-md">
+          <form className="w-full max-w-md" onSubmit={handleRegister}>
             <div className="mb-8">
               <div
                 className={`flex items-center justify-center mb-4 transition-all duration-1000 delay-200 ${
@@ -348,9 +366,13 @@ export default function LoginPage() {
               <User className="w-6 h-6" />
               <Input
                 type="text"
-                placeholder="Username"
+                placeholder="Nome"
                 required
                 className="flex-1"
+                value={registerData.name}
+                onChange={(e) =>
+                  setRegisterData({ ...registerData, name: e.target.value })
+                }
               />
             </div>
             <div className="input-box flex items-center gap-2">
@@ -360,24 +382,33 @@ export default function LoginPage() {
                 placeholder="Email"
                 required
                 className="flex-1"
+                value={registerData.email}
+                onChange={(e) =>
+                  setRegisterData({ ...registerData, email: e.target.value })
+                }
               />
             </div>
             <div className="input-box flex items-center gap-2">
               <Lock className="w-6 h-6" />
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder="Senha"
                 required
                 className="flex-1"
+                value={registerData.password}
+                onChange={(e) =>
+                  setRegisterData({ ...registerData, password: e.target.value })
+                }
               />
             </div>
             <button
               type="submit"
               className=" bg-fest-primary hover:bg-fest-black2  hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full"
+              disabled={isLoading}
             >
-              Register
+              {isLoading ? "Cadastrando..." : "Registrar"}
             </button>
-            <p>or register with social platforms</p>
+            <p>ou registre-se com redes sociais</p>
             <div className="social-icons flex gap-2">
               <a href="#" aria-label="Login com Google">
                 <Mail className="w-6 h-6" />
