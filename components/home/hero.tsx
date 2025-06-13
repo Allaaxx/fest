@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import AnimatedBackgroundBalls from "@/components/ui/animated-background-balls";
 
 export function Hero() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -14,19 +15,14 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen bg-white flex items-center justify-center">
-      {/* Simple geometric background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 right-20 w-2 h-2 bg-fest-primary rounded-full opacity-60"></div>
-        <div className="absolute top-40 left-16 w-1 h-1 bg-fest-primary rounded-full opacity-40"></div>
-        <div className="absolute bottom-32 right-1/3 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-50"></div>
-        <div className="absolute bottom-20 left-20 w-2 h-2 bg-fest-primary rounded-full opacity-30"></div>
-      </div>
+      {/* Fundo animado de bolinhas */}
+      <AnimatedBackgroundBalls />
 
       {/* Main content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         {/* Main heading */}
         <div
-          className={`transition-all duration-[1500ms] delay-100 ${
+          className={`transition-all bg-white rounded-md duration-[1500ms] delay-100 ${
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
