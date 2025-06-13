@@ -34,7 +34,12 @@ export async function POST(req: Request) {
     }
     await prisma.user.update({
       where: { id: payload.sub },
-      data: { emailVerified: new Date(), validationToken: null },
+      data: {
+        emailVerified: new Date(
+          new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+        ),
+        validationToken: null,
+      },
     });
     return NextResponse.json({ success: true });
   } catch (error) {

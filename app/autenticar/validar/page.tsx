@@ -13,11 +13,25 @@ export default function ValidarCodigoPage() {
   const searchParams = useSearchParams();
   // Pega o token da URL
   const token = searchParams.get("token") || "";
+  const toastParam = searchParams.get("toast");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const RESEND_INTERVAL = 120; // segundos
+
+  useEffect(() => {
+    if (toastParam === "register-success") {
+      toast.success(
+        "Cadastro realizado com sucesso! Verifique seu e-mail para validar a conta."
+      );
+    }
+    if (toastParam === "login-validate") {
+      toast.info(
+        "Seu e-mail ainda não foi autenticado. Verifique sua caixa de entrada."
+      );
+    }
+  }, [toastParam]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;

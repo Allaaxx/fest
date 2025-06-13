@@ -47,10 +47,6 @@ export default function LoginPage() {
       if (loginResult) {
         toast.success("Login realizado com sucesso!");
         router.push("/cliente/dashboard");
-      } else {
-        toast.info(
-          "Seu e-mail ainda não foi autenticado. Verifique sua caixa de entrada."
-        );
       }
     } catch (error: any) {
       toast.error("Erro ao fazer login. Verifique suas credenciais.");
@@ -76,15 +72,9 @@ export default function LoginPage() {
       // Log do resultado retornado pelo backend
       console.log("Resultado do backend (register):", result);
 
-      toast.success(
-        "Cadastro realizado com sucesso! Verifique seu e-mail para validar a conta."
-      );
       setTimeout(() => {
-        // Redireciona usando o token, não o e-mail
-        router.push(
-          `/autenticar/validar?token=${encodeURIComponent(result.token)}`
-        );
-      }, 1000);
+        window.location.href = `/autenticar/validar?token=${encodeURIComponent(result.token)}&toast=register-success`;
+      }, 1500);
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
       toast.error("Erro ao cadastrar. Tente novamente.");
