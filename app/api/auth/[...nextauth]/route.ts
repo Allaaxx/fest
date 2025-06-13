@@ -9,6 +9,8 @@ import { PrismaClient } from "@/lib/generated/prisma";
 import bcrypt from "bcryptjs";
 import type { Session, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+import jwt from "jsonwebtoken";
+import { sendVerificationEmail } from "@/lib/email";
 
 // Carrega variáveis de ambiente para NEXTAUTH_URL e NEXTAUTH_SECRET
 if (!process.env.NEXTAUTH_URL) {
@@ -34,18 +36,44 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
-        if (
-          user &&
-          (await bcrypt.compare(credentials.password, user.password))
-        ) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          };
+        if (!user) return null;
+        const senhaCorreta = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+        if (!senhaCorreta) return null;
+
+        // Se o e-mail não está verificado, força fluxo de validação
+        if (!user.emailVerified) {
+          const code2fa = Math.floor(
+            100000 + Math.random() * 900000
+          ).toString();
+          await prisma.user.update({
+            where: { email: credentials.email },
+            data: { validationToken: code2fa },
+          });
+          await sendVerificationEmail(user.email, code2fa);
+          const tempToken = jwt.sign(
+            {
+              sub: user.id,
+              email: user.email,
+              type: "email-verify",
+            },
+            process.env.NEXTAUTH_SECRET!,
+            { expiresIn: "15m" }
+          );
+          const error = new Error("2FA_REQUIRED");
+          (error as any).token = tempToken;
+          throw error;
         }
-        return null;
+
+        // Se já está verificado, permite login normal
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
       },
     }),
     GoogleProvider({

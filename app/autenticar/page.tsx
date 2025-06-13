@@ -15,13 +15,11 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/components/providers/auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import AnimatedBackgroundBalls from "@/components/ui/animated-background-balls";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -42,24 +40,53 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await login(formData.email, formData.password);
-      toast.success("Login realizado com sucesso!");
-      router.push("/cliente/dashboard");
-    } catch (error) {
+      // login retorna true se sucesso, false se redirecionou para validação
+      const loginResult = (await login(formData.email, formData.password)) as
+        | boolean
+        | void;
+      if (loginResult) {
+        toast.success("Login realizado com sucesso!");
+        router.push("/cliente/dashboard");
+      } else {
+        toast.info(
+          "Seu e-mail ainda não foi autenticado. Verifique sua caixa de entrada."
+        );
+      }
+    } catch (error: any) {
       toast.error("Erro ao fazer login. Verifique suas credenciais.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  type RegisterResult = { success: boolean; token: string };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await register(registerData);
-      toast.success("Cadastro realizado com sucesso!");
-      // Você pode redirecionar ou trocar para o painel de login aqui
+      // Log dos dados enviados para o backend
+      console.log("Dados enviados para registro:", registerData);
+
+      // O backend deve retornar um token temporário seguro após o cadastro
+      const result = (await register(
+        registerData
+      )) as unknown as RegisterResult;
+      // Exemplo: result = { success: true, token: 'uuid-aleatorio' }
+      // Log do resultado retornado pelo backend
+      console.log("Resultado do backend (register):", result);
+
+      toast.success(
+        "Cadastro realizado com sucesso! Verifique seu e-mail para validar a conta."
+      );
+      setTimeout(() => {
+        // Redireciona usando o token, não o e-mail
+        router.push(
+          `/autenticar/validar?token=${encodeURIComponent(result.token)}`
+        );
+      }, 1000);
     } catch (error) {
+      console.error("Erro ao cadastrar:", error);
       toast.error("Erro ao cadastrar. Tente novamente.");
     } finally {
       setIsLoading(false);
@@ -182,26 +209,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white relative overflow-hidden">
-      {/* Elementos geométricos do Hero */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-20">
-        <div className="absolute top-20 right-20 w-2 h-2 bg-fest-primary rounded-full opacity-60"></div>
-        <div className="absolute top-40 left-16 w-1 h-1 bg-fest-primary rounded-full opacity-40"></div>
-        <div className="absolute bottom-32 right-1/3 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-50"></div>
-        <div className="absolute bottom-20 left-20 w-2 h-2 bg-fest-primary rounded-full opacity-30"></div>
-        <div className="absolute top-10 left-1/4 w-3 h-3 bg-fest-primary rounded-full opacity-20"></div>
-        <div className="absolute top-1/2 left-10 w-2 h-2 bg-fest-primary rounded-full opacity-40"></div>
-        <div className="absolute top-1/3 right-10 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-30"></div>
-        <div className="absolute top-1/4 right-1/4 w-2.5 h-2.5 bg-fest-primary rounded-full opacity-25"></div>
-        <div className="absolute bottom-10 right-10 w-2 h-2 bg-fest-primary rounded-full opacity-35"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-fest-primary rounded-full opacity-50"></div>
-        <div className="absolute top-1/2 right-1/2 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-20"></div>
-        <div className="absolute top-28 left-1/2 w-2 h-2 bg-fest-primary rounded-full opacity-45"></div>
-        <div className="absolute bottom-1/3 left-1/5 w-2.5 h-2.5 bg-fest-primary rounded-full opacity-25"></div>
-        <div className="absolute top-1/5 right-1/5 w-1.5 h-1.5 bg-fest-primary rounded-full opacity-35"></div>
-        <div className="absolute bottom-10 left-1/2 w-1 h-1 bg-fest-primary rounded-full opacity-40"></div>
-        <div className="absolute top-1/6 left-1/6 w-2 h-2 bg-fest-primary rounded-full opacity-30"></div>
-        <div className="absolute bottom-1/6 right-1/6 w-2 h-2 bg-fest-primary rounded-full opacity-30"></div>
-      </div>
       {/* Formulário de autenticação */}
       <div className="auth-container  relative z-10">
         <div
@@ -332,7 +339,7 @@ export default function LoginPage() {
           <form className="w-full max-w-md" onSubmit={handleRegister}>
             <div className="mb-8">
               <div
-                className={`flex items-center justify-center mb-4 transition-all duration-1000 delay-200 ${
+                className={`flex items-center justify-center mb-4 transition-all ${
                   isLoaded
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-6"
@@ -344,7 +351,7 @@ export default function LoginPage() {
                 </span>
               </div>
               <h1
-                className={`text-4xl text-center md:text-6xl font-bold text-black mb-6 leading-tight transition-all duration-1000 delay-300 ${
+                className={`text-4xl text-center md:text-6xl font-bold text-black mb-6 leading-tight transition-all  ${
                   isLoaded
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-6"
@@ -353,7 +360,7 @@ export default function LoginPage() {
                 Registrar
               </h1>
               <p
-                className={`text-lg text-center text-gray-600 mb-8 leading-relaxed transition-all duration-1000 delay-500 ${
+                className={`text-lg text-center text-gray-600 mb-8 leading-relaxed transition-all  ${
                   isLoaded
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-6"
