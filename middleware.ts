@@ -1,22 +1,69 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
-export function middleware(request: NextRequest) {
-  // NextAuth usa dois possíveis nomes de cookie para session-token
-  const isAuthenticated = Boolean(
-    request.cookies.get("next-auth.session-token") ||
-      request.cookies.get("__Secure-next-auth.session-token")
-  );
+const JWT_SECRET = process.env.NEXTAUTH_SECRET || "um-segredo-forte-aqui";
 
-  // Se tentar acessar /autenticar e já estiver autenticado, redireciona para o dashboard
-  if (isAuthenticated && request.nextUrl.pathname.startsWith("/autenticar")) {
+export async function middleware(request: NextRequest) {
+  // Tenta pegar o token JWT do cookie do NextAuth
+  const token =
+    request.cookies.get("next-auth.session-token")?.value ||
+    request.cookies.get("__Secure-next-auth.session-token")?.value;
+
+  let userRole = null;
+  if (token) {
+    try {
+      const { payload } = await jwtVerify(
+        token,
+        new TextEncoder().encode(JWT_SECRET)
+      );
+      userRole = payload.role || null;
+    } catch (e) {
+      // Token inválido/expirado
+    }
+  }
+
+  // Exemplo: bloqueia acesso à /autenticar para qualquer usuário autenticado
+  if (userRole && request.nextUrl.pathname.startsWith("/autenticar")) {
+    // Redireciona para dashboard específico por role
+    if (userRole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+    if (userRole === "VENDEDOR") {
+      return NextResponse.redirect(new URL("/vendedor/dashboard", request.url));
+    }
+    // Default: CLIENTE
     return NextResponse.redirect(new URL("/cliente/dashboard", request.url));
   }
 
-  // Permite o acesso normalmente para outras rotas
+  // Exemplo: proteger rotas de dashboard por role
+  if (
+    request.nextUrl.pathname.startsWith("/admin/dashboard") &&
+    userRole !== "ADMIN"
+  ) {
+    return NextResponse.redirect(new URL("/autenticar", request.url));
+  }
+  if (
+    request.nextUrl.pathname.startsWith("/vendedor/dashboard") &&
+    userRole !== "VENDEDOR"
+  ) {
+    return NextResponse.redirect(new URL("/autenticar", request.url));
+  }
+  if (
+    request.nextUrl.pathname.startsWith("/cliente/dashboard") &&
+    userRole !== "CLIENTE"
+  ) {
+    return NextResponse.redirect(new URL("/autenticar", request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/autenticar/:path*"],
+  matcher: [
+    "/autenticar/:path*",
+    "/admin/dashboard/:path*",
+    "/vendedor/dashboard/:path*",
+    "/cliente/dashboard/:path*",
+  ],
 };

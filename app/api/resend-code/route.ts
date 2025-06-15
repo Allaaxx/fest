@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/lib/generated/prisma";
 import { sendVerificationEmail } from "@/lib/email";
-import { Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
