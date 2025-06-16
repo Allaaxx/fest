@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res?.ok) {
         // O NextAuth já gerencia a sessão, mas você pode buscar dados extras se quiser
         // setUser(...)
+        window.location.href = "/cliente/dashboard";
         return;
       } else if (res?.error === "2FA_REQUIRED" && (res as any).token) {
         if (typeof window !== "undefined") {

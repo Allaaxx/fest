@@ -12,14 +12,6 @@ import type { JWT } from "next-auth/jwt";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "@/lib/email";
 
-// Carrega variáveis de ambiente para NEXTAUTH_URL e NEXTAUTH_SECRET
-if (!process.env.NEXTAUTH_URL) {
-  process.env.NEXTAUTH_URL = "http://localhost:3000";
-}
-if (!process.env.NEXTAUTH_SECRET) {
-  process.env.NEXTAUTH_SECRET = "um-segredo-forte-aqui";
-}
-
 const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
@@ -96,19 +88,21 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" as const },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }) {
-      if (session?.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
-      }
-      return session;
-    },
     async jwt({ token, user }: { token: JWT; user?: User | any }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        token.role = user.role; // Só adiciona role se houver user
+      } else if (!token.role) {
+        delete token.role; // Remove role residual se não houver user
       }
       return token;
+    },
+    async session({ session, token }) {
+      if (token?.role) {
+        (session.user as any).role = token.role;
+      } else if ((session.user as any)?.role) {
+        delete (session.user as any).role;
+      }
+      return session;
     },
   },
   pages: {

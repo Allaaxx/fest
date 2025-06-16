@@ -21,6 +21,7 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import { signOut } from "next-auth/react"
 
 // Dados simulados para os gráficos
 const spendingData = [
@@ -514,6 +515,13 @@ export default function ClienteDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <button
+        onClick={() => signOut({ callbackUrl: "/autenticar" })}
+        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mt-4"
+      >
+        Sair
+      </button>
     </div>
   )
 }

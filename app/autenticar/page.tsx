@@ -20,8 +20,11 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AnimatedBackgroundBalls from "@/components/ui/animated-background-balls";
+import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -34,7 +37,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, register } = useAuth();
-  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      const role = (session?.user as any)?.role;
+      if (role === "ADMIN") router.replace("/admin/dashboard");
+      else if (role === "VENDEDOR") router.replace("/vendedor/dashboard");
+      else router.replace("/cliente/dashboard");
+    }
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,14 +278,39 @@ export default function LoginPage() {
               />
             </div>
             <div className="forgot-link">
-              <a href="#">Esqueceu a senha?</a>
+              <a href="/recuperar-senha" className="text-pink-500 hover:underline">Esqueceu a senha?</a>
             </div>
             <button
               type="submit"
-              className=" bg-fest-primary hover:bg-fest-black2  hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full"
+              className="bg-fest-primary hover:bg-fest-black2 hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "Carregando..." : "Entrar"}
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </span>
+              ) : (
+                "Entrar"
+              )}
             </button>
             <p>ou entre com redes sociais</p>
             <div className="social-icons">
@@ -400,10 +436,35 @@ export default function LoginPage() {
             </div>
             <button
               type="submit"
-              className=" bg-fest-primary hover:bg-fest-black2  hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full"
+              className="w-full h-12 bg-pink-500 hover:bg-pink-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "Cadastrando..." : "Registrar"}
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </span>
+              ) : (
+                "Registrar"
+              )}
             </button>
             <p>ou registre-se com redes sociais</p>
             <div className="social-icons flex gap-2">

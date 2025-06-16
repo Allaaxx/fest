@@ -2,13 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { CartProvider } from "@/components/providers/cart-provider";
-import { WishlistProvider } from "@/components/providers/wishlist-provider";
-import { AuthProvider } from "@/components/providers/auth-provider";
-import { Toaster } from "sonner";
-import { BodyScrollFixer } from "@/components/body-scroll-fixer";
+import ClientLayout from "./client-layout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,17 +23,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        <BodyScrollFixer />
-        <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <Navbar />
-              {children}
-              <Footer />
-              <Toaster position="top-right" richColors />
-            </CartProvider>
-          </WishlistProvider>
-        </AuthProvider>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );
