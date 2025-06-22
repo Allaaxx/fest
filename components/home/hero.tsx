@@ -19,7 +19,7 @@ export function Hero() {
       <AnimatedBackgroundBalls />
 
       {/* Main content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pb-8">
         {/* Main heading */}
         <div
           className={`transition-all bg-white rounded-md duration-[1500ms] delay-100 ${
