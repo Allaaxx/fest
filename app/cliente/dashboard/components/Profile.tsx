@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import { User, Trash2, ImageDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import PhoneInput from "react-phone-number-input";
@@ -21,8 +21,61 @@ function maskCEP(value: string) {
   return value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2");
 }
 
+function validateCPF(cpf: string) {
+  cpf = cpf.replace(/\D/g, "");
+  if (cpf.length !== 11 || /^([0-9])\1+$/.test(cpf)) return false;
+  let sum = 0,
+    rest;
+  for (let i = 1; i <= 9; i++)
+    sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  rest = (sum * 10) % 11;
+  if (rest === 10 || rest === 11) rest = 0;
+  if (rest !== parseInt(cpf.substring(9, 10))) return false;
+  sum = 0;
+  for (let i = 1; i <= 10; i++)
+    sum += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  rest = (sum * 10) % 11;
+  if (rest === 10 || rest === 11) rest = 0;
+  if (rest !== parseInt(cpf.substring(10, 11))) return false;
+  return true;
+}
+
+function validateEmail(email: string) {
+  return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+}
+
+function validatePhone(phone: string) {
+  return /^\+?\d{10,15}$/.test(phone.replace(/\D/g, ""));
+}
+
+function validateCEP(cep: string) {
+  return /^\d{5}-?\d{3}$/.test(cep);
+}
+
+type ProfileForm = {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  address: string;
+  cep: string;
+  cpf: string;
+  profileImage?: string;
+};
+
+function validateProfile(form: ProfileForm) {
+  if (!form.name.trim()) return "Nome obrigatório";
+  if (!form.surname.trim()) return "Sobrenome obrigatório";
+  if (!validateEmail(form.email)) return "E-mail inválido";
+  if (!validatePhone(form.phone)) return "Telefone inválido";
+  if (!validateCPF(form.cpf)) return "CPF inválido";
+  if (!validateCEP(form.cep)) return "CEP inválido";
+  if (!form.address.trim()) return "Endereço obrigatório";
+  return null;
+}
+
 export default function Profile() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ProfileForm>({
     name: "",
     surname: "",
     email: "",
@@ -30,8 +83,10 @@ export default function Profile() {
     address: "",
     cep: "",
     cpf: "",
+    profileImage: ""
   });
   const [loading, setLoading] = useState(false);
+  const [imageHover, setImageHover] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -47,6 +102,7 @@ export default function Profile() {
             address: data.address || "",
             cep: data.cep || "",
             cpf: data.cpf || "",
+            profileImage: data.profileImage || "" // garante que a imagem salva seja exibida
           });
       })
       .finally(() => setLoading(false));
@@ -74,8 +130,44 @@ export default function Profile() {
     }
   };
 
+  // Upload de imagem de perfil
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem válido.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("A imagem deve ter até 2MB.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setForm((prev) => ({ ...prev, profileImage: data.url }));
+        toast.success("Imagem enviada com sucesso!");
+      } else {
+        toast.error(data.error || "Erro ao enviar imagem");
+      }
+    } catch (err) {
+      toast.error("Erro ao enviar imagem");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const error = validateProfile(form);
+    if (error) {
+      toast.error(error);
+      return;
+    }
     setLoading(true);
     const res = await fetch("/api/cliente/profile", {
       method: "PUT",
@@ -99,12 +191,12 @@ export default function Profile() {
           Gerencie suas informações pessoais
         </p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[340px]">
+        <Card className="lg:col-span-2 h-full flex flex-col">
           <CardHeader>
             <CardTitle>Informações Pessoais</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1 flex flex-col">
             <form onSubmit={handleSubmit} className="space-y-4 w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -208,18 +300,75 @@ export default function Profile() {
             </form>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="h-full flex flex-col">
           <CardHeader>
             <CardTitle>Foto do Perfil</CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="h-12 w-12 text-pink-600" />
+          <CardContent className="flex flex-col items-center p-4 flex-1">
+            <div className="w-full flex flex-col items-center h-full gap-3">
+              <div className="w-full" style={{height: '90%'}}>
+                {form.profileImage ? (
+                  <div
+                    className="relative w-full h-full"
+                    style={{ borderRadius: '20px', height: '100%' }}
+                    onMouseEnter={() => setImageHover(true)}
+                    onMouseLeave={() => setImageHover(false)}
+                  >
+                    <img
+                      src={form.profileImage}
+                      alt="Foto do perfil"
+                      className="w-full h-full object-cover"
+                      style={{ borderRadius: '20px', height: '100%' }}
+                    />
+                    {imageHover && (
+                      <button
+                        type="button"
+                        className="absolute inset-0 flex items-center justify-center bg-black/50 hover:bg-black/70 transition rounded-[20px]"
+                        style={{ borderRadius: '20px' }}
+                        onClick={() => setForm((prev) => ({ ...prev, profileImage: "" }))}
+                        tabIndex={-1}
+                      >
+                        <Trash2 className="h-7 w-7 text-white" />
+                        <span className="ml-2 text-white font-semibold">Remover</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className="w-full h-full flex flex-col items-center justify-center bg-pink-50 border-2 border-dashed border-pink-300 cursor-pointer transition hover:bg-pink-100"
+                    style={{ borderRadius: '20px', height: '100%' }}
+                    onClick={() => document.getElementById('profileImage')?.click()}
+                    onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) {
+                        const input = document.getElementById('profileImage') as HTMLInputElement;
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        input.files = dt.files;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                      }
+                    }}
+                  >
+                    <ImageDown className="h-12 w-12 text-pink-600 mb-2" />
+                    <span className="text-pink-600 font-medium text-sm">Arraste uma imagem ou clique para enviar</span>
+                  </div>
+                )}
+              </div>
+              <label htmlFor="profileImage" className="block w-full" style={{height: '5%'}}>
+                <input
+                  id="profileImage"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                  disabled={loading}
+                />
+              </label>
             </div>
-            <Button variant="outline" className="mb-2" disabled>
-              Alterar Foto
-            </Button>
-            <p className="text-xs text-gray-500">JPG, PNG até 2MB</p>
+            <p className="text-xs text-gray-500 mt-2">JPG, PNG até 2MB</p>
           </CardContent>
         </Card>
       </div>

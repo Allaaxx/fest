@@ -10,6 +10,7 @@ interface User {
   email: string;
   type: "cliente" | "vendedor" | "admin";
   avatar?: string;
+  profileImage?: string; // Adicionado para compatibilidade com dados do backend
 }
 
 interface AuthContextType {

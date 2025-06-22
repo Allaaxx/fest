@@ -1,6 +1,6 @@
 import { Home, Package, Heart, Gift, User, X, LogOut } from "lucide-react";
 import React from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 type TabType = "overview" | "orders" | "favorites" | "loyalty" | "profile";
 
@@ -20,16 +20,30 @@ const menuItems = [
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }: SidebarProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
   return (
     <div
       className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 mt-16 lg:mt-0`}
     >
       <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
         <div className="flex items-center">
-          <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">C</span>
-          </div>
-          <span className="ml-2 text-xl font-bold text-gray-900">Cliente</span>
+          {user?.image ? (
+            <img
+              src={user.image}
+              alt={user.name || "Usuário"}
+              className="w-8 h-8 rounded-lg object-cover bg-pink-100 border border-pink-200"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">
+                {user?.name ? user.name[0] : "C"}
+              </span>
+            </div>
+          )}
+          <span className="ml-2 text-xl font-bold text-gray-900">
+            {user?.name || "Cliente"}
+          </span>
         </div>
         <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-500 hover:text-gray-700">
           <X className="h-6 w-6" />
