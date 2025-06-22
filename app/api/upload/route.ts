@@ -19,13 +19,17 @@ export async function POST(req: Request) {
   const buffer = Buffer.from(arrayBuffer);
   try {
     const upload = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream({ folder: "profile" }, (err, result) => {
+      cloudinary.uploader.upload_stream({ folder: "profile" }, (err: any, result: any) => {
         if (err) return reject(err);
         resolve(result);
-      }).end(buffer);
+      })
+      .end(buffer);
     });
     return NextResponse.json({ url: upload.secure_url });
   } catch (e) {
-    return NextResponse.json({ error: "Erro ao fazer upload" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro ao fazer upload" },
+      { status: 500 }
+    );
   }
 }
