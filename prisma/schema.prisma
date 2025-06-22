@@ -18,6 +18,7 @@ datasource db {
 model User {
   id             String   @id @default(uuid())
   name           String?
+  surname        String?
   email          String   @unique
   password       String
   role           Role     @default(CLIENTE)
@@ -25,6 +26,11 @@ model User {
   validationToken String?  // Token para validação de e-mail
   resetToken        String?  // Token para reset de senha
   resetTokenExpires DateTime? // Expiração do token de reset
+  phone          String?
+  address        String?
+  cep            String?
+  cpf            String?
+  profileImage   String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
