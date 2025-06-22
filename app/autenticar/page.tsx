@@ -72,23 +72,15 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // Log dos dados enviados para o backend
-      console.log("Dados enviados para registro:", registerData);
-
-      // O backend deve retornar um token temporário seguro após o cadastro
-      const result = (await register(
-        registerData
-      )) as unknown as RegisterResult;
-      // Exemplo: result = { success: true, token: 'uuid-aleatorio' }
-      // Log do resultado retornado pelo backend
-      console.log("Resultado do backend (register):", result);
-
-      setTimeout(() => {
-        window.location.href = `/autenticar/validar?token=${encodeURIComponent(result.token)}&toast=register-success`;
-      }, 1500);
-    } catch (error) {
-      console.error("Erro ao cadastrar:", error);
-      toast.error("Erro ao cadastrar. Tente novamente.");
+      const result = await register(registerData);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Cadastro realizado! Verifique seu e-mail para validar a conta.");
+      // Redirecionar ou mostrar instrução
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao registrar usuário.");
     } finally {
       setIsLoading(false);
     }
@@ -282,13 +274,13 @@ export default function LoginPage() {
             </div>
             <button
               type="submit"
-              className="bg-fest-primary hover:bg-fest-black2 hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full flex items-center justify-center"
+              className="bg-fest-primary hover:bg-fest-black2 hover:text-fest-primary text-white px-8 py-2 text-lg font-md rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group w-full flex items-center justify-center h-12 min-w-[110px]"
               disabled={isLoading}
             >
               {isLoading ? (
-                <span className="flex items-center">
+                <span className="flex items-center justify-center w-full">
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    className="animate-spin h-4 w-4 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"

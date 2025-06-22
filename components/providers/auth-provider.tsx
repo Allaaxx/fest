@@ -16,8 +16,13 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (data: any) => Promise<void>;
+  register: (data: any) => Promise<RegisterResponse>;
   isLoading: boolean;
+}
+
+interface RegisterResponse {
+  token?: string;
+  error?: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -98,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const register = async (data: any) => {
+  const register = async (data: any): Promise<RegisterResponse> => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/register", {
@@ -106,10 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Erro ao registrar usuário");
-      // NÃO faça login automático após cadastro!
-      // await login(data.email, data.password); // Removido para evitar erro de credenciais
-      return await res.json(); // Retorna o token para o frontend redirecionar
+      const json = await res.json();
+      if (!res.ok) {
+        return { error: json.error || "Erro ao registrar usuário" };
+      }
+      return json;
     } finally {
       setIsLoading(false);
     }
