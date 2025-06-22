@@ -1,527 +1,539 @@
 "use client"
 
 import { useState } from "react"
-import { ShoppingBag, Calendar, Heart, CreditCard, Settings, User, MapPin } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Calendar, CreditCard, Gift, Heart, Home, Menu, Package, ShoppingBag, TrendingUp, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
-import { signOut } from "next-auth/react"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-// Dados simulados para os gráficos
-const spendingData = [
-  { month: "Jan", valor: 450 },
-  { month: "Fev", valor: 320 },
-  { month: "Mar", valor: 650 },
-  { month: "Abr", valor: 890 },
-  { month: "Mai", valor: 1200 },
-  { month: "Jun", valor: 750 },
-]
+type TabType = "overview" | "orders" | "favorites" | "loyalty" | "profile"
 
-const categoryData = [
-  { name: "Decoração", value: 45, color: "#f0739f" },
-  { name: "Móveis", value: 30, color: "#ebaabd" },
-  { name: "Iluminação", value: 15, color: "#f53377" },
-  { name: "Outros", value: 10, color: "#394d58" },
-]
+export default function ClienteDashboardPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("overview")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
-const monthlyOrders = [
-  { month: "Jan", pedidos: 2 },
-  { month: "Fev", pedidos: 1 },
-  { month: "Mar", pedidos: 4 },
-  { month: "Abr", pedidos: 3 },
-  { month: "Mai", valor: 6 },
-  { month: "Jun", pedidos: 2 },
-]
-
-export default function ClienteDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
-
-  const stats = [
-    {
-      title: "Total Gasto",
-      value: "R$ 4.257,00",
-      change: "+12%",
-      icon: CreditCard,
-      color: "text-green-600",
-    },
-    {
-      title: "Pedidos Realizados",
-      value: "18",
-      change: "+3",
-      icon: ShoppingBag,
-      color: "text-blue-600",
-    },
-    {
-      title: "Locações Ativas",
-      value: "2",
-      change: "+1",
-      icon: Calendar,
-      color: "text-purple-600",
-    },
-    {
-      title: "Itens Favoritos",
-      value: "24",
-      change: "+8",
-      icon: Heart,
-      color: "text-red-600",
-    },
+  const menuItems = [
+    { id: "overview", label: "Visão Geral", icon: Home },
+    { id: "orders", label: "Meus Pedidos", icon: Package },
+    { id: "favorites", label: "Favoritos", icon: Heart },
+    { id: "loyalty", label: "Pontos de Fidelidade", icon: Gift },
+    { id: "profile", label: "Meu Perfil", icon: User },
   ]
 
-  const recentOrders = [
-    {
-      id: "#1001",
-      product: "Kit Decoração Casamento",
-      type: "locacao",
-      date: "15/01/2024",
-      status: "confirmado",
-      value: 299.99,
-    },
-    {
-      id: "#1002",
-      product: "Mesa Redonda Branca",
-      type: "locacao",
-      date: "12/01/2024",
-      status: "entregue",
-      value: 45.0,
-    },
-    {
-      id: "#1003",
-      product: "Conjunto Taças",
-      type: "venda",
-      date: "10/01/2024",
-      status: "entregue",
-      value: 159.99,
-    },
-  ]
-
-  const loyaltyPoints = 2450
-  const nextRewardAt = 3000
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return <ClienteOverviewContent />
+      case "orders":
+        return <ClienteOrdersContent />
+      case "favorites":
+        return <ClienteFavoritesContent />
+      case "loyalty":
+        return <ClienteLoyaltyContent />
+      case "profile":
+        return <ClienteProfileContent />
+      default:
+        return <ClienteOverviewContent />
+    }
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-16">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-fest-black2">Minha Conta</h1>
-          <p className="text-gray-600">Bem-vindo de volta, João Silva!</p>
+    <div className="min-h-screen bg-gray-50 flex pt-16">
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 mt-16 lg:mt-0`}
+      >
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+            <span className="ml-2 text-xl font-bold text-gray-900">Cliente</span>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <X className="h-6 w-6" />
+          </button>
         </div>
-        <Button variant="outline">
-          <Settings className="h-4 w-4 mr-2" />
-          Configurações
+
+        <nav className="mt-6 px-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id as TabType)
+                  setSidebarOpen(false)
+                }}
+                className={`w-full flex items-center px-3 py-3 mb-1 text-left rounded-lg transition-colors ${
+                  activeTab === item.id
+                    ? "bg-pink-50 text-pink-600 border-r-2 border-pink-500"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <Icon className="h-5 w-5 mr-3" />
+                {item.label}
+              </button>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-0">
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-6">
+            <div className="flex items-center">
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-700 mr-4">
+                <Menu className="h-6 w-6" />
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {menuItems.find((item) => item.id === activeTab)?.label}
+              </h1>
+            </div>
+          </div>
+        </div>
+
+        <main className="p-6">{renderContent()}</main>
+      </div>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          style={{ top: "64px" }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+// Cliente Overview Content
+function ClienteOverviewContent() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Gasto</p>
+                <p className="text-2xl font-bold text-gray-900">R$ 2.450</p>
+                <p className="text-xs text-green-600 flex items-center mt-1">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +15% este mês
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-pink-50 rounded-lg flex items-center justify-center">
+                <CreditCard className="h-6 w-6 text-pink-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pedidos</p>
+                <p className="text-2xl font-bold text-gray-900">12</p>
+                <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <Package className="h-3 w-3 mr-1" />2 em andamento
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <ShoppingBag className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pontos</p>
+                <p className="text-2xl font-bold text-gray-900">1.250</p>
+                <p className="text-xs text-yellow-600 flex items-center mt-1">
+                  <Gift className="h-3 w-3 mr-1" />
+                  250 para próxima recompensa
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
+                <Gift className="h-6 w-6 text-yellow-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Favoritos</p>
+                <p className="text-2xl font-bold text-gray-900">8</p>
+                <p className="text-xs text-red-600 flex items-center mt-1">
+                  <Heart className="h-3 w-3 mr-1" />3 com desconto
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
+                <Heart className="h-6 w-6 text-red-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pedidos Recentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { id: "001", item: "Decoração Casamento", status: "Entregue", valor: "R$ 1.200" },
+                { id: "002", item: "Som e Iluminação", status: "Em andamento", valor: "R$ 800" },
+                { id: "003", item: "Buffet Premium", status: "Confirmado", valor: "R$ 450" },
+              ].map((pedido) => (
+                <div key={pedido.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
+                      <Package className="h-5 w-5 text-pink-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{pedido.item}</p>
+                      <p className="text-sm text-gray-500">Pedido #{pedido.id}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">{pedido.valor}</p>
+                    <p className="text-sm text-green-600">{pedido.status}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Próximos Eventos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { nome: "Casamento Ana & Carlos", data: "15 de Fev, 2024", dias: "Em 10 dias" },
+                { nome: "Aniversário 50 anos", data: "28 de Fev, 2024", dias: "Em 23 dias" },
+                { nome: "Formatura Medicina", data: "15 de Mar, 2024", dias: "Em 38 dias" },
+              ].map((evento, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{evento.nome}</p>
+                      <p className="text-sm text-gray-500">{evento.data}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-blue-600 font-medium">{evento.dias}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// Cliente Orders Content
+function ClienteOrdersContent() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Meus Pedidos</h2>
+          <p className="text-sm text-gray-500">Acompanhe todos os seus pedidos</p>
+        </div>
+        <Button className="bg-pink-500 hover:bg-pink-600">
+          <ShoppingBag className="h-4 w-4 mr-2" />
+          Novo Pedido
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left p-4 font-medium text-gray-900">Pedido</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Item</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Data</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Status</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Total</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    id: "001",
+                    item: "Decoração Casamento",
+                    data: "15/01/2024",
+                    status: "Entregue",
+                    total: "R$ 1.200,00",
+                    statusColor: "bg-green-100 text-green-800",
+                  },
+                  {
+                    id: "002",
+                    item: "Som e Iluminação",
+                    data: "10/01/2024",
+                    status: "Em andamento",
+                    total: "R$ 800,00",
+                    statusColor: "bg-blue-100 text-blue-800",
+                  },
+                  {
+                    id: "003",
+                    item: "Buffet Premium",
+                    data: "05/01/2024",
+                    status: "Confirmado",
+                    total: "R$ 450,00",
+                    statusColor: "bg-yellow-100 text-yellow-800",
+                  },
+                ].map((pedido) => (
+                  <tr key={pedido.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4">
+                      <div className="font-medium text-gray-900">#{pedido.id}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium text-gray-900">{pedido.item}</div>
+                    </td>
+                    <td className="p-4 text-gray-500">{pedido.data}</td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pedido.statusColor}`}
+                      >
+                        {pedido.status}
+                      </span>
+                    </td>
+                    <td className="p-4 font-medium text-gray-900">{pedido.total}</td>
+                    <td className="p-4">
+                      <Button variant="ghost" size="sm">
+                        Ver detalhes
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Cliente Favorites Content
+function ClienteFavoritesContent() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Meus Favoritos</h2>
+        <p className="text-sm text-gray-500">Produtos e serviços que você salvou</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { nome: "Decoração Rústica", categoria: "Decoração", preco: "R$ 1.200", desconto: "10% OFF", imagem: "🌿" },
+          { nome: "DJ Premium", categoria: "Som", preco: "R$ 800", desconto: null, imagem: "🎵" },
+          { nome: "Buffet Gourmet", categoria: "Alimentação", preco: "R$ 45/pessoa", desconto: "15% OFF", imagem: "🍽️" },
+          { nome: "Fotografia Profissional", categoria: "Fotografia", preco: "R$ 1.500", desconto: null, imagem: "📸" },
+          { nome: "Flores Tropicais", categoria: "Decoração", preco: "R$ 300", desconto: "20% OFF", imagem: "🌺" },
+          { nome: "Iluminação LED", categoria: "Iluminação", preco: "R$ 600", desconto: null, imagem: "💡" },
+        ].map((item, index) => (
+          <Card key={index} className="relative">
+            {item.desconto && (
+              <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                {item.desconto}
+              </div>
+            )}
+            <CardContent className="p-4">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">{item.imagem}</div>
+                <h3 className="font-semibold text-gray-900">{item.nome}</h3>
+                <p className="text-sm text-gray-500">{item.categoria}</p>
+              </div>
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-fest-black2">{stat.value}</p>
-                  <p className={`text-sm ${stat.color}`}>{stat.change}</p>
+                <span className="font-bold text-pink-600">{item.preco}</span>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="sm">
+                    <Heart className="h-4 w-4 text-red-500 fill-current" />
+                  </Button>
+                  <Button size="sm" className="bg-pink-500 hover:bg-pink-600">
+                    Contratar
+                  </Button>
                 </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+    </div>
+  )
+}
 
-      {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="orders">Pedidos</TabsTrigger>
-          <TabsTrigger value="analytics">Análises</TabsTrigger>
-          <TabsTrigger value="loyalty">Fidelidade</TabsTrigger>
-          <TabsTrigger value="profile">Perfil</TabsTrigger>
-        </TabsList>
+// Cliente Loyalty Content
+function ClienteLoyaltyContent() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Programa de Fidelidade</h2>
+        <p className="text-sm text-gray-500">Seus pontos e recompensas</p>
+      </div>
 
-        <TabsContent value="overview" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Gastos Mensais */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Gastos nos Últimos 6 Meses</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={spendingData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`R$ ${value}`, "Valor"]} />
-                    <Line type="monotone" dataKey="valor" stroke="#f0739f" strokeWidth={3} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Pedidos Recentes */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Últimos Pedidos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">{order.product}</p>
-                        <p className="text-xs text-gray-600">
-                          {order.id} - {order.date}
-                        </p>
-                        <Badge variant={order.status === "entregue" ? "default" : "secondary"} className="text-xs mt-1">
-                          {order.status}
-                        </Badge>
-                      </div>
-                      <span className="font-bold text-fest-primary text-sm">R$ {order.value.toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Gift className="h-12 w-12 text-yellow-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">1.250 Pontos</h3>
+            <p className="text-gray-500 mb-4">Você precisa de mais 250 pontos para a próxima recompensa</p>
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div className="bg-yellow-500 h-3 rounded-full" style={{ width: "83%" }}></div>
+            </div>
+            <p className="text-sm text-gray-500">83% para o próximo nível</p>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Categorias Mais Compradas */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Categorias Mais Compradas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Status da Conta</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Nível: Cliente Gold</span>
-                    <span>85%</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recompensas Disponíveis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { nome: "Desconto 10%", pontos: 500, disponivel: true },
+                { nome: "Frete Grátis", pontos: 300, disponivel: true },
+                { nome: "Desconto 20%", pontos: 1000, disponivel: true },
+                { nome: "Serviço Grátis", pontos: 1500, disponivel: false },
+              ].map((recompensa, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">{recompensa.nome}</p>
+                    <p className="text-sm text-gray-500">{recompensa.pontos} pontos</p>
                   </div>
-                  <Progress value={85} className="h-2" />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Pedidos realizados</span>
-                    <span className="font-semibold">18</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total investido</span>
-                    <span className="font-semibold">R$ 4.257,00</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Pontos acumulados</span>
-                    <span className="font-semibold text-fest-primary">{loyaltyPoints}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="orders" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Histórico de Pedidos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[...recentOrders, ...recentOrders].map((order, index) => (
-                  <div
-                    key={`${order.id}-${index}`}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  <Button
+                    size="sm"
+                    disabled={!recompensa.disponivel}
+                    className={recompensa.disponivel ? "bg-yellow-500 hover:bg-yellow-600" : ""}
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-fest-primary/10 rounded-lg flex items-center justify-center">
-                        {order.type === "locacao" ? (
-                          <Calendar className="h-6 w-6 text-fest-primary" />
-                        ) : (
-                          <ShoppingBag className="h-6 w-6 text-fest-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{order.product}</h4>
-                        <p className="text-sm text-gray-600">
-                          {order.id} - {order.date}
-                        </p>
-                        <Badge
-                          variant={
-                            order.status === "entregue"
-                              ? "default"
-                              : order.status === "confirmado"
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {order.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-fest-primary">R$ {order.value.toFixed(2)}</p>
-                      <p className="text-sm text-gray-600">{order.type === "locacao" ? "Locação" : "Venda"}</p>
-                    </div>
+                    {recompensa.disponivel ? "Resgatar" : "Bloqueado"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Histórico de Pontos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { acao: "Compra realizada", pontos: "+120", data: "15/01/2024" },
+                { acao: "Avaliação produto", pontos: "+50", data: "10/01/2024" },
+                { acao: "Indicação amigo", pontos: "+200", data: "05/01/2024" },
+                { acao: "Desconto resgatado", pontos: "-500", data: "01/01/2024" },
+              ].map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">{item.acao}</p>
+                    <p className="text-sm text-gray-500">{item.data}</p>
                   </div>
-                ))}
+                  <span className={`font-medium ${item.pontos.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
+                    {item.pontos}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// Cliente Profile Content
+function ClienteProfileContent() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Meu Perfil</h2>
+        <p className="text-sm text-gray-500">Gerencie suas informações pessoais</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Informações Pessoais</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                <Input defaultValue="Maria Silva" />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
+                <Input defaultValue="Santos" />
+              </div>
+            </div>
 
-        <TabsContent value="analytics" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pedidos por Mês</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyOrders}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="pedidos" fill="#f0739f" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <Input defaultValue="maria@email.com" type="email" />
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Análise de Gastos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Maior gasto mensal</span>
-                    <span className="font-bold text-fest-primary">R$ 1.200,00</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Média mensal</span>
-                    <span className="font-bold">R$ 709,50</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Economia total com ofertas</span>
-                    <span className="font-bold text-green-600">R$ 485,00</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Categoria favorita</span>
-                    <span className="font-bold">Decoração</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+              <Input defaultValue="(11) 99999-9999" />
+            </div>
 
-        <TabsContent value="loyalty" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Programa de Fidelidade</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">Pontos Atuais</span>
-                      <span className="text-2xl font-bold text-fest-primary">{loyaltyPoints}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
-                      <span>Próxima recompensa em</span>
-                      <span>{nextRewardAt - loyaltyPoints} pontos</span>
-                    </div>
-                    <Progress value={(loyaltyPoints / nextRewardAt) * 100} className="h-3" />
-                  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+              <Input defaultValue="Rua das Flores, 123 - São Paulo, SP" />
+            </div>
 
-                  <div className="space-y-3">
-                    <h4 className="font-medium">Como ganhar pontos:</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Cada R$ 1 gasto</span>
-                        <span className="text-fest-primary">+1 ponto</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Avaliação de produto</span>
-                        <span className="text-fest-primary">+10 pontos</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Indicação de amigo</span>
-                        <span className="text-fest-primary">+50 pontos</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Button className="bg-pink-500 hover:bg-pink-600">Salvar Alterações</Button>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Recompensas Disponíveis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Desconto de 10%</h4>
-                      <p className="text-sm text-gray-600">Válido para qualquer produto</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-fest-primary font-bold">500 pontos</p>
-                      <Button size="sm" className="mt-1">
-                        Resgatar
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Frete Grátis</h4>
-                      <p className="text-sm text-gray-600">Para próxima compra</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-fest-primary font-bold">300 pontos</p>
-                      <Button size="sm" className="mt-1">
-                        Resgatar
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg opacity-50">
-                    <div>
-                      <h4 className="font-medium">Desconto de 20%</h4>
-                      <p className="text-sm text-gray-600">Válido para locações</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-500 font-bold">1000 pontos</p>
-                      <Button size="sm" disabled className="mt-1">
-                        Indisponível
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="profile" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações Pessoais</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-fest-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    JS
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">João Silva</h3>
-                    <p className="text-gray-600">Cliente desde Janeiro 2023</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <span>joão.silva@email.com</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <span>São Paulo, SP</span>
-                  </div>
-                </div>
-
-                <Button className="w-full bg-fest-primary hover:bg-fest-dark text-white">Editar Perfil</Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Preferências</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Notificações</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-2">
-                      <input type="checkbox" defaultChecked className="rounded" />
-                      <span className="text-sm">Ofertas e promoções</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input type="checkbox" defaultChecked className="rounded" />
-                      <span className="text-sm">Atualizações de pedidos</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded" />
-                      <span className="text-sm">Newsletter semanal</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-2">Categorias de Interesse</h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">Decoração</Badge>
-                    <Badge variant="outline">Móveis</Badge>
-                    <Badge variant="outline">Iluminação</Badge>
-                    <Badge variant="secondary">Buffet</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <button
-        onClick={() => signOut({ callbackUrl: "/autenticar" })}
-        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mt-4"
-      >
-        Sair
-      </button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Foto do Perfil</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="h-12 w-12 text-pink-600" />
+            </div>
+            <Button variant="outline" className="mb-2">
+              Alterar Foto
+            </Button>
+            <p className="text-xs text-gray-500">JPG, PNG até 2MB</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

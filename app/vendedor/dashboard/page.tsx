@@ -1,601 +1,631 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-
+import { BarChart3, DollarSign, Home, Menu, Package, Plus, ShoppingBag, Star, TrendingUp, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Package,
-  MessageCircle,
-  DollarSign,
-  Users,
-  Star,
-  Plus,
-  Edit,
-  Trash2,
-  QrCode,
-  FileText,
-  Eye,
-  TrendingUp,
-  ShoppingCart,
-  AlertCircle,
-} from "lucide-react"
-import Link from "next/link"
 
-export default function VendorDashboard() {
-  const router = useRouter()
+type TabType = "overview" | "products" | "orders" | "analytics" | "profile"
 
-  const [activeTab, setActiveTab] = useState("overview")
+export default function VendedorDashboardPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("overview")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  const menuItems = [
+    { id: "overview", label: "Visão Geral", icon: Home },
+    { id: "products", label: "Meus Produtos", icon: Package },
+    { id: "orders", label: "Pedidos", icon: ShoppingBag },
+    { id: "analytics", label: "Análises", icon: BarChart3 },
+    { id: "profile", label: "Perfil da Loja", icon: User },
+  ]
 
-
-  const stats = {
-    totalProducts: 45,
-    activeRentals: 12,
-    monthlyRevenue: 15420.5,
-    rating: 4.8,
-    totalReviews: 156,
-    pendingOrders: 8,
-    totalSales: 234,
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return <VendedorOverviewContent />
+      case "products":
+        return <VendedorProductsContent />
+      case "orders":
+        return <VendedorOrdersContent />
+      case "analytics":
+        return <VendedorAnalyticsContent />
+      case "profile":
+        return <VendedorProfileContent />
+      default:
+        return <VendedorOverviewContent />
+    }
   }
 
-  const products = [
-    {
-      id: 1,
-      name: "Decoração Mesa Ben 10",
-      type: "locacao",
-      price: 99.9,
-      stock: 5,
-      status: "active",
-      image: "/placeholder.svg?height=60&width=60",
-      views: 1250,
-      sales: 23,
-    },
-    {
-      id: 2,
-      name: "Kit Festa Princesa",
-      type: "venda",
-      price: 1250.0,
-      stock: 8,
-      status: "active",
-      image: "/placeholder.svg?height=60&width=60",
-      views: 890,
-      sales: 15,
-    },
-    {
-      id: 3,
-      name: "Buffet Premium",
-      type: "servico",
-      price: 2500.0,
-      stock: null,
-      status: "pending",
-      image: "/placeholder.svg?height=60&width=60",
-      views: 456,
-      sales: 7,
-    },
-  ]
-
-  const rentals = [
-    {
-      id: 1,
-      product: "Decoração Mesa Ben 10",
-      customer: "Maria Silva",
-      startDate: "2024-01-20",
-      endDate: "2024-01-22",
-      status: "active",
-      value: 199.8,
-    },
-    {
-      id: 2,
-      product: "Kit Iluminação LED",
-      customer: "João Santos",
-      startDate: "2024-01-25",
-      endDate: "2024-01-27",
-      status: "pending",
-      value: 400.0,
-    },
-  ]
-
-  const recentOrders = [
-    {
-      id: "ORD-001",
-      customer: "Ana Costa",
-      product: "Kit Festa Princesa",
-      value: 1250.0,
-      status: "pending",
-      date: "2024-01-15",
-      type: "venda",
-    },
-    {
-      id: "ORD-002",
-      customer: "Carlos Silva",
-      product: "Decoração Mesa Ben 10",
-      value: 199.8,
-      status: "confirmed",
-      date: "2024-01-14",
-      type: "locacao",
-    },
-  ]
-
   return (
-    <div className="min-h-screen ">
-     
+    <div className="min-h-screen bg-gray-50 flex pt-16">
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 mt-16 lg:mt-0`}
+      >
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">V</span>
+            </div>
+            <span className="ml-2 text-xl font-bold text-gray-900">Vendedor</span>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
 
-      <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-[#051922] mb-2">Painel do Vendedor</h1>
-                <p className="text-[#394d58]">
-                  Bem-vindo, Vendedor! Gerencie seus produtos e vendas
-                </p>
-              </div>
-              <div className="flex space-x-3">
-                <Link href="/vendedor/produtos/novo">
-                  <Button className="bg-[#f0739f] hover:bg-[#f53377] text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Novo Produto
-                  </Button>
-                </Link>
-                <Button variant="outline">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Mensagens
-                </Button>
-              </div>
+        <nav className="mt-6 px-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id as TabType)
+                  setSidebarOpen(false)
+                }}
+                className={`w-full flex items-center px-3 py-3 mb-1 text-left rounded-lg transition-colors ${
+                  activeTab === item.id
+                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-500"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <Icon className="h-5 w-5 mr-3" />
+                {item.label}
+              </button>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-0">
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-6">
+            <div className="flex items-center">
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-700 mr-4">
+                <Menu className="h-6 w-6" />
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {menuItems.find((item) => item.id === activeTab)?.label}
+              </h1>
             </div>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[#394d58]">Produtos</p>
-                    <p className="text-2xl font-bold text-[#051922]">{stats.totalProducts}</p>
-                    <p className="text-xs text-green-600">+3 este mês</p>
-                  </div>
-                  <Package className="w-8 h-8 text-[#f0739f]" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[#394d58]">Receita Mensal</p>
-                    <p className="text-2xl font-bold text-[#051922]">
-                      R$ {stats.monthlyRevenue.toFixed(2).replace(".", ",")}
-                    </p>
-                    <p className="text-xs text-green-600">+12% vs mês anterior</p>
-                  </div>
-                  <DollarSign className="w-8 h-8 text-[#f0739f]" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[#394d58]">Pedidos Pendentes</p>
-                    <p className="text-2xl font-bold text-[#051922]">{stats.pendingOrders}</p>
-                    <p className="text-xs text-orange-600">Requer atenção</p>
-                  </div>
-                  <ShoppingCart className="w-8 h-8 text-[#f0739f]" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[#394d58]">Avaliação</p>
-                    <div className="flex items-center space-x-1">
-                      <p className="text-2xl font-bold text-[#051922]">{stats.rating}</p>
-                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    </div>
-                    <p className="text-xs text-[#394d58]">{stats.totalReviews} avaliações</p>
-                  </div>
-                  <Users className="w-8 h-8 text-[#f0739f]" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="products">Produtos</TabsTrigger>
-              <TabsTrigger value="orders">Pedidos</TabsTrigger>
-              <TabsTrigger value="rentals">Locações</TabsTrigger>
-              <TabsTrigger value="analytics">Relatórios</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      Produtos em Destaque
-                      <Link href="/vendedor/produtos">
-                        <Button size="sm" variant="outline">
-                          Ver Todos
-                        </Button>
-                      </Link>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {products.slice(0, 3).map((product) => (
-                        <div key={product.id} className="flex items-center space-x-4 p-3 border rounded-lg">
-                          <img
-                            src={product.image || "/placeholder.svg"}
-                            alt={product.name}
-                            className="w-12 h-12 rounded object-cover"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-medium text-[#051922]">{product.name}</h4>
-                            <div className="flex items-center space-x-2 text-sm text-[#394d58]">
-                              <Badge
-                                variant={
-                                  product.type === "locacao"
-                                    ? "default"
-                                    : product.type === "venda"
-                                      ? "secondary"
-                                      : "outline"
-                                }
-                              >
-                                {product.type === "locacao"
-                                  ? "Locação"
-                                  : product.type === "venda"
-                                    ? "Venda"
-                                    : "Serviço"}
-                              </Badge>
-                              <span>R$ {product.price.toFixed(2).replace(".", ",")}</span>
-                            </div>
-                          </div>
-                          <div className="text-right text-sm">
-                            <p className="text-[#394d58]">{product.views} visualizações</p>
-                            <p className="text-[#051922] font-medium">{product.sales} vendas</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      Pedidos Recentes
-                      <Link href="/vendedor/pedidos">
-                        <Button size="sm" variant="outline">
-                          Ver Todos
-                        </Button>
-                      </Link>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {recentOrders.map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <h4 className="font-medium text-[#051922]">Pedido {order.id}</h4>
-                            <p className="text-sm text-[#394d58]">{order.customer}</p>
-                            <p className="text-sm text-[#394d58]">{order.product}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-[#051922]">R$ {order.value.toFixed(2).replace(".", ",")}</p>
-                            <Badge variant={order.status === "confirmed" ? "default" : "secondary"}>
-                              {order.status === "confirmed" ? "Confirmado" : "Pendente"}
-                            </Badge>
-                            <p className="text-xs text-[#394d58]">{order.date}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Performance do Mês</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Vendas</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
-                            <div className="bg-[#f0739f] h-2 rounded-full" style={{ width: "75%" }}></div>
-                          </div>
-                          <span className="text-sm font-medium">75%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Locações</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
-                            <div className="bg-[#394d58] h-2 rounded-full" style={{ width: "60%" }}></div>
-                          </div>
-                          <span className="text-sm font-medium">60%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Serviços</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
-                            <div className="bg-[#f53377] h-2 rounded-full" style={{ width: "45%" }}></div>
-                          </div>
-                          <span className="text-sm font-medium">45%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Rápidas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Link href="/vendedor/produtos/novo">
-                        <Button variant="outline" className="w-full h-16 flex flex-col">
-                          <Plus className="w-5 h-5 mb-1" />
-                          <span className="text-xs">Novo Produto</span>
-                        </Button>
-                      </Link>
-                      <Button variant="outline" className="w-full h-16 flex flex-col">
-                        <TrendingUp className="w-5 h-5 mb-1" />
-                        <span className="text-xs">Relatórios</span>
-                      </Button>
-                      <Button variant="outline" className="w-full h-16 flex flex-col">
-                        <MessageCircle className="w-5 h-5 mb-1" />
-                        <span className="text-xs">Mensagens</span>
-                      </Button>
-                      <Button variant="outline" className="w-full h-16 flex flex-col">
-                        <Star className="w-5 h-5 mb-1" />
-                        <span className="text-xs">Avaliações</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="products" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    Gerenciar Produtos
-                    <Link href="/vendedor/produtos/novo">
-                      <Button className="bg-[#f0739f] hover:bg-[#f53377]">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar Produto
-                      </Button>
-                    </Link>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {products.map((product) => (
-                      <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <img
-                            src={product.image || "/placeholder.svg"}
-                            alt={product.name}
-                            className="w-16 h-16 rounded object-cover"
-                          />
-                          <div>
-                            <h4 className="font-medium text-[#051922]">{product.name}</h4>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge
-                                variant={
-                                  product.type === "locacao"
-                                    ? "default"
-                                    : product.type === "venda"
-                                      ? "secondary"
-                                      : "outline"
-                                }
-                              >
-                                {product.type === "locacao"
-                                  ? "Locação"
-                                  : product.type === "venda"
-                                    ? "Venda"
-                                    : "Serviço"}
-                              </Badge>
-                              <span className="text-sm text-[#394d58]">
-                                R$ {product.price.toFixed(2).replace(".", ",")}
-                              </span>
-                              {product.stock !== null && (
-                                <span className="text-sm text-[#394d58]">Estoque: {product.stock}</span>
-                              )}
-                            </div>
-                            <div className="flex items-center space-x-4 mt-1 text-sm text-[#394d58]">
-                              <span>{product.views} visualizações</span>
-                              <span>{product.sales} vendas</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant={product.status === "active" ? "default" : "secondary"}>
-                            {product.status === "active" ? "Ativo" : "Pendente"}
-                          </Badge>
-                          <Button variant="outline" size="sm">
-                            <QrCode className="w-4 h-4 mr-2" />
-                            QR Code
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="orders" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Gerenciar Pedidos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentOrders.map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-[#051922]">Pedido {order.id}</h4>
-                          <p className="text-sm text-[#394d58]">Cliente: {order.customer}</p>
-                          <p className="text-sm text-[#394d58]">Produto: {order.product}</p>
-                          <p className="text-sm text-[#394d58]">Data: {order.date}</p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="font-bold text-[#051922]">R$ {order.value.toFixed(2).replace(".", ",")}</p>
-                            <Badge variant={order.status === "confirmed" ? "default" : "secondary"}>
-                              {order.status === "confirmed" ? "Confirmado" : "Pendente"}
-                            </Badge>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <FileText className="w-4 h-4 mr-2" />
-                              Detalhes
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <MessageCircle className="w-4 h-4 mr-2" />
-                              Chat
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="rentals" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Calendário de Locações</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {rentals.map((rental) => (
-                      <div key={rental.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-[#051922]">{rental.product}</h4>
-                          <p className="text-sm text-[#394d58]">Cliente: {rental.customer}</p>
-                          <p className="text-sm text-[#394d58]">
-                            Período: {rental.startDate} até {rental.endDate}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="font-bold text-[#051922]">R$ {rental.value.toFixed(2).replace(".", ",")}</p>
-                            <Badge variant={rental.status === "active" ? "default" : "secondary"}>
-                              {rental.status === "active" ? "Em Andamento" : "Agendado"}
-                            </Badge>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <FileText className="w-4 h-4 mr-2" />
-                              Contrato
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <MessageCircle className="w-4 h-4 mr-2" />
-                              Chat
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="analytics" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Vendas por Categoria</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Locação</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
-                            <div className="bg-[#f0739f] h-2 rounded-full" style={{ width: "70%" }}></div>
-                          </div>
-                          <span className="text-sm font-medium">70%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Venda</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
-                            <div className="bg-[#394d58] h-2 rounded-full" style={{ width: "25%" }}></div>
-                          </div>
-                          <span className="text-sm font-medium">25%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Serviços</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
-                            <div className="bg-[#f53377] h-2 rounded-full" style={{ width: "5%" }}></div>
-                          </div>
-                          <span className="text-sm font-medium">5%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Receita Mensal</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Janeiro</span>
-                        <span className="font-bold text-[#051922]">R$ 15.420,50</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Dezembro</span>
-                        <span className="font-bold text-[#051922]">R$ 18.750,00</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#394d58]">Novembro</span>
-                        <span className="font-bold text-[#051922]">R$ 12.300,25</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
         </div>
+
+        <main className="p-6">{renderContent()}</main>
+      </div>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          style={{ top: "64px" }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+// Vendedor Overview Content
+function VendedorOverviewContent() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Vendas do Mês</p>
+                <p className="text-2xl font-bold text-gray-900">R$ 12.450</p>
+                <p className="text-xs text-green-600 flex items-center mt-1">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +22% vs mês anterior
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pedidos</p>
+                <p className="text-2xl font-bold text-gray-900">34</p>
+                <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <ShoppingBag className="h-3 w-3 mr-1" />5 pendentes
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <ShoppingBag className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Produtos</p>
+                <p className="text-2xl font-bold text-gray-900">18</p>
+                <p className="text-xs text-purple-600 flex items-center mt-1">
+                  <Package className="h-3 w-3 mr-1" />3 em destaque
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+                <Package className="h-6 w-6 text-purple-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Avaliação</p>
+                <p className="text-2xl font-bold text-gray-900">4.8</p>
+                <p className="text-xs text-yellow-600 flex items-center mt-1">
+                  <Star className="h-3 w-3 mr-1" />
+                  127 avaliações
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
+                <Star className="h-6 w-6 text-yellow-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pedidos Recentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                {
+                  id: "001",
+                  cliente: "Maria Silva",
+                  produto: "Decoração Rústica",
+                  valor: "R$ 1.200",
+                  status: "Confirmado",
+                },
+                { id: "002", cliente: "João Santos", produto: "DJ Premium", valor: "R$ 800", status: "Em andamento" },
+                { id: "003", cliente: "Ana Costa", produto: "Buffet Gourmet", valor: "R$ 450", status: "Entregue" },
+              ].map((pedido) => (
+                <div key={pedido.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <ShoppingBag className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{pedido.produto}</p>
+                      <p className="text-sm text-gray-500">
+                        {pedido.cliente} - #{pedido.id}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">{pedido.valor}</p>
+                    <p className="text-sm text-green-600">{pedido.status}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Produtos Mais Vendidos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { nome: "Decoração Rústica", vendas: 12, receita: "R$ 14.400" },
+                { nome: "DJ Premium", vendas: 8, receita: "R$ 6.400" },
+                { nome: "Buffet Gourmet", vendas: 15, receita: "R$ 6.750" },
+              ].map((produto, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <Package className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{produto.nome}</p>
+                      <p className="text-sm text-gray-500">{produto.vendas} vendas</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">{produto.receita}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// Vendedor Products Content
+function VendedorProductsContent() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Meus Produtos</h2>
+          <p className="text-sm text-gray-500">Gerencie seus produtos e serviços</p>
+        </div>
+        <Button className="bg-blue-500 hover:bg-blue-600">
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Produto
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          {
+            nome: "Decoração Rústica",
+            categoria: "Decoração",
+            preco: "R$ 1.200",
+            status: "Ativo",
+            vendas: 12,
+            imagem: "🌿",
+          },
+          { nome: "DJ Premium", categoria: "Som", preco: "R$ 800", status: "Ativo", vendas: 8, imagem: "🎵" },
+          {
+            nome: "Buffet Gourmet",
+            categoria: "Alimentação",
+            preco: "R$ 45/pessoa",
+            status: "Ativo",
+            vendas: 15,
+            imagem: "🍽️",
+          },
+          {
+            nome: "Fotografia Profissional",
+            categoria: "Fotografia",
+            preco: "R$ 1.500",
+            status: "Pausado",
+            vendas: 3,
+            imagem: "📸",
+          },
+          {
+            nome: "Flores Tropicais",
+            categoria: "Decoração",
+            preco: "R$ 300",
+            status: "Ativo",
+            vendas: 7,
+            imagem: "🌺",
+          },
+          {
+            nome: "Iluminação LED",
+            categoria: "Iluminação",
+            preco: "R$ 600",
+            status: "Ativo",
+            vendas: 5,
+            imagem: "💡",
+          },
+        ].map((produto, index) => (
+          <Card key={index}>
+            <CardContent className="p-4">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">{produto.imagem}</div>
+                <h3 className="font-semibold text-gray-900">{produto.nome}</h3>
+                <p className="text-sm text-gray-500">{produto.categoria}</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Preço:</span>
+                  <span className="font-medium text-blue-600">{produto.preco}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Vendas:</span>
+                  <span className="font-medium">{produto.vendas}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Status:</span>
+                  <span
+                    className={`text-sm font-medium ${produto.status === "Ativo" ? "text-green-600" : "text-yellow-600"}`}
+                  >
+                    {produto.status}
+                  </span>
+                </div>
+              </div>
+              <div className="flex space-x-2 mt-4">
+                <Button variant="outline" size="sm" className="flex-1">
+                  Editar
+                </Button>
+                <Button size="sm" className="flex-1 bg-blue-500 hover:bg-blue-600">
+                  Ver Detalhes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Vendedor Orders Content
+function VendedorOrdersContent() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Pedidos Recebidos</h2>
+          <p className="text-sm text-gray-500">Gerencie todos os pedidos dos seus produtos</p>
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left p-4 font-medium text-gray-900">Pedido</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Cliente</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Produto</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Data</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Status</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Total</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    id: "001",
+                    cliente: "Maria Silva",
+                    produto: "Decoração Rústica",
+                    data: "15/01/2024",
+                    status: "Confirmado",
+                    total: "R$ 1.200,00",
+                    statusColor: "bg-green-100 text-green-800",
+                  },
+                  {
+                    id: "002",
+                    cliente: "João Santos",
+                    produto: "DJ Premium",
+                    data: "10/01/2024",
+                    status: "Em andamento",
+                    total: "R$ 800,00",
+                    statusColor: "bg-blue-100 text-blue-800",
+                  },
+                  {
+                    id: "003",
+                    cliente: "Ana Costa",
+                    produto: "Buffet Gourmet",
+                    data: "05/01/2024",
+                    status: "Pendente",
+                    total: "R$ 450,00",
+                    statusColor: "bg-yellow-100 text-yellow-800",
+                  },
+                ].map((pedido) => (
+                  <tr key={pedido.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4">
+                      <div className="font-medium text-gray-900">#{pedido.id}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium text-gray-900">{pedido.cliente}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium text-gray-900">{pedido.produto}</div>
+                    </td>
+                    <td className="p-4 text-gray-500">{pedido.data}</td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pedido.statusColor}`}
+                      >
+                        {pedido.status}
+                      </span>
+                    </td>
+                    <td className="p-4 font-medium text-gray-900">{pedido.total}</td>
+                    <td className="p-4">
+                      <Button variant="ghost" size="sm">
+                        Gerenciar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Vendedor Analytics Content
+function VendedorAnalyticsContent() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Análises de Vendas</h2>
+        <p className="text-sm text-gray-500">Acompanhe o desempenho dos seus produtos</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Vendas por Mês</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500">Gráfico de vendas seria exibido aqui</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Categorias Mais Vendidas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { categoria: "Decoração", vendas: 19, porcentagem: 45 },
+                { categoria: "Som", vendas: 12, porcentagem: 30 },
+                { categoria: "Alimentação", vendas: 8, porcentagem: 20 },
+                { categoria: "Iluminação", vendas: 3, porcentagem: 5 },
+              ].map((item, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-900">{item.categoria}</span>
+                    <span className="text-sm text-gray-500">{item.vendas} vendas</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${item.porcentagem}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Avaliações Recentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { cliente: "Maria Silva", produto: "Decoração Rústica", nota: 5, comentario: "Excelente trabalho!" },
+                { cliente: "João Santos", produto: "DJ Premium", nota: 4, comentario: "Muito bom, recomendo." },
+                { cliente: "Ana Costa", produto: "Buffet Gourmet", nota: 5, comentario: "Superou expectativas!" },
+              ].map((avaliacao, index) => (
+                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-900">{avaliacao.cliente}</span>
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < avaliacao.nota ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">{avaliacao.produto}</p>
+                  <p className="text-sm text-gray-500">"{avaliacao.comentario}"</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Métricas de Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-600">Taxa de Conversão</span>
+                <span className="font-medium text-green-600">12.5%</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-600">Tempo Médio de Resposta</span>
+                <span className="font-medium text-blue-600">2.3h</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-600">Satisfação do Cliente</span>
+                <span className="font-medium text-yellow-600">4.8/5</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-600">Taxa de Recompra</span>
+                <span className="font-medium text-purple-600">35%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// Vendedor Profile Content
+function VendedorProfileContent() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Perfil da Loja</h2>
+        <p className="text-sm text-gray-500">Gerencie as informações da sua loja</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Informações da Loja</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Loja</label>
+              <Input defaultValue="Eventos Premium" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+              <textarea
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                defaultValue="Especialistas em eventos de alta qualidade com mais de 10 anos de experiência no mercado."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <Input defaultValue="contato@eventospremium.com" type="email" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <Input defaultValue="(11) 99999-9999" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+              <Input defaultValue="Av. Paulista, 1000 - São Paulo, SP" />
+            </div>
+
+            <Button className="bg-blue-500 hover:bg-blue-600">Salvar Alterações</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Logo da Loja</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="w-24 h-24 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-blue-600">EP</span>
+            </div>
+            <Button variant="outline" className="mb-2">
+              Alterar Logo
+            </Button>
+            <p className="text-xs text-gray-500">JPG, PNG até 2MB</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
