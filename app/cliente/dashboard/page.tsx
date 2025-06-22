@@ -1,17 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import Sidebar from "./components/Sidebar"
-import Overview from "./components/Overview"
-import Orders from "./components/Orders"
-import Favorites from "./components/Favorites"
-import Loyalty from "./components/Loyalty"
-import Profile from "./components/Profile"
+import Sidebar from "@/components/dashboard/Sidebar"
+import Overview from "@/components/dashboard/Overview"
+import Orders from "@/components/dashboard/Orders"
+import Favorites from "@/components/dashboard/Favorites"
+import Loyalty from "@/components/dashboard/Loyalty"
+import Profile from "@/components/dashboard/Profile"
+import Messages from "@/components/dashboard/Messages"
 import { Menu } from "lucide-react"
 
 export default function ClienteDashboardPage() {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "orders" | "favorites" | "loyalty" | "profile"
+    "overview" | "orders" | "favorites" | "loyalty" | "profile" | "messages"
   >("overview")
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -27,6 +28,8 @@ export default function ClienteDashboardPage() {
         return <Loyalty />
       case "profile":
         return <Profile />
+      case "messages":
+        return <Messages />
       default:
         return <Overview />
     }
@@ -65,6 +68,8 @@ export default function ClienteDashboardPage() {
                       return "Pontos de Fidelidade"
                     case "profile":
                       return "Meu Perfil"
+                    case "messages":
+                      return "Mensagens"
                     default:
                       return "Visão Geral"
                   }

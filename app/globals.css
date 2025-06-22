@@ -17,21 +17,25 @@
   --swiper-navigation-top-offset: 85%;
   --ds-shadow-small: 0px 1px 2px rgba(0, 0, 0, 0.04);
   --ds-shadow-border-small: var(--ds-shadow-border), var(--ds-shadow-small);
-  --ds-shadow-medium: 0px 2px 2px rgba(0, 0, 0, 0.04),
-    0px 8px 8px -8px rgba(0, 0, 0, 0.04);
+  --ds-shadow-medium:
+    0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 8px -8px rgba(0, 0, 0, 0.04);
   --ds-shadow-border-medium: var(--ds-shadow-border), var(--ds-shadow-medium);
-  --ds-shadow-large: 0px 2px 2px rgba(0, 0, 0, 0.04),
-    0px 8px 16px -4px rgba(0, 0, 0, 0.04);
+  --ds-shadow-large:
+    0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 16px -4px rgba(0, 0, 0, 0.04);
   --ds-shadow-border-large: var(--ds-shadow-border), var(--ds-shadow-large);
-  --ds-shadow-tooltip: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
+  --ds-shadow-tooltip:
+    var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
     0px 4px 8px rgba(0, 0, 0, 0.04);
-  --ds-shadow-menu: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
+  --ds-shadow-menu:
+    var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
     0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
-  --ds-shadow-modal: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
+  --ds-shadow-modal:
+    var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
     0px 8px 16px -4px rgba(0, 0, 0, 0.04),
     0px 24px 32px -8px rgba(0, 0, 0, 0.06);
-  --ds-shadow-fullscreen: var(--ds-shadow-border),
-    0px 1px 1px rgba(0, 0, 0, 0.02), 0px 8px 16px -4px rgba(0, 0, 0, 0.04),
+  --ds-shadow-fullscreen:
+    var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.04),
     0px 24px 32px -8px rgba(0, 0, 0, 0.06);
   --scn-background: 0 0% 100%;
   --scn-foreground: 240 10% 3.9%;
@@ -327,7 +331,9 @@ form {
   text-align: center;
   padding: 40px;
   z-index: 1;
-  transition: 0.6s ease-in-out 1.2s, visibility 0s 1s;
+  transition:
+    0.6s ease-in-out 1.2s,
+    visibility 0s 1s;
 }
 
 .auth-container.active .form-box {
@@ -473,6 +479,30 @@ form {
   box-shadow: none;
 }
 
+/* Dashboard */
+
+.phoneinput-inside .PhoneInputInput {
+  padding-left: 48px !important;
+}
+.phoneinput-inside .PhoneInputCountry {
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+  z-index: 2;
+}
+.phoneinput-inside {
+  position: relative;
+}
+.phoneinput-inside .PhoneInput {
+  width: 100%;
+}
+.phoneinput-inside .PhoneInputCountrySelect {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
 @media screen and (max-width: 650px) {
   .auth-container {
     height: calc(100vh - 40px);
@@ -538,7 +568,8 @@ form {
     padding: 12px 14px !important;
     min-width: 0 !important;
   }
-  .input-box svg, .input-box i {
+  .input-box svg,
+  .input-box i {
     position: static !important;
     margin-bottom: 2px !important;
     margin-right: 0 !important;

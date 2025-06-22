@@ -5,7 +5,6 @@ import { User, Trash2, ImageDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import PhoneInput from "react-phone-number-input";
-import "react-phone-number-input/style.css";
 import "./phoneinput-custom.css";
 import axios from "axios";
 
