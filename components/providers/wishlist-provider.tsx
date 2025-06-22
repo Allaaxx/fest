@@ -1,84 +1,107 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { createContext, useContext, useReducer, type ReactNode } from "react"
+import { createContext, useContext, useReducer, type ReactNode } from "react";
 
 interface WishlistItem {
-  id: string
-  name: string
-  price: number
-  image: string
-  type: "venda" | "locacao" | "servico"
+  id: string;
+  nome: string;
+  categoria: string;
+  precoOriginal?: number | null;
+  desconto?: string | null;
+  avaliacao: number;
+  avaliacoes: number;
+  vendedor: string;
+  imagem: string;
+  disponivel: boolean;
+  promocao: boolean;
+  type: "venda" | "locacao" | "servico";
+  price: number; // valor numérico
+  image: string; // compatibilidade sidebar
+  name: string; // compatibilidade sidebar
 }
 
 interface WishlistState {
-  items: WishlistItem[]
+  items: WishlistItem[];
 }
 
 type WishlistAction =
   | { type: "ADD_ITEM"; payload: WishlistItem }
   | { type: "REMOVE_ITEM"; payload: string }
-  | { type: "CLEAR_WISHLIST" }
+  | { type: "CLEAR_WISHLIST" };
 
 const WishlistContext = createContext<{
-  state: WishlistState
-  dispatch: React.Dispatch<WishlistAction>
-  addToWishlist: (item: WishlistItem) => void
-  removeFromWishlist: (id: string) => void
-  isInWishlist: (id: string) => boolean
-} | null>(null)
+  state: WishlistState;
+  dispatch: React.Dispatch<WishlistAction>;
+  addToWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (id: string) => void;
+  isInWishlist: (id: string) => boolean;
+} | null>(null);
 
-function wishlistReducer(state: WishlistState, action: WishlistAction): WishlistState {
+function wishlistReducer(
+  state: WishlistState,
+  action: WishlistAction
+): WishlistState {
   switch (action.type) {
     case "ADD_ITEM":
-      const existingItem = state.items.find((item) => item.id === action.payload.id)
+      const existingItem = state.items.find(
+        (item) => item.id === action.payload.id
+      );
       if (existingItem) {
-        return state
+        return state;
       }
       return {
         items: [...state.items, action.payload],
-      }
+      };
 
     case "REMOVE_ITEM":
       return {
         items: state.items.filter((item) => item.id !== action.payload),
-      }
+      };
 
     case "CLEAR_WISHLIST":
-      return { items: [] }
+      return { items: [] };
 
     default:
-      return state
+      return state;
   }
 }
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(wishlistReducer, { items: [] })
+  const [state, dispatch] = useReducer(wishlistReducer, { items: [] });
 
   const addToWishlist = (item: WishlistItem) => {
-    dispatch({ type: "ADD_ITEM", payload: item })
-  }
+    dispatch({ type: "ADD_ITEM", payload: item });
+  };
 
   const removeFromWishlist = (id: string) => {
-    dispatch({ type: "REMOVE_ITEM", payload: id })
-  }
+    dispatch({ type: "REMOVE_ITEM", payload: id });
+  };
 
   const isInWishlist = (id: string) => {
-    return state.items.some((item) => item.id === id)
-  }
+    return state.items.some((item) => item.id === id);
+  };
 
   return (
-    <WishlistContext.Provider value={{ state, dispatch, addToWishlist, removeFromWishlist, isInWishlist }}>
+    <WishlistContext.Provider
+      value={{
+        state,
+        dispatch,
+        addToWishlist,
+        removeFromWishlist,
+        isInWishlist,
+      }}
+    >
       {children}
     </WishlistContext.Provider>
-  )
+  );
 }
 
 export function useWishlist() {
-  const context = useContext(WishlistContext)
+  const context = useContext(WishlistContext);
   if (!context) {
-    throw new Error("useWishlist must be used within a WishlistProvider")
+    throw new Error("useWishlist must be used within a WishlistProvider");
   }
-  return context
+  return context;
 }
