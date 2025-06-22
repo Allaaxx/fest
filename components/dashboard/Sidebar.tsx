@@ -1,8 +1,23 @@
-import { Home, Package, Heart, Gift, User, X, LogOut } from "lucide-react";
+import {
+  Home,
+  Package,
+  Heart,
+  Gift,
+  User,
+  X,
+  LogOut,
+  MessageCircle,
+} from "lucide-react";
 import React from "react";
 import { signOut, useSession } from "next-auth/react";
 
-type TabType = "overview" | "orders" | "favorites" | "loyalty" | "profile";
+type TabType =
+  | "overview"
+  | "orders"
+  | "favorites"
+  | "loyalty"
+  | "profile"
+  | "messages";
 
 type SidebarProps = {
   activeTab: TabType;
@@ -16,10 +31,16 @@ const menuItems = [
   { id: "orders", label: "Meus Pedidos", icon: Package },
   { id: "favorites", label: "Favoritos", icon: Heart },
   { id: "loyalty", label: "Pontos de Fidelidade", icon: Gift },
+  { id: "messages", label: "Mensagens", icon: MessageCircle },
   { id: "profile", label: "Meu Perfil", icon: User },
 ];
 
-export default function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }: SidebarProps) {
+export default function Sidebar({
+  activeTab,
+  setActiveTab,
+  sidebarOpen,
+  setSidebarOpen,
+}: SidebarProps) {
   const { data: session } = useSession();
   const user = session?.user;
   return (
@@ -45,7 +66,10 @@ export default function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSideb
             {user?.name || "Cliente"}
           </span>
         </div>
-        <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-500 hover:text-gray-700">
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden text-gray-500 hover:text-gray-700"
+        >
           <X className="h-6 w-6" />
         </button>
       </div>
