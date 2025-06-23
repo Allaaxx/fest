@@ -53,14 +53,6 @@ export default function ChatContent({ conversation }: ChatContentProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
   useEffect(() => {
     inputRef.current?.focus()
   }, [conversation])
@@ -187,7 +179,7 @@ export default function ChatContent({ conversation }: ChatContentProps) {
         {/* Área de Mensagens - Scroll Independente */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
           {/* Card do Produto - Fixo no topo */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm sticky top-0 z-10">
+          {/* <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm sticky top-0 z-10">
             <div className="flex items-center space-x-3">
               <img
                 src={conversation.product.image || "/placeholder.svg?height=60&width=60"}
@@ -202,7 +194,7 @@ export default function ChatContent({ conversation }: ChatContentProps) {
                 Ver Produto
               </Button>
             </div>
-          </div>
+          </div> */}
 
           {/* Mensagens */}
           {messages.map((message, index) => {

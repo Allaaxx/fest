@@ -78,7 +78,7 @@ export default function ClienteDashboardPage() {
             </div>
           </div>
         </div>
-        <main className="p-6">{renderContent()}</main>
+        <main className="p-3">{renderContent()}</main>
       </div>
       {/* Overlay for mobile */}
       {sidebarOpen && (

@@ -364,7 +364,7 @@ export default function MensagensPage() {
   const unreadCount = mockConversations.filter((conv) => conv.unread).length
 
   return (
-    <div className="w-full h-full flex">
+    <div className="flex h-[800px] max-h-[80vh] min-h-[350px] w-full bg-white shadow-md rounded-lg overflow-hidden flex-col md:flex-row">
       {/* Sidebar de Conversas - Scroll Independente */}
       <div className="w-full md:w-96 flex-shrink-0 flex flex-col border-r h-full">
         {/* Header da Sidebar - Fixo */}
