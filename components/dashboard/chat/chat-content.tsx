@@ -132,11 +132,11 @@ export default function ChatContent({ conversation }: ChatContentProps) {
   return (
     <div className="flex h-full">
       {/* Área Principal do Chat */}
-      <div className="flex-1 flex flex-col">
-        {/* Header do Chat */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header do Chat - Fixo */}
+        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <div className="relative flex-shrink-0">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={conversation.vendor.avatar || "/placeholder.svg"} />
                 <AvatarFallback className="bg-pink-100 text-pink-600 font-semibold">
@@ -151,10 +151,10 @@ export default function ChatContent({ conversation }: ChatContentProps) {
               )}
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2">
-                <h3 className="font-semibold text-gray-900">{conversation.vendor.name}</h3>
-                <div className="flex items-center space-x-1">
+                <h3 className="font-semibold text-gray-900 truncate">{conversation.vendor.name}</h3>
+                <div className="flex items-center space-x-1 flex-shrink-0">
                   <Star className="h-4 w-4 text-yellow-400 fill-current" />
                   <span className="text-sm text-gray-600">{conversation.vendor.rating}</span>
                 </div>
@@ -171,7 +171,7 @@ export default function ChatContent({ conversation }: ChatContentProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
               <Phone className="h-5 w-5" />
             </Button>
@@ -184,21 +184,21 @@ export default function ChatContent({ conversation }: ChatContentProps) {
           </div>
         </div>
 
-        {/* Área de Mensagens */}
+        {/* Área de Mensagens - Scroll Independente */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-          {/* Card do Produto */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+          {/* Card do Produto - Fixo no topo */}
+          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm sticky top-0 z-10">
             <div className="flex items-center space-x-3">
               <img
                 src={conversation.product.image || "/placeholder.svg?height=60&width=60"}
                 alt={conversation.product.name}
-                className="w-15 h-15 rounded-lg object-cover"
+                className="w-15 h-15 rounded-lg object-cover flex-shrink-0"
               />
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{conversation.product.name}</h4>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-gray-900 truncate">{conversation.product.name}</h4>
                 <p className="text-lg font-semibold text-pink-600">{conversation.product.price}</p>
               </div>
-              <Button size="sm" className="bg-pink-500 hover:bg-pink-600">
+              <Button size="sm" className="bg-pink-500 hover:bg-pink-600 flex-shrink-0">
                 Ver Produto
               </Button>
             </div>
@@ -226,7 +226,7 @@ export default function ChatContent({ conversation }: ChatContentProps) {
                         : "bg-white text-gray-900 border border-gray-200"
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm break-words">{message.text}</p>
                     <div
                       className={`flex items-center justify-between mt-1 text-xs ${
                         message.sender === "user" ? "text-pink-100" : "text-gray-500"
@@ -281,10 +281,10 @@ export default function ChatContent({ conversation }: ChatContentProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input de Mensagem */}
-        <div className="bg-white border-t border-gray-200 p-4">
+        {/* Input de Mensagem - Fixo */}
+        <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 flex-shrink-0">
               <Paperclip className="h-5 w-5" />
             </Button>
 
@@ -309,7 +309,7 @@ export default function ChatContent({ conversation }: ChatContentProps) {
             <Button
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
-              className="bg-pink-500 hover:bg-pink-600 rounded-full p-2"
+              className="bg-pink-500 hover:bg-pink-600 rounded-full p-2 flex-shrink-0"
             >
               <Send className="h-5 w-5" />
             </Button>
@@ -325,9 +325,9 @@ export default function ChatContent({ conversation }: ChatContentProps) {
         </div>
       </div>
 
-      {/* Sidebar de Informações */}
-      <div className="hidden xl:block w-80 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
-        <div className="space-y-6">
+      {/* Sidebar de Informações - Responsiva */}
+      <div className="hidden xl:block w-80 bg-gray-50 border-l border-gray-200 overflow-y-auto flex-shrink-0">
+        <div className="p-4 space-y-6">
           {/* Informações do Vendedor */}
           <div className="bg-white rounded-lg p-4 shadow-sm">
             <h4 className="font-semibold text-gray-900 mb-3">Sobre o Vendedor</h4>
@@ -367,10 +367,10 @@ export default function ChatContent({ conversation }: ChatContentProps) {
                   <img
                     src={item.image || "/placeholder.svg"}
                     alt={item.name}
-                    className="w-10 h-10 rounded-lg object-cover"
+                    className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                   />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
                     <p className="text-sm text-pink-600">{item.price}</p>
                   </div>
                 </div>
