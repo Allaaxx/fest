@@ -91,9 +91,10 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User | any }) {
       if (user) {
-        token.role = user.role; // Só adiciona role se houver user
+        token.id = user.id; // Garante que o id do usuário esteja no token JWT
+        token.role = user.role;
       } else if (!token.role) {
-        delete token.role; // Remove role residual se não houver user
+        delete token.role;
       }
       return token;
     },

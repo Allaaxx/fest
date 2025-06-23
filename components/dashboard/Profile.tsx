@@ -8,6 +8,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 import "./profile-phoneinput.css";
+import { useSession } from "next-auth/react";
 
 // Funções utilitárias para máscara
 function maskCPF(value: string) {
@@ -61,6 +62,7 @@ type ProfileForm = {
   cep: string;
   cpf: string;
   profileImage?: string;
+  profileImagePublicId?: string; // novo campo
 };
 
 function validateProfile(form: ProfileForm) {
@@ -75,6 +77,8 @@ function validateProfile(form: ProfileForm) {
 }
 
 export default function Profile() {
+  const { data: session, update } = useSession();
+  const userId = (session?.user as any)?.id || session?.user?.email;
   const [form, setForm] = useState<ProfileForm>({
     name: "",
     surname: "",
@@ -84,9 +88,12 @@ export default function Profile() {
     cep: "",
     cpf: "",
     profileImage: "",
+    profileImagePublicId: "",
   });
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false); // novo estado
   const [imageHover, setImageHover] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // novo estado
 
   useEffect(() => {
     setLoading(true);
@@ -102,7 +109,8 @@ export default function Profile() {
             address: data.address || "",
             cep: data.cep || "",
             cpf: data.cpf || "",
-            profileImage: data.profileImage || "", // garante que a imagem salva seja exibida
+            profileImage: data.profileImage || "",
+            profileImagePublicId: data.profileImagePublicId || "",
           });
       })
       .finally(() => setLoading(false));
@@ -130,10 +138,14 @@ export default function Profile() {
     }
   };
 
-  // Upload de imagem de perfil
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Novo: armazena o arquivo selecionado, não faz upload imediato
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!session) {
+      toast.error("Você precisa estar autenticado para trocar a imagem.");
+      return;
+    }
     if (!file.type.startsWith("image/")) {
       toast.error("Selecione um arquivo de imagem válido.");
       return;
@@ -142,25 +154,12 @@ export default function Profile() {
       toast.error("A imagem deve ter até 2MB.");
       return;
     }
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        setForm((prev) => ({ ...prev, profileImage: data.url }));
-        toast.success("Imagem enviada com sucesso!");
-      } else {
-        toast.error(data.error || "Erro ao enviar imagem");
-      }
-    } catch (err) {
-      toast.error("Erro ao enviar imagem");
-    }
+    setSelectedFile(file);
+    // Mostra preview local
+    setForm((prev) => ({ ...prev, profileImage: URL.createObjectURL(file) }));
   };
 
+  // Novo: upload só ao salvar alterações
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const error = validateProfile(form);
@@ -169,14 +168,50 @@ export default function Profile() {
       return;
     }
     setLoading(true);
+    let imageUrl = form.profileImage;
+    let imagePublicId = form.profileImagePublicId;
+    if (selectedFile) {
+      setImageLoading(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      if (form.profileImagePublicId) {
+        formData.append("oldPublicId", form.profileImagePublicId);
+      }
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          imageUrl = data.url;
+          imagePublicId = data.public_id;
+        } else {
+          toast.error(data.error || "Erro ao enviar imagem");
+        }
+      } catch (err) {
+        toast.error("Erro ao enviar imagem");
+      }
+      setImageLoading(false);
+    }
+    // Salva perfil com a nova imagem (ou a antiga)
     const res = await fetch("/api/cliente/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        profileImage: imageUrl,
+        profileImagePublicId: imagePublicId,
+      }),
     });
     const data = await res.json();
     if (res.ok) {
       toast.success("Perfil atualizado com sucesso!");
+      setSelectedFile(null); // limpa seleção
+      if (typeof update === "function") {
+        await update(); // Atualiza sessão para refletir nova imagem
+      }
     } else {
       toast.error(data.error || "Erro ao atualizar perfil");
     }
@@ -239,7 +274,7 @@ export default function Profile() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Telefone
                   </label>
-                  <PhoneInput 
+                  <PhoneInput
                     country={"br"}
                     value={form.phone}
                     onChange={(phone) =>
@@ -249,7 +284,11 @@ export default function Profile() {
                     inputClass="shadcn-input w-full !h-9 !text-base !rounded-md !border !border-input bg-background px-3 py-1.5 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     buttonClass="!border-none !bg-transparent"
                     containerClass="w-full"
-                    inputProps={{ name: "phone", required: true, autoFocus: false }}
+                    inputProps={{
+                      name: "phone",
+                      required: true,
+                      autoFocus: false,
+                    }}
                   />
                 </div>
                 <div>
@@ -294,11 +333,36 @@ export default function Profile() {
                 />
               </div>
               <Button
-                className="bg-pink-500 hover:bg-pink-600"
+                className="bg-fest-black2 text-fest-primary hover:bg-fest-primary hover:text-fest-black2 lg: flex items-center justify-center h-12 min-w-[110px]"
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Salvando..." : "Salvar Alterações"}
+                {loading ? (
+                  <span className="flex items-center justify-center w-full">
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </span>
+                ) : (
+                  "Salvar Alterações"
+                )}
               </Button>
             </form>
           </CardContent>
@@ -309,71 +373,103 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="flex flex-col items-center p-4 flex-1">
             <div className="w-full flex flex-col items-center h-full gap-3">
-              <div className="w-full max-h-[320px] h-[220px] lg:h-full" style={{ height: undefined }}>
-                {form.profileImage ? (
-                  <div
-                    className="relative w-full h-full"
-                    style={{ borderRadius: "20px", height: "100%" }}
-                    onMouseEnter={() => setImageHover(true)}
-                    onMouseLeave={() => setImageHover(false)}
-                  >
-                    <img
-                      src={form.profileImage}
-                      alt="Foto do perfil"
-                      className="w-full h-full object-cover"
+              <div
+                className="w-full max-h-[320px] h-[220px] lg:h-full"
+                style={{ height: undefined }}
+              >
+                <div
+                  className="relative w-full h-full"
+                  style={{ borderRadius: "20px", height: "100%" }}
+                  onMouseEnter={() => setImageHover(true)}
+                  onMouseLeave={() => setImageHover(false)}
+                >
+                  {form.profileImage ? (
+                    <>
+                      <img
+                        src={form.profileImage}
+                        alt="Foto do perfil"
+                        className="w-full h-full object-cover"
+                        style={{ borderRadius: "20px", height: "100%" }}
+                      />
+                      {imageLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-[20px] z-10">
+                          <span className="flex items-center justify-center w-full">
+                            <svg
+                              className="animate-spin h-4 w-4 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                          </span>
+                        </div>
+                      )}
+                      {imageHover && !imageLoading && (
+                        <button
+                          type="button"
+                          className="absolute inset-0 flex items-center justify-center bg-black/50 hover:bg-black/70 transition rounded-[20px]"
+                          style={{ borderRadius: "20px" }}
+                          onClick={() => {
+                            setForm((prev) => ({ ...prev, profileImage: "" }));
+                            setSelectedFile(null);
+                          }}
+                          tabIndex={-1}
+                        >
+                          <Trash2 className="h-7 w-7 text-white" />
+                          <span className="ml-2 text-white font-semibold">
+                            Remover
+                          </span>
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div
+                      className="w-full h-full flex flex-col items-center justify-center bg-pink-50 border-2 border-dashed border-pink-300 cursor-pointer transition hover:bg-pink-100"
                       style={{ borderRadius: "20px", height: "100%" }}
-                    />
-                    {imageHover && (
-                      <button
-                        type="button"
-                        className="absolute inset-0 flex items-center justify-center bg-black/50 hover:bg-black/70 transition rounded-[20px]"
-                        style={{ borderRadius: "20px" }}
-                        onClick={() =>
-                          setForm((prev) => ({ ...prev, profileImage: "" }))
-                        }
-                        tabIndex={-1}
-                      >
-                        <Trash2 className="h-7 w-7 text-white" />
-                        <span className="ml-2 text-white font-semibold">
-                          Remover
-                        </span>
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className="w-full h-full flex flex-col items-center justify-center bg-pink-50 border-2 border-dashed border-pink-300 cursor-pointer transition hover:bg-pink-100"
-                    style={{ borderRadius: "20px", height: "100%" }}
-                    onClick={() =>
-                      document.getElementById("profileImage")?.click()
-                    }
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) {
-                        const input = document.getElementById(
-                          "profileImage"
-                        ) as HTMLInputElement;
-                        const dt = new DataTransfer();
-                        dt.items.add(file);
-                        input.files = dt.files;
-                        input.dispatchEvent(
-                          new Event("change", { bubbles: true })
-                        );
+                      onClick={() =>
+                        document.getElementById("profileImage")?.click()
                       }
-                    }}
-                  >
-                    <ImageDown className="h-12 w-12 text-pink-600 mb-2" />
-                    <span className="text-pink-600 font-medium text-sm">
-                      Arraste uma imagem ou clique para enviar
-                    </span>
-                  </div>
-                )}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) {
+                          const input = document.getElementById(
+                            "profileImage"
+                          ) as HTMLInputElement;
+                          const dt = new DataTransfer();
+                          dt.items.add(file);
+                          input.files = dt.files;
+                          input.dispatchEvent(
+                            new Event("change", { bubbles: true })
+                          );
+                        }
+                      }}
+                    >
+                      <ImageDown className="h-12 w-12 text-pink-600 mb-2" />
+                      <span className="text-pink-600 font-medium text-sm">
+                        Arraste uma imagem ou clique para enviar
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
               <label
                 htmlFor="profileImage"
@@ -386,7 +482,7 @@ export default function Profile() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleImageChange}
-                  disabled={loading}
+                  disabled={loading || imageLoading}
                 />
               </label>
             </div>
