@@ -33,6 +33,7 @@ import {
   RadialBarChart,
   RadialBar,
 } from "recharts"
+import Link from "next/link"
 
 // Dados para os gráficos
 const gastosData = [
@@ -66,26 +67,26 @@ const metasData = [
 
 export default function Overview() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Cards de Estatísticas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-pink-600/5" />
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Gasto</p>
-                <p className="text-2xl font-bold text-gray-900">R$ 2.450</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">R$ 2.450</p>
                 <div className="flex items-center mt-2">
                   <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +15%
                   </Badge>
-                  <span className="text-xs text-gray-500 ml-2">vs mês anterior</span>
+                  <span className="text-xs sm:text-sm text-gray-500 ml-2">vs mês anterior</span>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
-                <CreditCard className="h-6 w-6 text-pink-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 rounded-xl flex items-center justify-center">
+                <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-pink-600" />
               </div>
             </div>
           </CardContent>
@@ -93,20 +94,20 @@ export default function Overview() {
 
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/5" />
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pedidos</p>
-                <p className="text-2xl font-bold text-gray-900">18</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">18</p>
                 <div className="flex items-center mt-2">
                   <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
                     <Package className="h-3 w-3 mr-1" />3 ativos
                   </Badge>
-                  <span className="text-xs text-gray-500 ml-2">este mês</span>
+                  <span className="text-xs sm:text-sm text-gray-500 ml-2">este mês</span>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <ShoppingBag className="h-6 w-6 text-blue-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -114,18 +115,18 @@ export default function Overview() {
 
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-yellow-600/5" />
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pontos Fidelidade</p>
-                <p className="text-2xl font-bold text-gray-900">1.250</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">1.250</p>
                 <div className="flex items-center mt-2">
                   <Progress value={83} className="w-16 h-2" />
-                  <span className="text-xs text-gray-500 ml-2">83% para VIP</span>
+                  <span className="text-xs sm:text-sm text-gray-500 ml-2">83% para VIP</span>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                <Gift className="h-6 w-6 text-yellow-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <Gift className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
@@ -133,19 +134,19 @@ export default function Overview() {
 
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-red-600/5" />
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Favoritos</p>
-                <p className="text-2xl font-bold text-gray-900">12</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">12</p>
                 <div className="flex items-center mt-2">
                   <Badge variant="secondary" className="bg-red-100 text-red-700 hover:bg-red-100">
                     <Heart className="h-3 w-3 mr-1" />5 promoções
                   </Badge>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                <Heart className="h-6 w-6 text-red-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
               </div>
             </div>
           </CardContent>
@@ -153,18 +154,14 @@ export default function Overview() {
       </div>
 
       {/* Gráficos Principais */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Gráfico de Gastos ao Longo do Tempo */}
-        <Card className="lg:col-span-2">
+        <Card className="xl:col-span-2 w-full">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Evolução dos Gastos</CardTitle>
               <p className="text-sm text-gray-500">Últimos 6 meses</p>
             </div>
-            <Button variant="outline" size="sm">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              Ver detalhes
-            </Button>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -178,7 +175,7 @@ export default function Overview() {
                   color: "hsl(var(--chart-2))",
                 },
               }}
-              className="h-[300px]"
+              className="h-[220px] sm:h-[300px] md:h-[350px] xl:h-[380px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={gastosData}>
@@ -220,7 +217,7 @@ export default function Overview() {
                 som: { label: "Som/Luz", color: "#10b981" },
                 foto: { label: "Fotografia", color: "#f59e0b" },
               }}
-              className="h-[250px]"
+              className="h-[220px] sm:h-[300px] md:h-[350px] xl:h-[380px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -293,7 +290,7 @@ export default function Overview() {
                 atual: { label: "Atual", color: "hsl(var(--chart-1))" },
                 meta: { label: "Meta", color: "hsl(var(--chart-2))" },
               }}
-              className="h-[200px]"
+              className="h-[220px] sm:h-[300px] md:h-[350px] xl:h-[380px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={metasData}>
@@ -307,7 +304,7 @@ export default function Overview() {
       </div>
 
       {/* Cards de Atividade Recente */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Pedidos Recentes com Status Visual */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
