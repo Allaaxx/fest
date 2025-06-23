@@ -479,30 +479,6 @@ form {
   box-shadow: none;
 }
 
-/* Dashboard */
-
-.phoneinput-inside .PhoneInputInput {
-  padding-left: 48px !important;
-}
-.phoneinput-inside .PhoneInputCountry {
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  position: absolute;
-  z-index: 2;
-}
-.phoneinput-inside {
-  position: relative;
-}
-.phoneinput-inside .PhoneInput {
-  width: 100%;
-}
-.phoneinput-inside .PhoneInputCountrySelect {
-  border: none;
-  background: transparent;
-  padding: 0;
-}
-
 @media screen and (max-width: 650px) {
   .auth-container {
     height: calc(100vh - 40px);

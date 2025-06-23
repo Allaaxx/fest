@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { User, Trash2, ImageDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import PhoneInput from "react-phone-number-input";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import axios from "axios";
+import "./profile-phoneinput.css";
 
 // Funções utilitárias para máscara
 function maskCPF(value: string) {
@@ -81,7 +83,7 @@ export default function Profile() {
     address: "",
     cep: "",
     cpf: "",
-    profileImage: ""
+    profileImage: "",
   });
   const [loading, setLoading] = useState(false);
   const [imageHover, setImageHover] = useState(false);
@@ -100,7 +102,7 @@ export default function Profile() {
             address: data.address || "",
             cep: data.cep || "",
             cpf: data.cpf || "",
-            profileImage: data.profileImage || "" // garante que a imagem salva seja exibida
+            profileImage: data.profileImage || "", // garante que a imagem salva seja exibida
           });
       })
       .finally(() => setLoading(false));
@@ -189,8 +191,8 @@ export default function Profile() {
           Gerencie suas informações pessoais
         </p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[340px]">
-        <Card className="lg:col-span-2 h-full flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 flex flex-col">
           <CardHeader>
             <CardTitle>Informações Pessoais</CardTitle>
           </CardHeader>
@@ -232,35 +234,38 @@ export default function Profile() {
                   disabled={loading}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefone
-                </label>
-                <PhoneInput
-                  international
-                  defaultCountry="BR"
-                  value={form.phone}
-                  onChange={(phone) =>
-                    setForm((prev) => ({ ...prev, phone: phone || "" }))
-                  }
-                  disabled={loading}
-                  className="w-full phoneinput-inside"
-                  inputComponent={Input as any}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  CPF
-                </label>
-                <Input
-                  name="cpf"
-                  value={maskCPF(form.cpf)}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, cpf: e.target.value }))
-                  }
-                  disabled={loading}
-                  maxLength={14}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Telefone
+                  </label>
+                  <PhoneInput 
+                    country={"br"}
+                    value={form.phone}
+                    onChange={(phone) =>
+                      setForm((prev) => ({ ...prev, phone: phone || "" }))
+                    }
+                    disabled={loading}
+                    inputClass="shadcn-input w-full !h-9 !text-base !rounded-md !border !border-input bg-background px-3 py-1.5 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    buttonClass="!border-none !bg-transparent"
+                    containerClass="w-full"
+                    inputProps={{ name: "phone", required: true, autoFocus: false }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CPF
+                  </label>
+                  <Input
+                    name="cpf"
+                    value={maskCPF(form.cpf)}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, cpf: e.target.value }))
+                    }
+                    disabled={loading}
+                    maxLength={14}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -298,17 +303,17 @@ export default function Profile() {
             </form>
           </CardContent>
         </Card>
-        <Card className="h-full flex flex-col">
+        <Card className="flex flex-col max-h-[420px] h-auto lg:h-full">
           <CardHeader>
             <CardTitle>Foto do Perfil</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center p-4 flex-1">
             <div className="w-full flex flex-col items-center h-full gap-3">
-              <div className="w-full" style={{height: '90%'}}>
+              <div className="w-full max-h-[320px] h-[220px] lg:h-full" style={{ height: undefined }}>
                 {form.profileImage ? (
                   <div
                     className="relative w-full h-full"
-                    style={{ borderRadius: '20px', height: '100%' }}
+                    style={{ borderRadius: "20px", height: "100%" }}
                     onMouseEnter={() => setImageHover(true)}
                     onMouseLeave={() => setImageHover(false)}
                   >
@@ -316,46 +321,65 @@ export default function Profile() {
                       src={form.profileImage}
                       alt="Foto do perfil"
                       className="w-full h-full object-cover"
-                      style={{ borderRadius: '20px', height: '100%' }}
+                      style={{ borderRadius: "20px", height: "100%" }}
                     />
                     {imageHover && (
                       <button
                         type="button"
                         className="absolute inset-0 flex items-center justify-center bg-black/50 hover:bg-black/70 transition rounded-[20px]"
-                        style={{ borderRadius: '20px' }}
-                        onClick={() => setForm((prev) => ({ ...prev, profileImage: "" }))}
+                        style={{ borderRadius: "20px" }}
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, profileImage: "" }))
+                        }
                         tabIndex={-1}
                       >
                         <Trash2 className="h-7 w-7 text-white" />
-                        <span className="ml-2 text-white font-semibold">Remover</span>
+                        <span className="ml-2 text-white font-semibold">
+                          Remover
+                        </span>
                       </button>
                     )}
                   </div>
                 ) : (
                   <div
                     className="w-full h-full flex flex-col items-center justify-center bg-pink-50 border-2 border-dashed border-pink-300 cursor-pointer transition hover:bg-pink-100"
-                    style={{ borderRadius: '20px', height: '100%' }}
-                    onClick={() => document.getElementById('profileImage')?.click()}
-                    onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
-                    onDrop={e => {
+                    style={{ borderRadius: "20px", height: "100%" }}
+                    onClick={() =>
+                      document.getElementById("profileImage")?.click()
+                    }
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       const file = e.dataTransfer.files?.[0];
                       if (file) {
-                        const input = document.getElementById('profileImage') as HTMLInputElement;
+                        const input = document.getElementById(
+                          "profileImage"
+                        ) as HTMLInputElement;
                         const dt = new DataTransfer();
                         dt.items.add(file);
                         input.files = dt.files;
-                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        input.dispatchEvent(
+                          new Event("change", { bubbles: true })
+                        );
                       }
                     }}
                   >
                     <ImageDown className="h-12 w-12 text-pink-600 mb-2" />
-                    <span className="text-pink-600 font-medium text-sm">Arraste uma imagem ou clique para enviar</span>
+                    <span className="text-pink-600 font-medium text-sm">
+                      Arraste uma imagem ou clique para enviar
+                    </span>
                   </div>
                 )}
               </div>
-              <label htmlFor="profileImage" className="block w-full" style={{height: '5%'}}>
+              <label
+                htmlFor="profileImage"
+                className="block w-full"
+                style={{ height: "5%" }}
+              >
                 <input
                   id="profileImage"
                   type="file"
