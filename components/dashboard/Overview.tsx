@@ -1,10 +1,14 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   TrendingUp,
   CreditCard,
@@ -19,7 +23,7 @@ import {
   Clock,
   Target,
   Zap,
-} from "lucide-react"
+} from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -32,8 +36,8 @@ import {
   ResponsiveContainer,
   RadialBarChart,
   RadialBar,
-} from "recharts"
-import Link from "next/link"
+} from "recharts";
+import Link from "next/link";
 
 // Dados para os gráficos
 const gastosData = [
@@ -43,27 +47,27 @@ const gastosData = [
   { mes: "Abr", valor: 1600, pedidos: 10 },
   { mes: "Mai", valor: 2450, pedidos: 18 },
   { mes: "Jun", valor: 2200, pedidos: 16 },
-]
+];
 
 const categoriaData = [
   { name: "Decoração", value: 35, color: "#ec4899" },
   { name: "Buffet", value: 28, color: "#3b82f6" },
   { name: "Som/Luz", value: 20, color: "#10b981" },
   { name: "Fotografia", value: 17, color: "#f59e0b" },
-]
+];
 
 const satisfacaoData = [
   { categoria: "Qualidade", valor: 92 },
   { categoria: "Entrega", valor: 88 },
   { categoria: "Atendimento", valor: 95 },
   { categoria: "Preço", valor: 85 },
-]
+];
 
 const metasData = [
   { name: "Eventos", atual: 75, meta: 100, color: "#ec4899" },
   { name: "Gastos", atual: 60, meta: 100, color: "#3b82f6" },
   { name: "Pontos", atual: 85, meta: 100, color: "#10b981" },
-]
+];
 
 export default function Overview() {
   return (
@@ -76,13 +80,20 @@ export default function Overview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Gasto</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">R$ 2.450</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                  R$ 2.450
+                </p>
                 <div className="flex items-center mt-2">
-                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 text-green-700 hover:bg-green-100"
+                  >
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +15%
                   </Badge>
-                  <span className="text-xs sm:text-sm text-gray-500 ml-2">vs mês anterior</span>
+                  <span className="text-xs sm:text-sm text-gray-500 ml-2">
+                    vs mês anterior
+                  </span>
                 </div>
               </div>
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 rounded-xl flex items-center justify-center">
@@ -98,12 +109,19 @@ export default function Overview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pedidos</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">18</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                  18
+                </p>
                 <div className="flex items-center mt-2">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 text-blue-700 hover:bg-blue-100"
+                  >
                     <Package className="h-3 w-3 mr-1" />3 ativos
                   </Badge>
-                  <span className="text-xs sm:text-sm text-gray-500 ml-2">este mês</span>
+                  <span className="text-xs sm:text-sm text-gray-500 ml-2">
+                    este mês
+                  </span>
                 </div>
               </div>
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -118,11 +136,17 @@ export default function Overview() {
           <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pontos Fidelidade</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">1.250</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Pontos Fidelidade
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                  1.250
+                </p>
                 <div className="flex items-center mt-2">
                   <Progress value={83} className="w-16 h-2" />
-                  <span className="text-xs sm:text-sm text-gray-500 ml-2">83% para VIP</span>
+                  <span className="text-xs sm:text-sm text-gray-500 ml-2">
+                    83% para VIP
+                  </span>
                 </div>
               </div>
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
@@ -138,9 +162,14 @@ export default function Overview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Favoritos</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">12</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                  12
+                </p>
                 <div className="flex items-center mt-2">
-                  <Badge variant="secondary" className="bg-red-100 text-red-700 hover:bg-red-100">
+                  <Badge
+                    variant="secondary"
+                    className="bg-red-100 text-red-700 hover:bg-red-100"
+                  >
                     <Heart className="h-3 w-3 mr-1" />5 promoções
                   </Badge>
                 </div>
@@ -241,64 +270,15 @@ export default function Overview() {
             <div className="grid grid-cols-2 gap-2 mt-4">
               {categoriaData.map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
                   <span className="text-xs text-gray-600">{item.name}</span>
                   <span className="text-xs font-medium">{item.value}%</span>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Métricas de Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Satisfação por Categoria */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Star className="h-5 w-5 text-yellow-500 mr-2" />
-              Satisfação por Categoria
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {satisfacaoData.map((item, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">{item.categoria}</span>
-                    <span className="text-sm font-bold text-gray-900">{item.valor}%</span>
-                  </div>
-                  <Progress value={item.valor} className="h-2" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Metas do Mês */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Target className="h-5 w-5 text-green-500 mr-2" />
-              Metas do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                atual: { label: "Atual", color: "hsl(var(--chart-1))" },
-                meta: { label: "Meta", color: "hsl(var(--chart-2))" },
-              }}
-              className="h-[220px] sm:h-[300px] md:h-[350px] xl:h-[380px] w-full"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={metasData}>
-                  <RadialBar dataKey="atual" cornerRadius={10} fill="#8884d8" />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </RadialBarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
           </CardContent>
         </Card>
       </div>
@@ -315,7 +295,7 @@ export default function Overview() {
             </Badge>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="flex flex-col gap-3">
               {[
                 {
                   id: "001",
@@ -345,32 +325,41 @@ export default function Overview() {
                   icon: DollarSign,
                 },
               ].map((pedido) => {
-                const IconComponent = pedido.icon
+                const IconComponent = pedido.icon;
                 return (
                   <div
                     key={pedido.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="flex flex-col items-start p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors text-sm"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                        <IconComponent className="h-5 w-5 text-gray-600" />
+                    <div className="flex items-center space-x-3 mb-1">
+                      <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                        <IconComponent className="h-4 w-4 text-gray-600" />
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{pedido.item}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge className={pedido.statusColor} variant="secondary">
-                            {pedido.status}
-                          </Badge>
-                          <span className="text-xs text-gray-500">{pedido.tempo}</span>
-                        </div>
-                      </div>
+                      <p className="font-medium text-gray-900 text-sm">
+                        {pedido.item}
+                      </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">{pedido.valor}</p>
-                      <p className="text-xs text-gray-500">#{pedido.id}</p>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <Badge
+                        className={pedido.statusColor + " text-xs"}
+                        variant="secondary"
+                      >
+                        {pedido.status}
+                      </Badge>
+                      <span className="text-xs text-gray-500">
+                        {pedido.tempo}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-bold text-gray-900">
+                        {pedido.valor}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        #{pedido.id}
+                      </span>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </CardContent>
@@ -385,7 +374,7 @@ export default function Overview() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="flex flex-col gap-3">
               {[
                 {
                   nome: "Casamento Ana & Carlos",
@@ -411,11 +400,11 @@ export default function Overview() {
               ].map((evento, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-transparent rounded-xl border border-blue-100"
+                  className="flex flex-col items-start p-3 bg-gradient-to-r from-blue-50 to-transparent rounded-xl border border-blue-100 text-sm"
                 >
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 mb-1">
                     <div
-                      className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center ${
                         evento.urgencia === "alta"
                           ? "bg-red-100"
                           : evento.urgencia === "media"
@@ -424,7 +413,7 @@ export default function Overview() {
                       }`}
                     >
                       <Calendar
-                        className={`h-5 w-5 ${
+                        className={`h-4 w-4 ${
                           evento.urgencia === "alta"
                             ? "text-red-600"
                             : evento.urgencia === "media"
@@ -433,25 +422,29 @@ export default function Overview() {
                         }`}
                       />
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{evento.nome}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {evento.tipo}
-                        </Badge>
-                        <span className="text-xs text-gray-500">{evento.data}</span>
-                      </div>
-                    </div>
+                    <p className="font-medium text-gray-900 text-sm">
+                      {evento.nome}
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-bold ${
-                        evento.dias <= 15 ? "text-red-600" : evento.dias <= 30 ? "text-yellow-600" : "text-green-600"
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Badge variant="outline" className="text-xs">
+                      {evento.tipo}
+                    </Badge>
+                    <span className="text-xs text-gray-500">{evento.data}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`text-xs font-bold ${
+                        evento.dias <= 15
+                          ? "text-red-600"
+                          : evento.dias <= 30
+                            ? "text-yellow-600"
+                            : "text-green-600"
                       }`}
                     >
                       {evento.dias} dias
-                    </p>
-                    <p className="text-xs text-gray-500">restantes</p>
+                    </span>
+                    <span className="text-xs text-gray-500">restantes</span>
                   </div>
                 </div>
               ))}
@@ -460,5 +453,5 @@ export default function Overview() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
