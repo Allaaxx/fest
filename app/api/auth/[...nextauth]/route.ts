@@ -5,7 +5,7 @@ import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
 import LinkedinProvider from "next-auth/providers/linkedin";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@/lib/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { Session, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           email: user.email,
           role: user.role,
-          image: user.profileImage, 
+          image: user.profileImage,
         };
       },
     }),

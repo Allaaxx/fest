@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@/lib/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -22,8 +22,8 @@ export async function GET() {
       cep: true,
       cpf: true,
       profileImage: true,
-      createdAt: true
-    }
+      createdAt: true,
+    },
   });
   return NextResponse.json(user);
 }
@@ -56,8 +56,8 @@ export async function PUT(req: Request) {
       cep: true,
       cpf: true,
       profileImage: true,
-      createdAt: true
-    }
+      createdAt: true,
+    },
   });
   return NextResponse.json(user);
 }
