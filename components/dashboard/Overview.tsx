@@ -73,11 +73,11 @@ export default function Overview() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Cards de Estatísticas Principais */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-pink-600/5" />
           <CardContent className="p-4 sm:p-6 relative">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-col items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Gasto</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -96,17 +96,16 @@ export default function Overview() {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 rounded-xl flex items-center justify-center self-end mt-2">
                 <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-pink-600" />
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/5" />
           <CardContent className="p-4 sm:p-6 relative">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-col items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pedidos</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -124,17 +123,16 @@ export default function Overview() {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center self-end mt-2">
                 <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-yellow-600/5" />
           <CardContent className="p-4 sm:p-6 relative">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-col items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-gray-600">
                   Pontos Fidelidade
@@ -149,17 +147,16 @@ export default function Overview() {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-xl flex items-center justify-center self-end mt-2">
                 <Gift className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
         </Card>
-
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-red-600/5" />
           <CardContent className="p-4 sm:p-6 relative">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-col items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-gray-600">Favoritos</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -174,7 +171,7 @@ export default function Overview() {
                   </Badge>
                 </div>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center self-end mt-2">
                 <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
               </div>
             </div>

@@ -2,8 +2,8 @@
 
 import type React from "react";
 
-import { useState } from "react";
-import { ArrowLeft, Check, KeyRound, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Check, KeyRound, Mail, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -13,6 +13,15 @@ export default function RecuperarSenhaPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +43,7 @@ export default function RecuperarSenhaPage() {
 
       if (res.ok) {
         setIsSubmitted(true);
+        setCooldown(60); // 60 segundos de cooldown
         toast.success("Email de recuperação enviado com sucesso!");
       } else {
         toast.error(data.error || "Erro ao enviar email de recuperação");
@@ -121,7 +131,6 @@ export default function RecuperarSenhaPage() {
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                               ></path>
                             </svg>
-                            Enviando...
                           </span>
                         ) : (
                           "Recuperar senha"
@@ -159,25 +168,29 @@ export default function RecuperarSenhaPage() {
 
               <div className="mt-8 pt-6 border-t border-gray-100">
                 <div className="text-center">
-                  <p className="text-sm text-gray-500 mb-3">
-                    Não recebeu o email?
-                  </p>
-                  <button
-                    onClick={() => {
-                      if (isSubmitted) {
-                        handleSubmit(new Event("click") as any);
-                      }
-                    }}
-                    disabled={!isSubmitted || isLoading}
-                    className={`text-pink-500 hover:text-pink-600 font-medium text-sm flex items-center justify-center mx-auto ${
-                      !isSubmitted || isLoading
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                  >
-                    <Mail className="h-4 w-4 mr-1" />
-                    Reenviar email
-                  </button>
+                  {cooldown > 0 ? (
+                    <span className="inline-flex items-center justify-center bg-gray-100 text-gray-400 font-medium text-sm rounded-lg px-4 py-2 cursor-not-allowed mx-auto">
+                      <Clock className="h-4 w-4 mr-2 animate-pulse" />
+                      {`${String(Math.floor(cooldown / 60)).padStart(2, "0")}:${String(
+                        cooldown % 60
+                      ).padStart(2, "0")}`}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (isSubmitted) {
+                          handleSubmit(new Event("click") as any);
+                        }
+                      }}
+                      disabled={!isSubmitted || isLoading}
+                      className={`text-pink-500 hover:text-pink-600 font-medium text-sm flex items-center justify-center mx-auto transition-colors rounded-lg px-4 py-2
+                        ${!isSubmitted || isLoading ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}
+                      `}
+                    >
+                      <Mail className="h-4 w-4 mr-1" />
+                      Reenviar email
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
