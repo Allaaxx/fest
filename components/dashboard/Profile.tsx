@@ -190,6 +190,11 @@ export default function Profile() {
       }
       setImageLoading(false);
     }
+    // Proteção extra: nunca envie blob para o backend
+    if (imageUrl && imageUrl.startsWith("blob:")) {
+      imageUrl = "";
+      imagePublicId = "";
+    }
     // Salva perfil com a nova imagem (ou a antiga)
     const res = await fetch("/api/cliente/profile", {
       method: "PUT",

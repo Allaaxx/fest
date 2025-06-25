@@ -91,8 +91,10 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User | any }) {
       if (user) {
-        token.id = user.id; // Garante que o id do usuário esteja no token JWT
+        token.id = user.id;
         token.role = user.role;
+        // Garante que a imagem propagada para o token seja sempre a URL real do Cloudinary
+        token.image = user.image || user.profileImage || "";
       } else if (!token.role) {
         delete token.role;
       }
@@ -103,6 +105,10 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
       } else if ((session.user as any)?.role) {
         delete (session.user as any).role;
+      }
+      // Garante que a imagem na sessão seja sempre a URL real do Cloudinary
+      if (session.user) {
+        session.user.image = typeof token.image === "string" ? token.image : "";
       }
       return session;
     },
