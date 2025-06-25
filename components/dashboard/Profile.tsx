@@ -138,14 +138,10 @@ export default function Profile() {
     }
   };
 
-  // Novo: armazena o arquivo selecionado, não faz upload imediato
+  // Upload da imagem só ao salvar alterações
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!session) {
-      toast.error("Você precisa estar autenticado para trocar a imagem.");
-      return;
-    }
     if (!file.type.startsWith("image/")) {
       toast.error("Selecione um arquivo de imagem válido.");
       return;
@@ -154,12 +150,11 @@ export default function Profile() {
       toast.error("A imagem deve ter até 2MB.");
       return;
     }
-    setSelectedFile(file);
-    // Mostra preview local
-    setForm((prev) => ({ ...prev, profileImage: URL.createObjectURL(file) }));
+    setSelectedFile(file); // Apenas armazena o arquivo para upload posterior
+    setForm((prev) => ({ ...prev, profileImage: URL.createObjectURL(file) })); // Mostra preview local
   };
 
-  // Novo: upload só ao salvar alterações
+  // Upload e atualização só ao salvar
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const error = validateProfile(form);
@@ -209,9 +204,16 @@ export default function Profile() {
     if (res.ok) {
       toast.success("Perfil atualizado com sucesso!");
       setSelectedFile(null); // limpa seleção
+      setForm((prev) => ({
+        ...prev,
+        profileImage: imageUrl,
+        profileImagePublicId: imagePublicId,
+      }));
       if (typeof update === "function") {
-        await update(); // Atualiza sessão para refletir nova imagem
+        await update({ image: imageUrl }); // Atualiza sessão NextAuth SÓ com a URL do Cloudinary
       }
+      // Dispara evento para Sidebar atualizar instantaneamente
+      window.dispatchEvent(new Event("profile-image-updated"));
     } else {
       toast.error(data.error || "Erro ao atualizar perfil");
     }

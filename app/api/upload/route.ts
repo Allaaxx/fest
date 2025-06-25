@@ -37,6 +37,7 @@ export async function POST(req: Request) {
         await cloudinary.uploader.destroy(oldPublicId);
       } catch (e) {
         // Não bloqueia o upload se falhar ao deletar
+        console.error("Erro ao deletar imagem antiga do Cloudinary:", e);
       }
     }
     const upload = await new Promise<any>((resolve, reject) => {
@@ -60,8 +61,12 @@ export async function POST(req: Request) {
       public_id: upload.public_id,
     });
   } catch (e) {
+    console.error("Erro ao fazer upload:", e);
     return NextResponse.json(
-      { error: "Erro ao fazer upload" },
+      { 
+        error: "Erro ao fazer upload", 
+        details: (e instanceof Error) ? e.message : String(e) 
+      },
       { status: 500 }
     );
   }

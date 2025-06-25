@@ -8,7 +8,7 @@ import {
   LogOut,
   MessageCircle,
 } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
 type TabType =
@@ -42,17 +42,63 @@ export default function Sidebar({
   setSidebarOpen,
 }: SidebarProps) {
   const { data: session } = useSession();
-  const user = session?.user;
+  type UserWithPublicId = typeof session extends { user: infer U }
+    ? U & { public_id?: string; image?: string | null; name?: string | null; email?: string | null }
+    : { public_id?: string; image?: string | null; name?: string | null; email?: string | null };
+  const user = session?.user as UserWithPublicId | undefined;
+
+  // Estado para imagem reativa do backend
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.email) {
+      fetch(`/api/cliente/profile?email=${encodeURIComponent(user.email ?? "")}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.profileImage && !data.profileImage.startsWith("blob:")) {
+            setProfileImage(data.profileImage);
+          } else {
+            setProfileImage(null);
+          }
+        })
+        .catch(() => setProfileImage(null));
+    }
+  }, [user?.email]);
+
+  // Atualiza a imagem do perfil sempre que o usuário salvar alterações no Profile
+  useEffect(() => {
+    if (!user?.email) return;
+    // Função para buscar imagem
+    const fetchImage = () => {
+      fetch(`/api/cliente/profile?email=${encodeURIComponent(user.email ?? "")}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.profileImage && !data.profileImage.startsWith("blob:")) {
+            setProfileImage(data.profileImage);
+          } else {
+            setProfileImage(null);
+          }
+        })
+        .catch(() => setProfileImage(null));
+    };
+    fetchImage();
+    // Adiciona um listener customizado para atualização reativa
+    window.addEventListener("profile-image-updated", fetchImage);
+    return () => {
+      window.removeEventListener("profile-image-updated", fetchImage);
+    };
+  }, [user?.email]);
+
   return (
     <div
       className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 mt-16 lg:mt-0`}
     >
       <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
         <div className="flex items-center">
-          {user?.image ? (
+          {profileImage ? (
             <img
-              src={user.image}
-              alt={user.name || "Usuário"}
+              src={profileImage}
+              alt={user?.name || "Usuário"}
               className="w-8 h-8 rounded-lg object-cover bg-pink-100 border border-pink-200"
             />
           ) : (
