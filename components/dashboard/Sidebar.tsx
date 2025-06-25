@@ -99,7 +99,7 @@ export default function Sidebar({
             <img
               src={profileImage}
               alt={user?.name || "Usuário"}
-              className="w-8 h-8 rounded-lg object-cover bg-pink-100 border border-pink-200"
+              className="w-8 h-8 rounded-lg object-cover bg-pink-100"
             />
           ) : (
             <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
