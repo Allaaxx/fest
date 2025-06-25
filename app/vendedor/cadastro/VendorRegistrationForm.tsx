@@ -41,6 +41,7 @@ import {
   isValidCEP,
 } from "@/lib/masks";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
 export default function VendorRegistrationPage() {
   const router = useRouter();
@@ -228,6 +229,27 @@ export default function VendorRegistrationPage() {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Busca endereço pelo CEP
+  const handleCepBlur = async () => {
+    const cep = formData.cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      try {
+        const { data } = await axios.get(
+          `https://viacep.com.br/ws/${cep}/json/`
+        );
+        if (!data.erro) {
+          setFormData((prev) => ({
+            ...prev,
+            address: data.logradouro || prev.address,
+            neighborhood: data.bairro || prev.neighborhood,
+            city: data.localidade || prev.city,
+            state: data.uf || prev.state,
+          }));
+        }
+      } catch {}
     }
   };
 
@@ -490,6 +512,7 @@ export default function VendorRegistrationPage() {
                         mask={cepMask}
                         value={formData.cep}
                         onChange={handleMaskedInputChange("cep")}
+                        onBlur={handleCepBlur}
                         placeholder="00000-000"
                         className={errors.cep ? "border-red-500" : ""}
                       />
