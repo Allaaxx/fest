@@ -9,27 +9,51 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+console.log("[UPLOAD] CLOUDINARY CONFIG:", {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET ? '***' : undefined,
+});
+
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   // Usa o req original para obter o token JWT
-  const token = await getToken({ req });
-  console.log("TOKEN JWT:", token);
+  let token;
+  try {
+    token = await getToken({ req: req as any });
+  } catch (e) {
+    console.error("[UPLOAD] Erro ao obter token JWT:", e);
+    return NextResponse.json({ error: "Erro ao obter token JWT", details: String(e) }, { status: 500 });
+  }
+  console.log("[UPLOAD] TOKEN JWT:", token);
   const userId = token?.sub || token?.id || token?.email || null;
 
-  const formData = await req.formData();
-  const file = formData.get("file") as File;
-  const oldPublicId = formData.get("oldPublicId") as string | null;
+  let formData, file, oldPublicId;
+  try {
+    formData = await req.formData();
+    file = formData.get("file") as File;
+    oldPublicId = formData.get("oldPublicId") as string | null;
+  } catch (e) {
+    console.error("[UPLOAD] Erro ao processar formData:", e);
+    return NextResponse.json({ error: "Erro ao processar formData", details: String(e) }, { status: 500 });
+  }
 
   if (!file || !userId) {
-    console.error("Token JWT ausente ou usuário não identificado", { token, userId });
+    console.error("[UPLOAD] Token JWT ausente ou usuário não identificado", { token, userId });
     return NextResponse.json(
       { error: "Arquivo ou usuário não enviado" },
       { status: 400 }
     );
   }
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  let buffer;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    buffer = Buffer.from(arrayBuffer);
+  } catch (e) {
+    console.error("[UPLOAD] Erro ao converter arquivo em buffer:", e);
+    return NextResponse.json({ error: "Erro ao processar arquivo", details: String(e) }, { status: 500 });
+  }
 
   try {
     if (oldPublicId) {
@@ -37,31 +61,35 @@ export async function POST(req: Request) {
         await cloudinary.uploader.destroy(oldPublicId);
       } catch (e) {
         // Não bloqueia o upload se falhar ao deletar
-        console.error("Erro ao deletar imagem antiga do Cloudinary:", e);
+        console.error("[UPLOAD] Erro ao deletar imagem antiga do Cloudinary:", e);
       }
     }
+    console.log("[UPLOAD] Iniciando upload para Cloudinary", { userId, fileSize: buffer.length });
     const upload = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "profile",
-            public_id: `profile_${userId}`,
-            overwrite: true,
-            resource_type: "image",
-          },
-          (err: any, result: any) => {
-            if (err) return reject(err);
-            resolve(result);
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "profile",
+          public_id: `profile_${userId}`,
+          overwrite: true,
+          resource_type: "image",
+        },
+        (err: any, result: any) => {
+          if (err) {
+            console.error("[UPLOAD] Erro no upload_stream:", err);
+            return reject(err);
           }
-        )
-        .end(buffer);
+          console.log("[UPLOAD] Resultado do upload:", result);
+          resolve(result);
+        }
+      );
+      stream.end(buffer);
     });
     return NextResponse.json({
       url: upload.secure_url,
       public_id: upload.public_id,
     });
   } catch (e) {
-    console.error("Erro ao fazer upload:", e);
+    console.error("[UPLOAD] Erro ao fazer upload:", e);
     return NextResponse.json(
       { 
         error: "Erro ao fazer upload", 
