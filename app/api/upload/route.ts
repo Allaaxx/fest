@@ -9,11 +9,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log("[UPLOAD] CLOUDINARY CONFIG:", {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET ? '***' : undefined,
-});
+// Log seguro apenas para debug local (NÃO expõe secrets em produção)
+if (process.env.NODE_ENV !== "production") {
+  console.log("[UPLOAD] CLOUDINARY CONFIG OK");
+}
 
 export const runtime = "nodejs";
 
@@ -23,10 +22,13 @@ export async function POST(req: Request) {
   try {
     token = await getToken({ req: req as any });
   } catch (e) {
-    console.error("[UPLOAD] Erro ao obter token JWT:", e);
-    return NextResponse.json({ error: "Erro ao obter token JWT", details: String(e) }, { status: 500 });
+    console.error("[UPLOAD] Erro ao obter token JWT");
+    return NextResponse.json(
+      { error: "Erro ao obter token JWT" },
+      { status: 500 }
+    );
   }
-  console.log("[UPLOAD] TOKEN JWT:", token);
+  // Não loga mais o token em produção
   const userId = token?.sub || token?.id || token?.email || null;
 
   let formData, file, oldPublicId;
@@ -35,12 +37,15 @@ export async function POST(req: Request) {
     file = formData.get("file") as File;
     oldPublicId = formData.get("oldPublicId") as string | null;
   } catch (e) {
-    console.error("[UPLOAD] Erro ao processar formData:", e);
-    return NextResponse.json({ error: "Erro ao processar formData", details: String(e) }, { status: 500 });
+    console.error("[UPLOAD] Erro ao processar formData");
+    return NextResponse.json(
+      { error: "Erro ao processar formData" },
+      { status: 500 }
+    );
   }
 
   if (!file || !userId) {
-    console.error("[UPLOAD] Token JWT ausente ou usuário não identificado", { token, userId });
+    console.error("[UPLOAD] Token JWT ausente ou usuário não identificado");
     return NextResponse.json(
       { error: "Arquivo ou usuário não enviado" },
       { status: 400 }
@@ -51,8 +56,11 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     buffer = Buffer.from(arrayBuffer);
   } catch (e) {
-    console.error("[UPLOAD] Erro ao converter arquivo em buffer:", e);
-    return NextResponse.json({ error: "Erro ao processar arquivo", details: String(e) }, { status: 500 });
+    console.error("[UPLOAD] Erro ao converter arquivo em buffer");
+    return NextResponse.json(
+      { error: "Erro ao processar arquivo" },
+      { status: 500 }
+    );
   }
 
   try {
@@ -61,10 +69,16 @@ export async function POST(req: Request) {
         await cloudinary.uploader.destroy(oldPublicId);
       } catch (e) {
         // Não bloqueia o upload se falhar ao deletar
-        console.error("[UPLOAD] Erro ao deletar imagem antiga do Cloudinary:", e);
+        console.error("[UPLOAD] Erro ao deletar imagem antiga do Cloudinary");
       }
     }
-    console.log("[UPLOAD] Iniciando upload para Cloudinary", { userId, fileSize: buffer.length });
+    // Loga apenas início do upload
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[UPLOAD] Iniciando upload para Cloudinary", {
+        userId,
+        fileSize: buffer.length,
+      });
+    }
     const upload = await new Promise<any>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
@@ -75,10 +89,12 @@ export async function POST(req: Request) {
         },
         (err: any, result: any) => {
           if (err) {
-            console.error("[UPLOAD] Erro no upload_stream:", err);
+            console.error("[UPLOAD] Erro no upload_stream");
             return reject(err);
           }
-          console.log("[UPLOAD] Resultado do upload:", result);
+          if (process.env.NODE_ENV !== "production") {
+            console.log("[UPLOAD] Resultado do upload");
+          }
           resolve(result);
         }
       );
@@ -89,11 +105,10 @@ export async function POST(req: Request) {
       public_id: upload.public_id,
     });
   } catch (e) {
-    console.error("[UPLOAD] Erro ao fazer upload:", e);
+    console.error("[UPLOAD] Erro ao fazer upload");
     return NextResponse.json(
-      { 
-        error: "Erro ao fazer upload", 
-        details: (e instanceof Error) ? e.message : String(e) 
+      {
+        error: "Erro ao fazer upload",
       },
       { status: 500 }
     );
