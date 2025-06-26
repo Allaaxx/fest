@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 describe('Exemplo de teste', () => {
   it('deve renderizar o texto corretamente', () => {
