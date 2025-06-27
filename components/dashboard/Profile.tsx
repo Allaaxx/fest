@@ -157,11 +157,7 @@ export default function Profile() {
   // Upload e atualização só ao salvar
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const error = validateProfile(form);
-    if (error) {
-      toast.error(error);
-      return;
-    }
+    // Remove validação local, deixa só a do backend para mensagens detalhadas
     setLoading(true);
     let imageUrl = form.profileImage;
     let imagePublicId = form.profileImagePublicId;
@@ -220,7 +216,75 @@ export default function Profile() {
       // Dispara evento para Sidebar atualizar instantaneamente
       window.dispatchEvent(new Event("profile-image-updated"));
     } else {
-      toast.error(data.error || "Erro ao atualizar perfil");
+      // Exibe mensagens detalhadas do backend de forma amigável
+      if (Array.isArray(data.details) && data.details.length > 0) {
+        const uniqueMsgs = Array.from(new Set(data.details));
+        // Agrupa mensagens por campo (exemplo: nome, email, etc)
+        const fieldMap: Record<string, string[]> = {};
+        uniqueMsgs.forEach((msgUnknown) => {
+          const msg = String(msgUnknown);
+          const match = msg.match(/^(.*?) (é|deve|precisa|não|inválido|obrigatório)/i);
+          if (match) {
+            const field = match[1].trim().toLowerCase();
+            if (!fieldMap[field]) fieldMap[field] = [];
+            fieldMap[field].push(msg.replace(new RegExp(`^${match[1]} ?`, 'i'), '').replace(/^deve /i, 'Deve '));
+          } else {
+            if (!fieldMap['outros']) fieldMap['outros'] = [];
+            fieldMap['outros'].push(msg);
+          }
+        });
+        // Agrupamento especial: Nome e Sobrenome
+        const nomeMsgs = fieldMap['nome'] || [];
+        const sobrenomeMsgs = fieldMap['sobrenome'] || [];
+        let nomeESobrenomeMsgs: string[] = [];
+        if (nomeMsgs.length && sobrenomeMsgs.length) {
+          // Junta e remove duplicatas
+          nomeESobrenomeMsgs = Array.from(new Set([...nomeMsgs, ...sobrenomeMsgs]));
+          delete fieldMap['nome'];
+          delete fieldMap['sobrenome'];
+        }
+        toast.error(
+          <div style={{ textAlign: "left" }}>
+            <b>Corrija os seguintes erros:</b>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {nomeESobrenomeMsgs.length > 0 && (
+                <li style={{ marginBottom: 4 }}>
+                  <b>Nome e Sobrenome:</b>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {nomeESobrenomeMsgs.map((m, i) => (
+                      <li key={i}>{m.charAt(0).toUpperCase() + m.slice(1)}</li>
+                    ))}
+                  </ul>
+                </li>
+              )}
+              {Object.entries(fieldMap).map(([field, msgs], idx) => (
+                msgs.length > 0 && field !== 'outros' ? (
+                  <li key={field+idx} style={{ marginBottom: 4 }}>
+                    <b>{field.charAt(0).toUpperCase() + field.slice(1)}:</b>
+                    <ul style={{ margin: 0, paddingLeft: 18 }}>
+                      {msgs.map((m, i) => (
+                        <li key={i}>{m.charAt(0).toUpperCase() + m.slice(1)}</li>
+                      ))}
+                    </ul>
+                  </li>
+                ) : null
+              ))}
+              {fieldMap['outros'] && fieldMap['outros'].length > 0 && (
+                <li style={{ marginBottom: 4 }}>
+                  <b>Outros:</b>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {fieldMap['outros'].map((m, i) => (
+                      <li key={i}>{m.charAt(0).toUpperCase() + m.slice(1)}</li>
+                    ))}
+                  </ul>
+                </li>
+              )}
+            </ul>
+          </div>
+        );
+      } else {
+        toast.error(data.error || "Erro ao atualizar perfil");
+      }
     }
     setLoading(false);
   };

@@ -64,15 +64,7 @@ export default function RedefinirSenhaPage() {
       return;
     }
 
-    // Validação de senha forte
-    const strongPasswordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-    if (!strongPasswordRegex.test(password)) {
-      toast.error(
-        "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial."
-      );
-      return;
-    }
+
 
     if (password !== confirmPassword) {
       toast.error("As senhas não coincidem");
@@ -98,7 +90,11 @@ export default function RedefinirSenhaPage() {
           router.push("/autenticar");
         }, 3000);
       } else {
-        toast.error(data.error || "Erro ao redefinir senha");
+        if (Array.isArray(data.details)) {
+          data.details.forEach((msg: string) => toast.error(msg));
+        } else {
+          toast.error(data.error || "Erro ao redefinir senha");
+        }
       }
     } catch (error) {
       toast.error("Erro ao redefinir senha");

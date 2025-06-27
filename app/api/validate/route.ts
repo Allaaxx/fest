@@ -1,18 +1,29 @@
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import * as yup from "yup";
+// Schema de validação para validação de conta
+const validateSchema = yup.object({
+  token: yup.string().required("Token é obrigatório."),
+  code: yup.string().required("Código é obrigatório."),
+});
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const { token, code } = await req.json();
-    if (!token || !code) {
+    const body = await req.json();
+    // Validação com Yup
+    try {
+      await validateSchema.validate(body, { abortEarly: false });
+    } catch (err: any) {
       return NextResponse.json(
-        { error: "Token e código são obrigatórios.", debug: { token, code } },
+        { error: "Dados inválidos", details: err.errors },
         { status: 400 }
       );
     }
+    const { token, code } = body;
     let payload: any;
     try {
       payload = jwt.verify(token, process.env.JWT_SECRET!);

@@ -1,21 +1,42 @@
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
 import jwt from "jsonwebtoken";
+import * as yup from "yup";
+// Schema de validação para cadastro
+const registerSchema = yup.object({
+  name: yup.string().min(2, "Nome muito curto").max(50, "Nome muito longo").required("Nome é obrigatório"),
+  email: yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
+  password: yup
+    .string()
+    .required("Senha é obrigatória")
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .max(100, "Senha muito longa")
+    .matches(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
+    .matches(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+    .matches(/[0-9]/, "A senha deve conter pelo menos um número")
+    .matches(/[^a-zA-Z0-9]/, "A senha deve conter pelo menos um caractere especial"),
+  role: yup.string().oneOf(["CLIENTE", "ADMIN", "VENDEDOR"], "Tipo de usuário inválido").notRequired(),
+});
 
 const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, role } = await req.json();
-    if (!email || !password) {
+    const body = await req.json();
+    // Validação com Yup
+    try {
+      await registerSchema.validate(body, { abortEarly: false });
+    } catch (err: any) {
       return NextResponse.json(
-        { error: "Email e senha são obrigatórios." },
+        { error: "Dados inválidos", details: err.errors },
         { status: 400 }
       );
     }
+    const { name, email, password, role } = body;
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
       return NextResponse.json(
