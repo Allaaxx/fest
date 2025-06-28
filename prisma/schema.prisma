@@ -32,6 +32,30 @@ model User {
   profileImage   String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  vendorProfile  VendorProfile?
+}
+
+model VendorProfile {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+
+  companyName   String
+  companyType   String
+  description   String
+  rg            String
+  cpfDoc        String
+  comprovante   String
+  bankName      String
+  accountType   String
+  agency        String
+  account       String
+  number        String
+  neighborhood  String
+  city          String
+  state         String
+  // Adicione outros campos específicos do vendedor conforme necessário
 }
 
 enum Role {

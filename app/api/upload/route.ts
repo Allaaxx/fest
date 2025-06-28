@@ -1,7 +1,14 @@
+
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { getToken } from "next-auth/jwt";
 import { cookies } from "next/headers";
+import * as yup from "yup";
+// Schema de validação para upload de imagem
+const uploadSchema = yup.object({
+  file: yup.mixed().required("Arquivo é obrigatório"),
+  oldPublicId: yup.string().nullable().notRequired(),
+});
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -34,8 +41,20 @@ export async function POST(req: Request) {
   let formData, file, oldPublicId;
   try {
     formData = await req.formData();
-    file = formData.get("file") as File;
-    oldPublicId = formData.get("oldPublicId") as string | null;
+    file = formData.get("file");
+    oldPublicId = formData.get("oldPublicId");
+    // Validação com Yup
+    try {
+      await uploadSchema.validate({ file, oldPublicId }, { abortEarly: false });
+    } catch (err: any) {
+      return NextResponse.json(
+        { error: "Dados inválidos", details: err.errors },
+        { status: 400 }
+      );
+    }
+    // Conversão de tipos após validação
+    file = file as File;
+    oldPublicId = oldPublicId ? String(oldPublicId) : null;
   } catch (e) {
     console.error("[UPLOAD] Erro ao processar formData");
     return NextResponse.json(
@@ -44,10 +63,10 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!file || !userId) {
+  if (!userId) {
     console.error("[UPLOAD] Token JWT ausente ou usuário não identificado");
     return NextResponse.json(
-      { error: "Arquivo ou usuário não enviado" },
+      { error: "Usuário não enviado" },
       { status: 400 }
     );
   }

@@ -1,4 +1,5 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
+import * as yup from "yup";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -24,6 +25,17 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
+        // Validação com Yup
+        const schema = yup.object({
+          email: yup.string().email().required(),
+          password: yup.string().min(6).required(),
+        });
+        try {
+          await schema.validate(credentials);
+        } catch (err) {
+          return null; // Ou lance um erro customizado se quiser tratar diferente
+        }
+
         if (!credentials?.email || !credentials?.password) return null;
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },

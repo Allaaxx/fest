@@ -1,8 +1,8 @@
+
 "use client";
 
-import React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +44,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
 export default function VendorRegistrationPage() {
+
   const router = useRouter();
   const { user, updateUserType } = useStore();
   const [currentStep, setCurrentStep] = useState(1);
@@ -87,6 +88,38 @@ export default function VendorRegistrationPage() {
     acceptTerms: false,
     acceptCommission: false,
   });
+
+  // Busca automática de endereço pelo CEP ao sair do campo
+  const handleCepBlur = async () => {
+    const cep = formData.cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const dataCep = await res.json();
+        if (!dataCep.erro) {
+          setFormData((prev) => ({
+            ...prev,
+            address: dataCep.logradouro || "",
+            neighborhood: dataCep.bairro || "",
+            city: dataCep.localidade || "",
+            state: dataCep.uf || "",
+          }));
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            address: "",
+            neighborhood: "",
+            city: "",
+            state: "",
+          }));
+          toast.error("CEP não encontrado");
+        }
+      } catch {
+        toast.error("Erro ao buscar endereço pelo CEP");
+      }
+    }
+  };
+
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -206,17 +239,83 @@ export default function VendorRegistrationPage() {
     }
   };
 
-  const handleSubmit = () => {
-    if (validateStep(6)) {
-      // Simulate registration process
-      if (user) {
-        updateUserType("vendedor");
-        router.push("/vendedor/dashboard");
+  // Função para converter arquivos em nomes (para enviar ao backend)
+  function getDocumentName(file: File | null) {
+    return file ? file.name : "";
+  }
+
+  // Função para exibir toasts agrupados
+  function showGroupedToasts(details: string[]) {
+    if (!details || !Array.isArray(details)) return;
+    // Agrupa por campo se possível (exemplo simples)
+    const grouped: Record<string, string[]> = {};
+    details.forEach((msg) => {
+      // Extrai o campo se vier no formato "Campo: mensagem"
+      const [field, ...rest] = msg.split(":");
+      if (rest.length > 0) {
+        const key = field.trim();
+        grouped[key] = grouped[key] || [];
+        grouped[key].push(rest.join(":").trim());
       } else {
-        // If no user, create one and set as vendor
-        // This would normally be handled by your auth system
-        router.push("/vendedor/dashboard");
+        grouped["outros"] = grouped["outros"] || [];
+        grouped["outros"].push(msg);
       }
+    });
+    Object.entries(grouped).forEach(([campo, msgs]) => {
+      toast.error(`${campo !== "outros" ? campo + ": " : ""}${msgs.join("; ")}`);
+    });
+  }
+
+  // Envia todos os dados para o endpoint centralizado
+  const handleSubmit = async () => {
+    if (!validateStep(6)) return;
+
+    // Monta o payload conforme esperado pelo backend
+    const payload = {
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      cpf: formData.cpf,
+      companyName: formData.companyName,
+      companyType: formData.companyType,
+      description: formData.description,
+      cep: formData.cep,
+      address: formData.address,
+      number: formData.number,
+      neighborhood: formData.neighborhood,
+      city: formData.city,
+      state: formData.state,
+      bankName: formData.bankName,
+      accountType: formData.accountType,
+      agency: formData.agency,
+      account: formData.account,
+      rg: getDocumentName(formData.documents.rg),
+      cpfDoc: getDocumentName(formData.documents.cpfDoc),
+      comprovante: getDocumentName(formData.documents.comprovante),
+      acceptTerms: formData.acceptTerms,
+      acceptCommission: formData.acceptCommission,
+    };
+
+    try {
+      const res = await fetch("/api/vendedor", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        if (result.details) {
+          showGroupedToasts(result.details);
+        } else {
+          toast.error(result.error || "Erro ao cadastrar vendedor");
+        }
+        return;
+      }
+      toast.success("Cadastro de vendedor realizado com sucesso!");
+      updateUserType && updateUserType("vendedor");
+      router.push("/vendedor/dashboard");
+    } catch (err) {
+      toast.error("Erro inesperado ao cadastrar vendedor");
     }
   };
 

@@ -24,6 +24,7 @@ interface AuthContextType {
 interface RegisterResponse {
   token?: string;
   error?: string;
+  details?: string[];
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -114,7 +115,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       const json = await res.json();
       if (!res.ok) {
-        return { error: json.error || "Erro ao registrar usuário" };
+        // Garante que detalhes de erro do backend sejam repassados ao frontend
+        return {
+          error: json.error || "Erro ao registrar usuário",
+          details: json.details || [],
+        };
       }
       return json;
     } finally {

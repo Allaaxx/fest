@@ -66,15 +66,53 @@ export default function LoginPage() {
     }
   };
 
-  type RegisterResult = { success: boolean; token: string };
+
+  // Tipo flexível para resultado do register, permitindo detalhes de erro
+  type RegisterResult =
+    | { success: true; token: string }
+    | { error: string; details?: string[] };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const result = await register(registerData);
-      if (result?.error) {
-        toast.error(result.error);
+      const result = (await register(registerData)) as RegisterResult;
+      if ('error' in result) {
+        if (Array.isArray(result.details) && result.details.length > 0) {
+          // Remove duplicadas e agrupa mensagens de senha
+          const uniqueMsgs = Array.from(new Set(result.details));
+          const senhaMsgs = uniqueMsgs
+            .filter((msg) => msg.toLowerCase().startsWith("a senha") || msg.toLowerCase().startsWith("senha"))
+            .map((msg) => msg.replace(/^a senha (deve|é|precisa|não)/i, '').replace(/^senha (deve|é|precisa|não)/i, '').replace(/^deve /i, '').trim().replace(/^/, msg.includes('deve') ? '' : 'Deve '));
+          const otherMsgs = uniqueMsgs.filter((msg) => !msg.toLowerCase().startsWith("a senha") && !msg.toLowerCase().startsWith("senha"));
+          toast.error(
+            <div style={{ textAlign: "left" }}>
+              {senhaMsgs.length > 0 && (
+                <>
+                  <b>Senha inválida:</b>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {senhaMsgs.map((msg, idx) => (
+                      <li key={"senha-"+idx}>{msg.charAt(0).toUpperCase() + msg.slice(1)}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {otherMsgs.length > 0 && (
+                <>
+                  {senhaMsgs.length > 0 && <div style={{ height: 8 }} />}
+                  <b>Corrija os seguintes erros:</b>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {otherMsgs.map((msg, idx) => (
+                      <li key={"other-"+idx}>{msg}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          );
+        } else {
+          toast.error(result.error);
+        }
         return;
       }
       toast.success("Cadastro realizado! Verifique seu e-mail para validar a conta.");

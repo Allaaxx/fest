@@ -1,6 +1,12 @@
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { sendVerificationEmail } from "@/lib/email";
+import * as yup from "yup";
+// Schema de validação para o corpo da requisição
+const emailSchema = yup.object({
+  email: yup.string().email("E-mail inválido").required("E-mail é obrigatório."),
+});
 
 const prisma = new PrismaClient();
 
@@ -14,14 +20,17 @@ async function sendPasswordResetEmail(email: string, token: string) {
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
-
-    if (!email) {
+    const body = await request.json();
+    // Validação com Yup
+    try {
+      await emailSchema.validate(body, { abortEarly: false });
+    } catch (err: any) {
       return NextResponse.json(
-        { error: "Email é obrigatório" },
+        { error: "Dados inválidos", details: err.errors },
         { status: 400 }
       );
     }
+    const { email } = body;
 
     // Verificar se o usuário existe
     const user = await prisma.user.findUnique({
