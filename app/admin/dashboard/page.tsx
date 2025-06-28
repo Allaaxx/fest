@@ -26,6 +26,7 @@ import { AdminProductsContent } from "@/components/admin/dashboard/AdminProducts
 import { AdminOrdersContent } from "@/components/admin/dashboard/AdminOrdersContent";
 import { AdminAnalyticsContent } from "@/components/admin/dashboard/AdminAnalyticsContent";
 import { AdminSettingsContent } from "@/components/admin/dashboard/AdminSettingsContent";
+import { AdminCategoriesContent } from "@/components/admin/dashboard/AdminCategoriesContent";
 
 type TabType =
   | "overview"
@@ -33,7 +34,8 @@ type TabType =
   | "products"
   | "orders"
   | "analytics"
-  | "settings";
+  | "settings"
+  | "categories";
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
@@ -46,6 +48,7 @@ export default function AdminDashboardPage() {
     { id: "orders", label: "Pedidos", icon: ShoppingBag },
     { id: "analytics", label: "Relatórios", icon: BarChart3 },
     { id: "settings", label: "Configurações", icon: Settings },
+    { id: "categories", label: "Categorias", icon: Package },
   ];
 
   const renderContent = () => {
@@ -62,6 +65,8 @@ export default function AdminDashboardPage() {
         return <AdminAnalyticsContent />;
       case "settings":
         return <AdminSettingsContent />;
+      case "categories":
+        return <AdminCategoriesContent />;
       default:
         return <AdminOverviewContent />;
     }
