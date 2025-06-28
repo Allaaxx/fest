@@ -44,10 +44,14 @@ export async function PUT(req: Request) {
   }
   const data = await req.json();
 
+  // Loga o payload recebido
+  console.log("Payload recebido em /api/vendedor:", data);
+
   // Validação com Yup
   try {
     await vendorSchema.validate(data, { abortEarly: false });
   } catch (err: any) {
+    console.error("Erro de validação:", err);
     return NextResponse.json(
       { error: "Dados inválidos", details: err.errors },
       { status: 400 }
@@ -66,6 +70,7 @@ export async function PUT(req: Request) {
         cpf: data.cpf,
         address: data.address,
         cep: data.cep,
+        email: data.email,
       },
     });
 
@@ -109,8 +114,9 @@ export async function PUT(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Erro no upsert do vendedor:", error);
     return NextResponse.json(
-      { error: "Erro ao atualizar perfil para vendedor" },
+      { error: "Erro ao atualizar perfil para vendedor", details: String(error) },
       { status: 500 }
     );
   }

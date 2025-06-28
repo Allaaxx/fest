@@ -1,10 +1,8 @@
+
 "use client";
 
-
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
-
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +43,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function VendorRegistrationPage() {
+
   const router = useRouter();
   const { user, updateUserType } = useStore();
   const [currentStep, setCurrentStep] = useState(1);
@@ -88,6 +87,38 @@ export default function VendorRegistrationPage() {
     acceptTerms: false,
     acceptCommission: false,
   });
+
+  // Busca automática de endereço pelo CEP ao sair do campo
+  const handleCepBlur = async () => {
+    const cep = formData.cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const dataCep = await res.json();
+        if (!dataCep.erro) {
+          setFormData((prev) => ({
+            ...prev,
+            address: dataCep.logradouro || "",
+            neighborhood: dataCep.bairro || "",
+            city: dataCep.localidade || "",
+            state: dataCep.uf || "",
+          }));
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            address: "",
+            neighborhood: "",
+            city: "",
+            state: "",
+          }));
+          toast.error("CEP não encontrado");
+        }
+      } catch {
+        toast.error("Erro ao buscar endereço pelo CEP");
+      }
+    }
+  };
+
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -558,6 +589,7 @@ export default function VendorRegistrationPage() {
                         mask={cepMask}
                         value={formData.cep}
                         onChange={handleMaskedInputChange("cep")}
+                        onBlur={handleCepBlur}
                         placeholder="00000-000"
                         className={errors.cep ? "border-red-500" : ""}
                       />
