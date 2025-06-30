@@ -89,38 +89,6 @@ export default function VendorRegistrationPage() {
     acceptCommission: false,
   });
 
-  // Busca automática de endereço pelo CEP ao sair do campo
-  const handleCepBlur = async () => {
-    const cep = formData.cep.replace(/\D/g, "");
-    if (cep.length === 8) {
-      try {
-        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const dataCep = await res.json();
-        if (!dataCep.erro) {
-          setFormData((prev) => ({
-            ...prev,
-            address: dataCep.logradouro || "",
-            neighborhood: dataCep.bairro || "",
-            city: dataCep.localidade || "",
-            state: dataCep.uf || "",
-          }));
-        } else {
-          setFormData((prev) => ({
-            ...prev,
-            address: "",
-            neighborhood: "",
-            city: "",
-            state: "",
-          }));
-          toast.error("CEP não encontrado");
-        }
-      } catch {
-        toast.error("Erro ao buscar endereço pelo CEP");
-      }
-    }
-  };
-
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const steps = [
@@ -397,7 +365,7 @@ export default function VendorRegistrationPage() {
                     >
                       {step.title}
                     </span>
-                    {index < steps.length - 1 && (
+                    {index < steps.length  && (
                       <div
                         className={`hidden md:block w-16 h-0.5 mt-6 ${isCompleted ? "bg-green-500" : "bg-gray-200"}`}
                       />
