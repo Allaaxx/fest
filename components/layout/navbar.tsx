@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, User, Heart, Menu, X } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -193,52 +194,55 @@ export function Navbar() {
                   {cartState.items.length}
                 </NavbarBadge>
               </Button>
-
-              {/* User Authentication */}
-              {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`${
-                        isScrolled ? "text-white " : "text-gray-700"
-                      } hover:text-fest-primary hover:bg-gray-100`}
-                    >
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-white border border-gray-200 shadow-lg"
-                  >
-                    <DropdownMenuItem>
-                      <Link href="/cliente/dashboard">Minha Conta</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/cliente/pedidos">Meus Pedidos</Link>
-                    </DropdownMenuItem>
-                    {user.type === "vendedor" && (
-                      <DropdownMenuItem>
-                        <Link href="/vendedor/dashboard">Área do Vendedor</Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={logout}>Sair</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Link href="/autenticar">
+              {/* User Authentication - Avatar com Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`${
-                      isScrolled ? "text-white " : "text-gray-700"
-                    } hover:text-fest-primary hover:bg-gray-100`}
+                    className={`${isScrolled ? "text-white" : "text-gray-700"} hover:text-fest-primary hover:bg-gray-100`}
                   >
-                    <User className="h-5 w-5" />
+                    {user && user.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt={user.name || "Avatar"}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
                   </Button>
-                </Link>
-              )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-white border border-gray-200 shadow-lg"
+                >
+                  {user ? (
+                    <>
+                      <DropdownMenuItem>
+                        <Link href="/cliente/dashboard">Minha Conta</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link href="/cliente/pedidos">Meus Pedidos</Link>
+                      </DropdownMenuItem>
+                      {user.type === "vendedor" && (
+                        <DropdownMenuItem>
+                          <Link href="/vendedor/dashboard">
+                            Área do Vendedor
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={logout}>Sair</DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem>
+                      <Link href="/autenticar">Entrar</Link>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Mobile Menu Button */}
               <Button

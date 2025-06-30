@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { signIn, signOut } from "next-auth/react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 interface User {
@@ -29,9 +29,28 @@ interface RegisterResponse {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { data: session, status } = useSession();
+
+  // Sincroniza o usuário do NextAuth com o contexto
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      const userData = session.user as any;
+      setUser({
+        id: userData.id || userData.email || "",
+        name: userData.name || "",
+        email: userData.email || "",
+        type: userData.type || "cliente",
+        avatar: userData.avatar || userData.image || undefined,
+        profileImage: userData.profileImage || undefined,
+      });
+    } else if (status === "unauthenticated") {
+      setUser(null);
+    }
+  }, [session, status]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
