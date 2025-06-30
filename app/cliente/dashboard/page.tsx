@@ -1,14 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import Sidebar from "@/components/dashboard/Sidebar"
-import Overview from "@/components/dashboard/Overview"
-import Orders from "@/components/dashboard/Orders"
-import Favorites from "@/components/dashboard/Favorites"
-import Loyalty from "@/components/dashboard/Loyalty"
-import Profile from "@/components/dashboard/Profile"
-import Messages from "@/components/dashboard/Messages"
+
 import { Menu } from "lucide-react"
+import Overview from "@/components/cliente/dashboard/Overview"
+import Orders from "@/components/cliente/dashboard/Orders"
+import Favorites from "@/components/cliente/dashboard/Favorites"
+import Loyalty from "@/components/cliente/dashboard/Loyalty"
+import Profile from "@/components/cliente/dashboard/Profile"
+import Messages from "@/components/cliente/dashboard/Messages"
+import Sidebar from "@/components/cliente/dashboard/Sidebar"
 
 export default function ClienteDashboardPage() {
   const [activeTab, setActiveTab] = useState<

@@ -5,7 +5,7 @@ import { MessageCircle, Search, Filter, Star, Clock } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import ChatContent from "@/components/dashboard/chat/chat-content"
+import ChatContent from "@/components/cliente/dashboard/chat/chat-content"
 
 // Expandir os dados mockados para incluir mais campos de busca
 const mockConversations = [
