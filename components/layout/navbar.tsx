@@ -194,55 +194,87 @@ export function Navbar() {
                   {cartState.items.length}
                 </NavbarBadge>
               </Button>
-              {/* User Authentication - Avatar com Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`${isScrolled ? "text-white" : "text-gray-700"} hover:text-fest-primary hover:bg-gray-100`}
-                  >
-                    {user && user.avatar ? (
-                      <Image
-                        src={user.avatar}
-                        alt={user.name || "Avatar"}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="h-5 w-5" />
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="bg-white border border-gray-200 shadow-lg"
-                >
-                  {user ? (
-                    <>
-                      <DropdownMenuItem>
-                        <Link href="/cliente/dashboard">Minha Conta</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link href="/cliente/pedidos">Meus Pedidos</Link>
-                      </DropdownMenuItem>
-                      {user.type === "vendedor" && (
-                        <DropdownMenuItem>
-                          <Link href="/vendedor/dashboard">
-                            Área do Vendedor
-                          </Link>
-                        </DropdownMenuItem>
+              {/* User Authentication - Avatar ou Botão Entrar */}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`${isScrolled ? "text-white" : "text-gray-700"} hover:text-fest-primary hover:bg-gray-100`}
+                    >
+                      {user.avatar ? (
+                        <Image
+                          src={user.avatar}
+                          alt={user.name || "Avatar"}
+                          width={32}
+                          height={32}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-5 w-5" />
                       )}
-                      <DropdownMenuItem onClick={logout}>Sair</DropdownMenuItem>
-                    </>
-                  ) : (
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-white border border-gray-200 shadow-lg"
+                  >
                     <DropdownMenuItem>
-                      <Link href="/autenticar">Entrar</Link>
+                      <Link
+                        href={
+                          user.role?.toLowerCase() === "vendedor"
+                            ? "/vendedor/dashboard"
+                            : user.role?.toLowerCase() === "admin"
+                            ? "/admin"
+                            : "/cliente/dashboard"
+                        }
+                      >
+                        Minha Conta
+                      </Link>
                     </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem>
+                      <Link
+                        href={
+                          user.role?.toLowerCase() === "vendedor"
+                            ? "/vendedor/pedidos"
+                            : user.role?.toLowerCase() === "admin"
+                            ? "/admin/pedidos"
+                            : "/cliente/pedidos"
+                        }
+                      >
+                        Meus Pedidos
+                      </Link>
+                    </DropdownMenuItem>
+                    {user.role?.toLowerCase() === "vendedor" && (
+                      <DropdownMenuItem>
+                        <Link href="/vendedor/dashboard">
+                          Área do Vendedor
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {user.role?.toLowerCase() === "admin" && (
+                      <DropdownMenuItem>
+                        <Link href="/admin">
+                          Painel Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={logout}>Sair</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`${isScrolled ? "text-white" : "text-gray-700"} hover:text-fest-primary hover:bg-gray-100`}
+                  asChild
+                >
+                  <Link href="/autenticar">
+                    <User className="h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
 
               {/* Mobile Menu Button */}
               <Button

@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   type: "cliente" | "vendedor" | "admin";
+  role?: string; // Adicionado para compatibilidade com NextAuth
   avatar?: string;
   profileImage?: string; // Adicionado para compatibilidade com dados do backend
 }
@@ -43,7 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: userData.id || userData.email || "",
         name: userData.name || "",
         email: userData.email || "",
-        type: userData.type || "cliente",
+        type: userData.type || userData.role || "cliente",
+        role: userData.role || userData.type || "cliente",
         avatar: userData.avatar || userData.image || undefined,
         profileImage: userData.profileImage || undefined,
       });
@@ -63,7 +65,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res?.ok) {
         // O NextAuth já gerencia a sessão, mas você pode buscar dados extras se quiser
         // setUser(...)
-        window.location.href = "/cliente/dashboard";
+        // Aguarda a sessão ser atualizada antes de redirecionar
+        setTimeout(() => {
+          // Busca a role do usuário na sessão atualizada
+          const nextUser = (window as any).nextauth?.session?.user || null;
+          const userType = nextUser?.type || "cliente";
+          if (userType === "vendedor") {
+            window.location.href = "/vendedor/dashboard";
+          } else if (userType === "admin") {
+            window.location.href = "/admin";
+          } else {
+            window.location.href = "/cliente/dashboard";
+          }
+        }, 500);
         return;
       } else if (res?.error === "2FA_REQUIRED" && (res as any).token) {
         if (typeof window !== "undefined") {
