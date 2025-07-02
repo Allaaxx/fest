@@ -90,15 +90,29 @@ export function CategoryForm({ category, onSave, onCancel, isEditing = false }: 
             Voltar
           </Button>
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">{isEditing ? "Editar Categoria" : "Nova Categoria"}</h2>
+            <div className="flex items-center space-x-3">
+              <h2 className="text-3xl font-bold text-gray-900">{isEditing ? "Editar Categoria" : "Nova Categoria"}</h2>
+              {isEditing && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  Editando
+                </Badge>
+              )}
+              {!isEditing && (
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  Criando
+                </Badge>
+              )}
+            </div>
             <p className="text-gray-600 mt-1">
-              {isEditing ? "Atualize as informações da categoria" : "Crie uma nova categoria para seus produtos"}
+              {isEditing
+                ? `Atualize as informações da categoria "${category?.name}"`
+                : "Crie uma nova categoria para organizar seus produtos"}
             </p>
           </div>
         </div>
-        {isEditing && (
-          <Badge variant="outline" className="text-sm">
-            ID: {category?.id}
+        {isEditing && category?.id && (
+          <Badge variant="outline" className="text-sm font-mono">
+            ID: {category.id}
           </Badge>
         )}
       </div>
@@ -228,28 +242,26 @@ export function CategoryForm({ category, onSave, onCancel, isEditing = false }: 
               </Card>
             )}
 
-            <div className="space-y-3">
-              <Button
-                type="submit"
-                className="w-full bg-red-600 hover:bg-red-700"
-                disabled={isLoading || !formData.name.trim()}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    {isEditing ? "Atualizar" : "Criar"} Categoria
-                  </>
-                )}
-              </Button>
-              <Button type="button" variant="outline" onClick={onCancel} className="w-full">
-                Cancelar
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              className="w-full bg-red-600 hover:bg-red-700"
+              disabled={isLoading || !formData.name.trim()}
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  {isEditing ? "Atualizando..." : "Criando..."}
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  {isEditing ? "Atualizar Categoria" : "Criar Categoria"}
+                </>
+              )}
+            </Button>
+            <Button type="button" variant="outline" onClick={onCancel} className="w-full">
+              Cancelar
+            </Button>
           </div>
         </div>
       </form>
