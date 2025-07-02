@@ -17,20 +17,35 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Search, MoreHorizontal, Edit, Trash2, Ban, UserX, Users, UserCheck, Calendar, Mail, Phone } from "lucide-react"
+import {
+  Search,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Ban,
+  Clock,
+  Users,
+  UserCheck,
+  UserX,
+  UserMinus,
+  Eye,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react"
 
 interface User {
   id: string
   name: string
   email: string
-  phone?: string
-  role: "admin" | "vendor" | "customer"
+  phone: string
+  role: "customer" | "vendor" | "admin"
   status: "active" | "suspended" | "banned" | "inactive"
   createdAt: string
   lastLogin?: string
-  totalOrders: number
+  orders: number
   totalSpent: number
-  avatar?: string
+  location: string
 }
 
 interface ActionDialogProps {
@@ -39,25 +54,15 @@ interface ActionDialogProps {
   onConfirm: (reason?: string) => void
   title: string
   description: string
-  actionType: "delete" | "ban" | "suspend" | "edit"
+  actionType: "delete" | "suspend" | "ban" | "edit"
   user?: User
 }
 
 function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionType, user }: ActionDialogProps) {
   const [reason, setReason] = useState("")
-  const [editData, setEditData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    role: user?.role || "customer",
-  })
 
   const handleConfirm = () => {
-    if (actionType === "edit") {
-      onConfirm(JSON.stringify(editData))
-    } else {
-      onConfirm(reason)
-    }
+    onConfirm(reason)
     setReason("")
     onClose()
   }
@@ -68,72 +73,28 @@ function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionTy
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {actionType === "delete" && <Trash2 className="h-5 w-5 text-red-500" />}
+            {actionType === "suspend" && <Clock className="h-5 w-5 text-yellow-500" />}
             {actionType === "ban" && <Ban className="h-5 w-5 text-red-500" />}
-            {actionType === "suspend" && <UserX className="h-5 w-5 text-yellow-500" />}
             {actionType === "edit" && <Edit className="h-5 w-5 text-blue-500" />}
             {title}
           </DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {actionType === "edit" ? (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  value={editData.name}
-                  onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editData.email}
-                  onChange={(e) => setEditData((prev) => ({ ...prev, email: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Telefone</Label>
-                <Input
-                  id="phone"
-                  value={editData.phone}
-                  onChange={(e) => setEditData((prev) => ({ ...prev, phone: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="role">Função</Label>
-                <Select
-                  value={editData.role}
-                  onValueChange={(value: any) => setEditData((prev) => ({ ...prev, role: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="customer">Cliente</SelectItem>
-                    <SelectItem value="vendor">Vendedor</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <Label htmlFor="reason">Motivo {actionType !== "delete" ? "(opcional)" : ""}</Label>
-              <Textarea
-                id="reason"
-                placeholder={`Descreva o motivo para ${actionType === "delete" ? "excluir" : actionType === "ban" ? "banir" : "suspender"} este usuário...`}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="min-h-20"
-              />
-            </div>
-          )}
-        </div>
+        {(actionType === "suspend" || actionType === "ban" || actionType === "delete") && (
+          <div className="space-y-2">
+            <Label htmlFor="reason">Motivo {actionType === "ban" ? "(obrigatório)" : "(opcional)"}</Label>
+            <Textarea
+              id="reason"
+              placeholder={`Descreva o motivo para ${
+                actionType === "suspend" ? "suspender" : actionType === "ban" ? "banir" : "excluir"
+              } este usuário...`}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="min-h-20"
+            />
+          </div>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
@@ -141,6 +102,7 @@ function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionTy
           </Button>
           <Button
             onClick={handleConfirm}
+            disabled={actionType === "ban" && !reason.trim()}
             className={
               actionType === "delete" || actionType === "ban"
                 ? "bg-red-600 hover:bg-red-700"
@@ -150,8 +112,8 @@ function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionTy
             }
           >
             {actionType === "delete" && "Excluir"}
-            {actionType === "ban" && "Banir"}
             {actionType === "suspend" && "Suspender"}
+            {actionType === "ban" && "Banir"}
             {actionType === "edit" && "Salvar"}
           </Button>
         </DialogFooter>
@@ -166,7 +128,7 @@ export function UsersManagement() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [actionDialog, setActionDialog] = useState<{
     isOpen: boolean
-    type: "delete" | "ban" | "suspend" | "edit"
+    type: "delete" | "suspend" | "ban" | "edit"
     user?: User
   }>({ isOpen: false, type: "delete" })
 
@@ -181,8 +143,9 @@ export function UsersManagement() {
       status: "active",
       createdAt: "2024-01-15",
       lastLogin: "2024-01-20",
-      totalOrders: 5,
-      totalSpent: 2500,
+      orders: 5,
+      totalSpent: 1250.0,
+      location: "São Paulo, SP",
     },
     {
       id: "2",
@@ -193,49 +156,56 @@ export function UsersManagement() {
       status: "active",
       createdAt: "2024-01-10",
       lastLogin: "2024-01-19",
-      totalOrders: 0,
+      orders: 0,
       totalSpent: 0,
+      location: "Rio de Janeiro, RJ",
     },
     {
       id: "3",
       name: "Carlos Lima",
       email: "carlos@email.com",
+      phone: "(11) 77777-7777",
       role: "customer",
       status: "suspended",
-      createdAt: "2024-01-08",
+      createdAt: "2024-01-05",
       lastLogin: "2024-01-18",
-      totalOrders: 2,
-      totalSpent: 800,
+      orders: 2,
+      totalSpent: 450.0,
+      location: "Belo Horizonte, MG",
     },
     {
       id: "4",
       name: "Ana Costa",
       email: "ana@email.com",
-      phone: "(11) 77777-7777",
+      phone: "(11) 66666-6666",
       role: "vendor",
       status: "active",
-      createdAt: "2024-01-05",
-      lastLogin: "2024-01-21",
-      totalOrders: 0,
+      createdAt: "2024-01-01",
+      lastLogin: "2024-01-20",
+      orders: 0,
       totalSpent: 0,
+      location: "Salvador, BA",
     },
     {
       id: "5",
       name: "Pedro Oliveira",
       email: "pedro@email.com",
+      phone: "(11) 55555-5555",
       role: "customer",
       status: "banned",
-      createdAt: "2024-01-03",
+      createdAt: "2023-12-20",
       lastLogin: "2024-01-10",
-      totalOrders: 1,
-      totalSpent: 150,
+      orders: 1,
+      totalSpent: 200.0,
+      location: "Fortaleza, CE",
     },
   ]
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.phone.includes(searchTerm)
 
     const matchesRole = roleFilter === "all" || user.role === roleFilter
     const matchesStatus = statusFilter === "all" || user.status === statusFilter
@@ -260,18 +230,30 @@ export function UsersManagement() {
 
   const getRoleBadge = (role: string) => {
     switch (role) {
-      case "admin":
-        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Admin</Badge>
-      case "vendor":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Vendedor</Badge>
       case "customer":
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Cliente</Badge>
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+            Cliente
+          </Badge>
+        )
+      case "vendor":
+        return (
+          <Badge variant="outline" className="bg-purple-50 text-purple-700">
+            Vendedor
+          </Badge>
+        )
+      case "admin":
+        return (
+          <Badge variant="outline" className="bg-orange-50 text-orange-700">
+            Admin
+          </Badge>
+        )
       default:
         return <Badge variant="outline">{role}</Badge>
     }
   }
 
-  const handleAction = (type: "delete" | "ban" | "suspend" | "edit", user: User) => {
+  const handleAction = (type: "delete" | "suspend" | "ban" | "edit", user: User) => {
     setActionDialog({ isOpen: true, type, user })
   }
 
@@ -286,14 +268,14 @@ export function UsersManagement() {
       case "delete":
         console.log("Excluindo usuário:", user.id, "Motivo:", reason)
         break
-      case "ban":
-        console.log("Banindo usuário:", user.id, "Motivo:", reason)
-        break
       case "suspend":
         console.log("Suspendendo usuário:", user.id, "Motivo:", reason)
         break
+      case "ban":
+        console.log("Banindo usuário:", user.id, "Motivo:", reason)
+        break
       case "edit":
-        console.log("Editando usuário:", user.id, "Dados:", reason)
+        console.log("Editando usuário:", user.id)
         break
     }
   }
@@ -323,7 +305,7 @@ export function UsersManagement() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Usuários Ativos</p>
+                <p className="text-sm text-gray-600">Ativos</p>
                 <p className="text-2xl font-bold text-green-600">{activeUsers}</p>
               </div>
               <UserCheck className="h-8 w-8 text-green-500" />
@@ -338,7 +320,7 @@ export function UsersManagement() {
                 <p className="text-sm text-gray-600">Suspensos</p>
                 <p className="text-2xl font-bold text-yellow-600">{suspendedUsers}</p>
               </div>
-              <UserX className="h-8 w-8 text-yellow-500" />
+              <UserMinus className="h-8 w-8 text-yellow-500" />
             </div>
           </CardContent>
         </Card>
@@ -350,7 +332,7 @@ export function UsersManagement() {
                 <p className="text-sm text-gray-600">Banidos</p>
                 <p className="text-2xl font-bold text-red-600">{bannedUsers}</p>
               </div>
-              <Ban className="h-8 w-8 text-red-500" />
+              <UserX className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -375,18 +357,18 @@ export function UsersManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as funções</SelectItem>
-              <SelectItem value="admin">Administrador</SelectItem>
-              <SelectItem value="vendor">Vendedor</SelectItem>
               <SelectItem value="customer">Cliente</SelectItem>
+              <SelectItem value="vendor">Vendedor</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-32">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="all">Todos os status</SelectItem>
               <SelectItem value="active">Ativo</SelectItem>
               <SelectItem value="suspended">Suspenso</SelectItem>
               <SelectItem value="banned">Banido</SelectItem>
@@ -399,7 +381,7 @@ export function UsersManagement() {
       {/* Lista de usuários */}
       <Card>
         <CardHeader>
-          <CardTitle>Usuários do Sistema</CardTitle>
+          <CardTitle>Gerenciamento de Usuários</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -407,12 +389,12 @@ export function UsersManagement() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left p-3">Usuário</th>
+                  <th className="text-left p-3">Contato</th>
                   <th className="text-left p-3">Função</th>
                   <th className="text-left p-3">Status</th>
-                  <th className="text-left p-3">Cadastro</th>
-                  <th className="text-left p-3">Último Login</th>
                   <th className="text-left p-3">Pedidos</th>
                   <th className="text-left p-3">Total Gasto</th>
+                  <th className="text-left p-3">Último Login</th>
                   <th className="text-left p-3">Ações</th>
                 </tr>
               </thead>
@@ -423,35 +405,36 @@ export function UsersManagement() {
                       <div>
                         <div className="font-medium">{user.name}</div>
                         <div className="text-sm text-gray-500 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {user.location}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="space-y-1">
+                        <div className="text-sm flex items-center gap-1">
                           <Mail className="h-3 w-3" />
                           {user.email}
                         </div>
-                        {user.phone && (
-                          <div className="text-sm text-gray-500 flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
-                            {user.phone}
-                          </div>
-                        )}
+                        <div className="text-sm text-gray-500 flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {user.phone}
+                        </div>
                       </div>
                     </td>
                     <td className="p-3">{getRoleBadge(user.role)}</td>
                     <td className="p-3">{getStatusBadge(user.status)}</td>
-                    <td className="p-3">
-                      <div className="text-sm flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(user.createdAt).toLocaleDateString("pt-BR")}
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      {user.lastLogin ? (
-                        <div className="text-sm">{new Date(user.lastLogin).toLocaleDateString("pt-BR")}</div>
-                      ) : (
-                        <span className="text-gray-400 text-sm">Nunca</span>
-                      )}
-                    </td>
-                    <td className="p-3">{user.totalOrders}</td>
-                    <td className="p-3">
+                    <td className="p-3 font-medium">{user.orders}</td>
+                    <td className="p-3 font-medium">
                       {user.totalSpent.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    </td>
+                    <td className="p-3">
+                      <div className="text-sm">
+                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString("pt-BR") : "Nunca"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Cadastrado em {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+                      </div>
                     </td>
                     <td className="p-3">
                       <DropdownMenu>
@@ -461,13 +444,17 @@ export function UsersManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalhes
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleAction("edit", user)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
                           </DropdownMenuItem>
                           {user.status === "active" && (
                             <DropdownMenuItem onClick={() => handleAction("suspend", user)} className="text-yellow-600">
-                              <UserX className="h-4 w-4 mr-2" />
+                              <Clock className="h-4 w-4 mr-2" />
                               Suspender
                             </DropdownMenuItem>
                           )}
@@ -512,19 +499,19 @@ export function UsersManagement() {
         title={
           actionDialog.type === "delete"
             ? "Excluir Usuário"
-            : actionDialog.type === "ban"
-              ? "Banir Usuário"
-              : actionDialog.type === "suspend"
-                ? "Suspender Usuário"
+            : actionDialog.type === "suspend"
+              ? "Suspender Usuário"
+              : actionDialog.type === "ban"
+                ? "Banir Usuário"
                 : "Editar Usuário"
         }
         description={
           actionDialog.type === "delete"
             ? `Tem certeza que deseja excluir o usuário "${actionDialog.user?.name}"? Esta ação não pode ser desfeita.`
-            : actionDialog.type === "ban"
-              ? `Tem certeza que deseja banir o usuário "${actionDialog.user?.name}"? O usuário não poderá mais acessar a plataforma.`
-              : actionDialog.type === "suspend"
-                ? `Tem certeza que deseja suspender o usuário "${actionDialog.user?.name}"? O usuário ficará temporariamente impedido de usar a plataforma.`
+            : actionDialog.type === "suspend"
+              ? `Tem certeza que deseja suspender o usuário "${actionDialog.user?.name}"? O usuário não poderá acessar a plataforma.`
+              : actionDialog.type === "ban"
+                ? `Tem certeza que deseja banir o usuário "${actionDialog.user?.name}"? Informe o motivo do banimento.`
                 : `Edite as informações do usuário "${actionDialog.user?.name}".`
         }
       />

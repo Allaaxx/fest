@@ -4,7 +4,7 @@ import { AdminOverviewContent } from "@/components/admin/dashboard/AdminOverview
 import { ProductsManagement } from "@/components/admin/dashboard/products-management";
 import { UsersManagement } from "@/components/admin/dashboard/users-management";
 import { AdminAnalyticsContent } from "@/components/admin/dashboard/AdminAnalyticsContent";
-import { SiteSettings } from "@/components/admin/dashboard/AdminSettingsContent";
+import { SiteSettings } from "@/components/admin/dashboard/site-settings";
 
 import { useState } from "react"
 import { AdminSidebar } from "@/components/admin/dashboard/AdminSidebar"
