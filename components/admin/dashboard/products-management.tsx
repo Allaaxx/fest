@@ -396,18 +396,92 @@ function ProductsListPanel({
   );
 }
 
+import dynamic from "next/dynamic";
+const ProductPreviewPage = dynamic(() => import("@/components/shared/product-preview-page"), { ssr: false });
+
+// Conversão para o formato do ProductPreviewPage
+import type { ComponentType } from "react";
+type PreviewProduct = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  type: "venda" | "locacao" | "servico" | "";
+  price: number | string;
+  originalPrice?: number | string;
+  stock?: number | string;
+  status: "active" | "inactive" | "draft" | "pending" | "approved" | "rejected";
+  sales: number;
+  views: number;
+  rating: number;
+  createdAt: string;
+  image: string;
+  images: File[];
+  features: string[];
+  vendor: { name: string; id: string };
+  availability?: boolean;
+  delivery?: boolean;
+  pickup?: boolean;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  rejectionReason?: string;
+};
+
+function toPreviewProduct(product: Product): PreviewProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    category: product.category,
+    type: product.type || "venda",
+    price: product.price !== undefined && product.price !== null ? String(product.price) : "",
+    originalPrice: (product as any).originalPrice !== undefined && (product as any).originalPrice !== null ? String((product as any).originalPrice) : "",
+    stock: "",
+    status: (product.status as any) || "active",
+    sales: product.sales ?? 0,
+    views: product.views ?? 0,
+    rating: 0,
+    createdAt: product.createdAt ?? "",
+    image: "",
+    images: [],
+    features: [""],
+    vendor: product.vendor ?? { name: "", id: "" },
+    availability: true,
+    delivery: false,
+    pickup: false,
+    reviewedAt: product.reviewedAt,
+    reviewedBy: product.reviewedBy,
+    rejectionReason: product.rejectionReason,
+  };
+}
+
+function fromPreviewProduct(product: PreviewProduct): Product {
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    category: product.category,
+    type: product.type === "" ? "venda" : (product.type as "venda" | "locacao" | "servico"),
+    price: typeof product.price === "string" ? Number(product.price) : product.price,
+    status: ["pending", "approved", "rejected", "active", "inactive"].includes(product.status) ? (product.status as any) : "active",
+    vendor: product.vendor,
+    createdAt: product.createdAt,
+    reviewedAt: product.reviewedAt,
+    reviewedBy: product.reviewedBy,
+    rejectionReason: product.rejectionReason,
+    sales: product.sales,
+    views: product.views,
+  };
+}
+
 export function ProductsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [actionDialog, setActionDialog] = useState<{
-    isOpen: boolean;
-    type: "delete" | "approve" | "reject" | "edit";
-    product?: Product;
-  }>({ isOpen: false, type: "delete" });
+  const [editState, setEditState] = useState<{ open: boolean; product?: Product }>({ open: false });
 
   // Mock data - em produção viria de uma API
-  const products: Product[] = [
+  const [products, setProducts] = useState<Product[]>([
     {
       id: "1",
       name: "Decoração Rústica Completa",
@@ -480,7 +554,7 @@ export function ProductsManagement() {
       sales: 0,
       views: 67,
     },
-  ];
+  ]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -502,7 +576,13 @@ export function ProductsManagement() {
     handleAction: (
       type: "delete" | "approve" | "reject" | "edit",
       product: Product
-    ) => setActionDialog({ isOpen: true, type, product }),
+    ) => {
+      if (type === "edit") {
+        setEditState({ open: true, product });
+      } else {
+        setActionDialog({ isOpen: true, type, product });
+      }
+    },
     getStatusBadge: (status: string) => {
       switch (status) {
         case "pending":
@@ -565,25 +645,30 @@ export function ProductsManagement() {
     },
   };
 
+  const [actionDialog, setActionDialog] = useState<{
+    isOpen: boolean;
+    type: "delete" | "approve" | "reject" | "edit";
+    product?: Product;
+  }>({ isOpen: false, type: "delete" });
+
   const confirmAction = (reason?: string) => {
     const { type, product } = actionDialog;
     if (!product) return;
     // Aqui você implementaria a lógica real da API
     switch (type) {
       case "delete":
-        console.log("Excluindo produto:", product.id, "Motivo:", reason);
+        setProducts((prev) => prev.filter((p) => p.id !== product.id));
         break;
       case "approve":
-        console.log("Aprovando produto:", product.id);
+        setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, status: "approved" } : p));
         break;
       case "reject":
-        console.log("Rejeitando produto:", product.id, "Motivo:", reason);
-        break;
-      case "edit":
-        console.log("Editando produto:", product.id);
+        setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, status: "rejected", rejectionReason: reason } : p));
         break;
     }
   };
+
+  // Removido: handleSaveProduct (não é mais usado)
 
   const totalProducts = products.length;
   const pendingProducts = products.filter((p) => p.status === "pending").length;
@@ -610,24 +695,38 @@ export function ProductsManagement() {
         categoryFilter={categoryFilter}
         setCategoryFilter={handlers.setCategoryFilter}
       />
-      <ProductsListPanel
-        products={filteredProducts}
-        getTypeBadge={handlers.getTypeBadge}
-        getStatusBadge={handlers.getStatusBadge}
-        handleAction={handlers.handleAction}
-      />
-      {filteredProducts.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Nenhum produto encontrado
-            </h3>
-            <p className="text-gray-500">
-              Não encontramos produtos que correspondam aos seus filtros.
-            </p>
-          </CardContent>
-        </Card>
+      {editState.open && editState.product ? (
+        <ProductPreviewPage
+          mode="edit"
+          initialProduct={toPreviewProduct(editState.product)}
+          onSave={(data) => {
+            setProducts((prev) => prev.map((p) => p.id === data.id ? fromPreviewProduct(data) : p));
+            setEditState({ open: false });
+          }}
+          onCancel={() => setEditState({ open: false })}
+        />
+      ) : (
+        <>
+          <ProductsListPanel
+            products={filteredProducts}
+            getTypeBadge={handlers.getTypeBadge}
+            getStatusBadge={handlers.getStatusBadge}
+            handleAction={handlers.handleAction}
+          />
+          {filteredProducts.length === 0 && (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Nenhum produto encontrado
+                </h3>
+                <p className="text-gray-500">
+                  Não encontramos produtos que correspondam aos seus filtros.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
       <ActionDialog
         isOpen={actionDialog.isOpen}

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +16,7 @@ interface Product {
   price: number | string;
   originalPrice?: number | string;
   stock?: number | string;
-  status: "active" | "inactive" | "draft";
+  status: "active" | "inactive" | "draft" | "pending" | "approved" | "rejected";
   sales: number;
   views: number;
   rating: number;
@@ -31,6 +31,9 @@ interface Product {
   availability?: boolean;
   delivery?: boolean;
   pickup?: boolean;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  rejectionReason?: string;
 }
 
 type Mode = "add" | "edit";
@@ -39,10 +42,15 @@ interface ProductPreviewPageProps {
   mode: Mode;
   initialProduct?: Product;
   onSave?: (product: Product) => void;
+  onCancel?: () => void;
 }
 
 // Painel de preview (carrossel + tabs)
-function ProductPreviewPanel({ productData, selectedImage, setSelectedImage }: {
+function ProductPreviewPanel({
+  productData,
+  selectedImage,
+  setSelectedImage,
+}: {
   productData: Product;
   selectedImage: number;
   setSelectedImage: (idx: number) => void;
@@ -59,7 +67,11 @@ function ProductPreviewPanel({ productData, selectedImage, setSelectedImage }: {
         <Tabs
           defaultValue="description"
           className="w-full"
-          orientation={typeof window !== "undefined" && window.innerWidth < 1024 ? "vertical" : "horizontal"}
+          orientation={
+            typeof window !== "undefined" && window.innerWidth < 1024
+              ? "vertical"
+              : "horizontal"
+          }
         >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="description">Descrição</TabsTrigger>
@@ -154,25 +166,30 @@ function ProductEditPanel({
   );
 }
 
-export default function ProductPreviewPage({ mode, initialProduct, onSave }: ProductPreviewPageProps) {
+export default function ProductPreviewPage({
+  mode,
+  initialProduct,
+  onSave,
+  onCancel,
+}: ProductPreviewPageProps) {
   const [productData, setProductData] = useState<Product>(
     initialProduct || {
-      id: '',
-      name: '',
-      description: '',
-      category: '',
-      type: '',
-      price: '',
-      originalPrice: '',
-      stock: '',
-      status: 'active',
+      id: "",
+      name: "",
+      description: "",
+      category: "",
+      type: "",
+      price: "",
+      originalPrice: "",
+      stock: "",
+      status: "active",
       sales: 0,
       views: 0,
       rating: 0,
-      createdAt: '',
-      image: '',
-      vendor: { name: '', id: '' },
-      features: [''],
+      createdAt: "",
+      image: "",
+      vendor: { name: "", id: "" },
+      features: [""],
       images: [],
       availability: true,
       delivery: false,
@@ -208,7 +225,10 @@ export default function ProductPreviewPage({ mode, initialProduct, onSave }: Pro
       }));
     },
     handleImageUpload: (files: FileList) => {
-      const newImages = Array.from(files).slice(0, 5 - productData.images.length);
+      const newImages = Array.from(files).slice(
+        0,
+        5 - productData.images.length
+      );
       setProductData((prev) => ({
         ...prev,
         images: [...prev.images, ...newImages],
@@ -255,6 +275,15 @@ export default function ProductPreviewPage({ mode, initialProduct, onSave }: Pro
           removeImage={handlers.removeImage}
           onSave={onSave}
         />
+        {onCancel && (
+          <button
+            type="button"
+            className="mt-4 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium"
+            onClick={onCancel}
+          >
+            Cancelar
+          </button>
+        )}
       </div>
     </section>
   );
