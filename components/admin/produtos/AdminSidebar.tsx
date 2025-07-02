@@ -21,7 +21,6 @@ import { usePathname } from "next/navigation";
 
 import type { TabType } from "@/types/admin-tabs";
 
-
 interface AdminSidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -65,7 +64,10 @@ const menuItems: MenuItem[] = [
   { id: "settings", label: "Configurações", icon: Settings },
 ];
 
-export function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps) {
+export function AdminSidebar({
+  sidebarOpen,
+  setSidebarOpen,
+}: AdminSidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
 
@@ -93,10 +95,20 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps)
     );
   };
 
-  const isActive = (id: string) => {
-    const route = routeMap[id];
-    if (!route) return false;
-    return pathname === route || pathname.startsWith(route + "/");
+  // Verifica se o menu principal deve estar ativo (se algum submenu está ativo)
+  const isMenuActive = (item: MenuItem) => {
+    if (!item.submenu) {
+      const route = routeMap[item.id];
+      return pathname === route;
+    }
+    // Se algum submenu está ativo
+    return item.submenu.some((sub) => pathname === routeMap[sub.id]);
+  };
+
+  // Verifica se o submenu está ativo
+  const isSubmenuActive = (subId: string) => {
+    const route = routeMap[subId];
+    return pathname === route;
   };
 
   return (
@@ -132,7 +144,7 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps)
                 <button
                   onClick={() => toggleSubmenu(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-3 text-left rounded-lg transition-colors ${
-                    isActive(item.id)
+                    isMenuActive(item)
                       ? "bg-red-50 text-red-600 border-r-2 border-red-500"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
@@ -153,7 +165,7 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps)
                 <Link
                   href={routeMap[item.id]}
                   className={`w-full flex items-center justify-between px-3 py-3 rounded-lg transition-colors ${
-                    isActive(item.id)
+                    isMenuActive(item)
                       ? "bg-red-50 text-red-600 border-r-2 border-red-500"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
@@ -176,7 +188,7 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps)
                         key={subItem.id}
                         href={routeMap[subItem.id]}
                         className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors text-sm ${
-                          isActive(subItem.id)
+                          isSubmenuActive(subItem.id)
                             ? "bg-red-100 text-red-700 font-medium border-l-2 border-red-500"
                             : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                         }`}
