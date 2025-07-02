@@ -2,7 +2,7 @@
 import { AdminOverviewContent } from "@/components/admin/dashboard/AdminOverviewContent";
 import { ProductsManagement } from "@/components/admin/dashboard/products-management";
 import { UsersManagement } from "@/components/admin/dashboard/users-management";
-import { AdminAnalyticsContent } from "@/components/admin/dashboard/AdminAnalyticsContent";
+import { AdminAnalyticsContent } from "@/components/admin/dashboard/analytics-content";
 import { SiteSettings } from "@/components/admin/dashboard/site-settings";
 import { useState } from "react"
 import { AdminSidebar } from "@/components/admin/dashboard/AdminSidebar"
@@ -13,7 +13,7 @@ import { Menu } from "lucide-react"
 import type { TabType } from "@/types/admin-tabs";
 
 interface Category {
-  id?: string
+  id: string
   name: string
   description: string
   status: "active" | "inactive"
@@ -77,9 +77,9 @@ export default function AdminDashboard() {
   }
 
   const handleEditProduct = (product: Product) => {
-    setEditingProduct(product)
-    // Aqui você pode navegar para a página de edição de produto
-    console.log("Edit product:", product)
+    setEditingProduct(product);
+    setActiveTab("products-edit");
+    console.log("Edit product:", product);
   }
 
   const handleAddProduct = () => {
@@ -104,15 +104,29 @@ export default function AdminDashboard() {
       case "products-edit": {
         const ProductPreviewPage = require("@/components/shared/product-preview-page").default;
         return (
-          <ProductPreviewPage mode="edit" initialProduct={editingProduct || undefined} />
+          <ProductPreviewPage 
+            mode="edit" 
+            initialProduct={editingProduct || undefined} 
+            onCancel={() => setActiveTab("products-list")}
+          />
         );
       }
 
-
       case "categories-list":
+        return <CategoriesManagement mode="list" onEditCategory={handleEditCategory} onAddCategory={handleAddCategory} />
       case "categories-add":
+        return <CategoriesManagement mode="add" onSaveCategory={handleSaveCategory} onCancel={handleCancelCategoryForm} />
       case "categories-edit":
-        return <CategoriesManagement />
+        return <CategoriesManagement 
+          mode="edit" 
+          category={editingCategory ? { 
+            ...editingCategory, 
+            productsCount: editingCategory.productsCount ?? 0, 
+            createdAt: editingCategory.createdAt ?? "" 
+          } : undefined}
+          onSaveCategory={handleSaveCategory} 
+          onCancel={handleCancelCategoryForm} 
+        />
       case "users":
         return <UsersManagement />
       case "analytics":
