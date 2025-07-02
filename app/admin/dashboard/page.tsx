@@ -4,21 +4,11 @@ import { ProductsManagement } from "@/components/admin/dashboard/products-manage
 import { UsersManagement } from "@/components/admin/dashboard/users-management";
 import { AdminAnalyticsContent } from "@/components/admin/dashboard/AdminAnalyticsContent";
 import { SiteSettings } from "@/components/admin/dashboard/site-settings";
-
 import { useState } from "react"
 import { AdminSidebar } from "@/components/admin/dashboard/AdminSidebar"
-import { CategoriesList } from "@/components/admin/dashboard/categories/categories-list"
-import { CategoryForm } from "@/components/admin/dashboard/categories/category-form"
-import ProductPreviewPanelAdd from "@/components/shared/product-preview-panel-add";
-import ProductPreviewPanelEdit from "@/components/shared/product-preview-panel-edit";
-import ProductImageCarousel from "@/components/shared/product-image-carousel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// O ProductsTab está definido neste próprio arquivo, não precisa importar
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { CategoriesManagement } from "@/components/admin/dashboard/categories/categories-management"
 import { Button } from "@/components/ui/button"
-import { DollarSign, Users, Package, ShoppingBag, TrendingUp, Menu } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import type { TabType } from "@/types/admin-tabs";
 
@@ -117,40 +107,18 @@ export default function AdminDashboard() {
           <ProductPreviewPage mode="edit" initialProduct={editingProduct || undefined} />
         );
       }
+
+
       case "categories-list":
-        return <CategoriesList onEdit={handleEditCategory} onAdd={handleAddCategory} />
       case "categories-add":
-        return <CategoryForm onSave={handleSaveCategory} onCancel={handleCancelCategoryForm} isEditing={false} />
       case "categories-edit":
-        return (
-          <CategoryForm
-            category={editingCategory || undefined}
-            onSave={handleSaveCategory}
-            onCancel={handleCancelCategoryForm}
-            isEditing={true}
-          />
-        )
+        return <CategoriesManagement />
       case "users":
         return <UsersManagement />
       case "analytics":
         return <AdminAnalyticsContent />
       case "settings":
         return <SiteSettings />
-      case "categories-list":
-        return <CategoriesList onEdit={handleEditCategory} onAdd={handleAddCategory} />
-
-      case "categories-add":
-        return <CategoryForm onSave={handleSaveCategory} onCancel={handleCancelCategoryForm} isEditing={false} />
-
-      case "categories-edit":
-        return (
-          <CategoryForm
-            category={editingCategory || undefined}
-            onSave={handleSaveCategory}
-            onCancel={handleCancelCategoryForm}
-            isEditing={true}
-          />
-        )
 
       default:
         return (

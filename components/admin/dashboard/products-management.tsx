@@ -1,12 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +25,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Search,
   MoreHorizontal,
@@ -30,56 +41,70 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-} from "lucide-react"
+} from "lucide-react";
 
 interface Product {
-  id: string
-  name: string
-  description: string
-  category: string
-  type: "venda" | "locacao" | "servico"
-  price: number
-  status: "pending" | "approved" | "rejected" | "active" | "inactive"
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  type: "venda" | "locacao" | "servico";
+  price: number;
+  status: "pending" | "approved" | "rejected" | "active" | "inactive";
   vendor: {
-    name: string
-    id: string
-  }
-  createdAt: string
-  reviewedAt?: string
-  reviewedBy?: string
-  rejectionReason?: string
-  sales: number
-  views: number
+    name: string;
+    id: string;
+  };
+  createdAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  rejectionReason?: string;
+  sales: number;
+  views: number;
 }
 
 interface ActionDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: (reason?: string) => void
-  title: string
-  description: string
-  actionType: "delete" | "approve" | "reject" | "edit"
-  product?: Product
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (reason?: string) => void;
+  title: string;
+  description: string;
+  actionType: "delete" | "approve" | "reject" | "edit";
+  product?: Product;
 }
 
-function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionType, product }: ActionDialogProps) {
-  const [reason, setReason] = useState("")
+function ActionDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  actionType,
+  product,
+}: ActionDialogProps) {
+  const [reason, setReason] = useState("");
 
   const handleConfirm = () => {
-    onConfirm(reason)
-    setReason("")
-    onClose()
-  }
+    onConfirm(reason);
+    setReason("");
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {actionType === "delete" && <Trash2 className="h-5 w-5 text-red-500" />}
-            {actionType === "approve" && <Check className="h-5 w-5 text-green-500" />}
+            {actionType === "delete" && (
+              <Trash2 className="h-5 w-5 text-red-500" />
+            )}
+            {actionType === "approve" && (
+              <Check className="h-5 w-5 text-green-500" />
+            )}
             {actionType === "reject" && <X className="h-5 w-5 text-red-500" />}
-            {actionType === "edit" && <Edit className="h-5 w-5 text-blue-500" />}
+            {actionType === "edit" && (
+              <Edit className="h-5 w-5 text-blue-500" />
+            )}
             {title}
           </DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -87,7 +112,9 @@ function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionTy
 
         {(actionType === "reject" || actionType === "delete") && (
           <div className="space-y-2">
-            <Label htmlFor="reason">Motivo {actionType === "reject" ? "(obrigatório)" : "(opcional)"}</Label>
+            <Label htmlFor="reason">
+              Motivo {actionType === "reject" ? "(obrigatório)" : "(opcional)"}
+            </Label>
             <Textarea
               id="reason"
               placeholder={`Descreva o motivo para ${actionType === "reject" ? "rejeitar" : "excluir"} este produto...`}
@@ -121,12 +148,21 @@ function ActionDialog({ isOpen, onClose, onConfirm, title, description, actionTy
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-
 // Painel de estatísticas
-function ProductsStatsPanel({ total, pending, approved, rejected }: { total: number; pending: number; approved: number; rejected: number }) {
+function ProductsStatsPanel({
+  total,
+  pending,
+  approved,
+  rejected,
+}: {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <Card>
@@ -178,7 +214,14 @@ function ProductsStatsPanel({ total, pending, approved, rejected }: { total: num
 }
 
 // Painel de filtros
-function ProductsFilterPanel({ searchTerm, setSearchTerm, statusFilter, setStatusFilter, categoryFilter, setCategoryFilter }: any) {
+function ProductsFilterPanel({
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  categoryFilter,
+  setCategoryFilter,
+}: any) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
       <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -210,8 +253,12 @@ function ProductsFilterPanel({ searchTerm, setSearchTerm, statusFilter, setStatu
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as categorias</SelectItem>
-            <SelectItem value="decoracao-infantil">Decoração Infantil</SelectItem>
-            <SelectItem value="decoracao-casamento">Decoração Casamento</SelectItem>
+            <SelectItem value="decoracao-infantil">
+              Decoração Infantil
+            </SelectItem>
+            <SelectItem value="decoracao-casamento">
+              Decoração Casamento
+            </SelectItem>
             <SelectItem value="buffet">Buffet</SelectItem>
             <SelectItem value="som">Som</SelectItem>
             <SelectItem value="fotografia">Fotografia</SelectItem>
@@ -224,7 +271,12 @@ function ProductsFilterPanel({ searchTerm, setSearchTerm, statusFilter, setStatu
 }
 
 // Painel de lista de produtos
-function ProductsListPanel({ products, getTypeBadge, getStatusBadge, handleAction }: any) {
+function ProductsListPanel({
+  products,
+  getTypeBadge,
+  getStatusBadge,
+  handleAction,
+}: any) {
   return (
     <Card>
       <CardHeader>
@@ -251,27 +303,40 @@ function ProductsListPanel({ products, getTypeBadge, getStatusBadge, handleActio
                   <td className="p-3">
                     <div>
                       <div className="font-medium">{product.name}</div>
-                      <div className="text-sm text-gray-500 max-w-xs truncate">{product.description}</div>
-                      {product.status === "rejected" && product.rejectionReason && (
-                        <div className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          {product.rejectionReason}
-                        </div>
-                      )}
+                      <div className="text-sm text-gray-500 max-w-xs truncate">
+                        {product.description}
+                      </div>
+                      {product.status === "rejected" &&
+                        product.rejectionReason && (
+                          <div className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                            <AlertTriangle className="h-3 w-3" />
+                            {product.rejectionReason}
+                          </div>
+                        )}
                     </div>
                   </td>
                   <td className="p-3">{product.vendor.name}</td>
-                  <td className="p-3 capitalize">{product.category.replace("-", " ")}</td>
+                  <td className="p-3 capitalize">
+                    {product.category.replace("-", " ")}
+                  </td>
                   <td className="p-3">{getTypeBadge(product.type)}</td>
                   <td className="p-3 font-medium">
-                    {product.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {product.price.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                   </td>
                   <td className="p-3">{getStatusBadge(product.status)}</td>
                   <td className="p-3">
-                    <div className="text-sm">{new Date(product.createdAt).toLocaleDateString("pt-BR")}</div>
+                    <div className="text-sm">
+                      {new Date(product.createdAt).toLocaleDateString("pt-BR")}
+                    </div>
                     {product.reviewedAt && (
                       <div className="text-xs text-gray-500">
-                        Revisado em {new Date(product.reviewedAt).toLocaleDateString("pt-BR")}
+                        Revisado em{" "}
+                        {new Date(product.reviewedAt).toLocaleDateString(
+                          "pt-BR"
+                        )}
                       </div>
                     )}
                   </td>
@@ -305,11 +370,16 @@ function ProductsListPanel({ products, getTypeBadge, getStatusBadge, handleActio
                             </DropdownMenuItem>
                           </>
                         )}
-                        <DropdownMenuItem onClick={() => handleAction("edit", product)}>
+                        <DropdownMenuItem
+                          onClick={() => handleAction("edit", product)}
+                        >
                           <Edit className="h-4 w-4 mr-2" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleAction("delete", product)} className="text-red-600">
+                        <DropdownMenuItem
+                          onClick={() => handleAction("delete", product)}
+                          className="text-red-600"
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
                         </DropdownMenuItem>
@@ -417,8 +487,10 @@ export function ProductsManagement() {
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || product.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+    const matchesStatus =
+      statusFilter === "all" || product.status === statusFilter;
+    const matchesCategory =
+      categoryFilter === "all" || product.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
@@ -427,19 +499,42 @@ export function ProductsManagement() {
     setSearchTerm,
     setStatusFilter,
     setCategoryFilter,
-    handleAction: (type: "delete" | "approve" | "reject" | "edit", product: Product) => setActionDialog({ isOpen: true, type, product }),
+    handleAction: (
+      type: "delete" | "approve" | "reject" | "edit",
+      product: Product
+    ) => setActionDialog({ isOpen: true, type, product }),
     getStatusBadge: (status: string) => {
       switch (status) {
         case "pending":
-          return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pendente</Badge>;
+          return (
+            <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+              Pendente
+            </Badge>
+          );
         case "approved":
-          return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Aprovado</Badge>;
+          return (
+            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+              Aprovado
+            </Badge>
+          );
         case "rejected":
-          return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Rejeitado</Badge>;
+          return (
+            <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+              Rejeitado
+            </Badge>
+          );
         case "active":
-          return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Ativo</Badge>;
+          return (
+            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+              Ativo
+            </Badge>
+          );
         case "inactive":
-          return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Inativo</Badge>;
+          return (
+            <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+              Inativo
+            </Badge>
+          );
         default:
           return <Badge variant="outline">{status}</Badge>;
       }
@@ -447,11 +542,23 @@ export function ProductsManagement() {
     getTypeBadge: (type: string) => {
       switch (type) {
         case "venda":
-          return <Badge variant="outline" className="bg-blue-50 text-blue-700">Venda</Badge>;
+          return (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700">
+              Venda
+            </Badge>
+          );
         case "locacao":
-          return <Badge variant="outline" className="bg-purple-50 text-purple-700">Locação</Badge>;
+          return (
+            <Badge variant="outline" className="bg-purple-50 text-purple-700">
+              Locação
+            </Badge>
+          );
         case "servico":
-          return <Badge variant="outline" className="bg-orange-50 text-orange-700">Serviço</Badge>;
+          return (
+            <Badge variant="outline" className="bg-orange-50 text-orange-700">
+              Serviço
+            </Badge>
+          );
         default:
           return <Badge variant="outline">{type}</Badge>;
       }
@@ -480,12 +587,21 @@ export function ProductsManagement() {
 
   const totalProducts = products.length;
   const pendingProducts = products.filter((p) => p.status === "pending").length;
-  const approvedProducts = products.filter((p) => p.status === "approved" || p.status === "active").length;
-  const rejectedProducts = products.filter((p) => p.status === "rejected").length;
+  const approvedProducts = products.filter(
+    (p) => p.status === "approved" || p.status === "active"
+  ).length;
+  const rejectedProducts = products.filter(
+    (p) => p.status === "rejected"
+  ).length;
 
   return (
     <div className="space-y-6">
-      <ProductsStatsPanel total={totalProducts} pending={pendingProducts} approved={approvedProducts} rejected={rejectedProducts} />
+      <ProductsStatsPanel
+        total={totalProducts}
+        pending={pendingProducts}
+        approved={approvedProducts}
+        rejected={rejectedProducts}
+      />
       <ProductsFilterPanel
         searchTerm={searchTerm}
         setSearchTerm={handlers.setSearchTerm}
@@ -504,8 +620,12 @@ export function ProductsManagement() {
         <Card>
           <CardContent className="p-12 text-center">
             <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum produto encontrado</h3>
-            <p className="text-gray-500">Não encontramos produtos que correspondam aos seus filtros.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Nenhum produto encontrado
+            </h3>
+            <p className="text-gray-500">
+              Não encontramos produtos que correspondam aos seus filtros.
+            </p>
           </CardContent>
         </Card>
       )}
