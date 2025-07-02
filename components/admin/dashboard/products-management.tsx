@@ -41,6 +41,9 @@ import {
   CheckCircle,
   XCircle,
   Eye,
+  Grid3X3,
+  List,
+  Plus,
 } from "lucide-react";
 
 interface Product {
@@ -61,6 +64,8 @@ interface Product {
   rejectionReason?: string;
   sales: number;
   views: number;
+  rating?: number;
+  totalReviews?: number;
 }
 
 interface ActionDialogProps {
@@ -221,6 +226,11 @@ function ProductsFilterPanel({
   setStatusFilter,
   categoryFilter,
   setCategoryFilter,
+  typeFilter,
+  setTypeFilter,
+  viewMode,
+  setViewMode,
+  onAddProduct,
 }: any) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -234,6 +244,7 @@ function ProductsFilterPanel({
             className="pl-10"
           />
         </div>
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-40">
             <SelectValue placeholder="Status" />
@@ -247,30 +258,69 @@ function ProductsFilterPanel({
             <SelectItem value="inactive">Inativo</SelectItem>
           </SelectContent>
         </Select>
+
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Categoria" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as categorias</SelectItem>
-            <SelectItem value="decoracao-infantil">
-              Decoração Infantil
-            </SelectItem>
-            <SelectItem value="decoracao-casamento">
-              Decoração Casamento
-            </SelectItem>
+            <SelectItem value="decoracao-infantil">Decoração Infantil</SelectItem>
+            <SelectItem value="decoracao-casamento">Decoração Casamento</SelectItem>
             <SelectItem value="buffet">Buffet</SelectItem>
             <SelectItem value="som">Som</SelectItem>
             <SelectItem value="fotografia">Fotografia</SelectItem>
             <SelectItem value="iluminacao">Iluminação</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-full sm:w-32">
+            <SelectValue placeholder="Tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="venda">Venda</SelectItem>
+            <SelectItem value="locacao">Locação</SelectItem>
+            <SelectItem value="servico">Serviço</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex gap-2">
+        <div className="flex border rounded-lg">
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="rounded-r-none"
+          >
+            <Grid3X3 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "table" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("table")}
+            className="rounded-l-none"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Button
+          onClick={onAddProduct}
+          className="bg-fest-primary hover:bg-fest-primary/90 text-fest-black2"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Produto
+        </Button>
       </div>
     </div>
   );
 }
 
-// Painel de lista de produtos
+
+// Painel de lista de produtos (tabela)
 function ProductsListPanel({
   products,
   getTypeBadge,
@@ -348,7 +398,9 @@ function ProductsListPanel({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleAction("details", product)}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           Ver Detalhes
                         </DropdownMenuItem>
@@ -396,8 +448,111 @@ function ProductsListPanel({
   );
 }
 
+// Painel de produtos em grid
+function ProductsGridPanel({
+  products,
+  getTypeBadge,
+  getStatusBadge,
+  handleAction,
+}: any) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Produtos</h2>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.map((product: any) => (
+          <Card key={product.id} className="flex flex-col h-full">
+            <div className="relative h-40 w-full bg-gray-100 rounded-t-lg flex items-center justify-center overflow-hidden">
+              {/* Imagem do produto (placeholder) */}
+              <Package className="h-16 w-16 text-gray-300" />
+              {product.status === "rejected" && product.rejectionReason && (
+                <div className="absolute bottom-0 left-0 right-0 bg-red-50 bg-opacity-90 text-xs text-red-700 px-2 py-1 flex items-center gap-1 border-t border-red-200">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span className="truncate">{product.rejectionReason}</span>
+                </div>
+              )}
+            </div>
+            <CardContent className="flex-1 flex flex-col p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-base line-clamp-1" title={product.name}>{product.name}</span>
+                {getStatusBadge(product.status)}
+              </div>
+              <div className="text-xs text-gray-500 mb-1 line-clamp-2" title={product.description}>{product.description}</div>
+              <div className="flex items-center gap-2 mb-2">
+                {getTypeBadge(product.type)}
+                <span className="capitalize text-xs text-gray-400">{product.category.replace("-", " ")}</span>
+              </div>
+              <div className="font-bold text-fest-primary text-lg mb-2">
+                {product.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              </div>
+              <div className="flex-1" />
+              <div className="flex gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAction("details", product)}
+                  className="flex-1"
+                >
+                  <Eye className="h-4 w-4 mr-1" /> Detalhes
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {product.status === "pending" && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => handleAction("approve", product)}
+                          className="text-green-600"
+                        >
+                          <Check className="h-4 w-4 mr-2" /> Aprovar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleAction("reject", product)}
+                          className="text-red-600"
+                        >
+                          <X className="h-4 w-4 mr-2" /> Rejeitar
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => handleAction("edit", product)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" /> Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleAction("delete", product)}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 import dynamic from "next/dynamic";
-const ProductPreviewPage = dynamic(() => import("@/components/shared/product-preview-page"), { ssr: false });
+const ProductPreviewPage = dynamic(
+  () => import("@/components/shared/product-preview-page"),
+  { ssr: false }
+);
+const ProductDetailsModal = dynamic(
+  () =>
+    import("@/components/admin/dashboard/product-details-modal").then(
+      (mod) => mod.ProductDetailsModal
+    ),
+  { ssr: false }
+);
 
 // Conversão para o formato do ProductPreviewPage
 import type { ComponentType } from "react";
@@ -434,8 +589,15 @@ function toPreviewProduct(product: Product): PreviewProduct {
     description: product.description,
     category: product.category,
     type: product.type || "venda",
-    price: product.price !== undefined && product.price !== null ? String(product.price) : "",
-    originalPrice: (product as any).originalPrice !== undefined && (product as any).originalPrice !== null ? String((product as any).originalPrice) : "",
+    price:
+      product.price !== undefined && product.price !== null
+        ? String(product.price)
+        : "",
+    originalPrice:
+      (product as any).originalPrice !== undefined &&
+      (product as any).originalPrice !== null
+        ? String((product as any).originalPrice)
+        : "",
     stock: "",
     status: (product.status as any) || "active",
     sales: product.sales ?? 0,
@@ -461,9 +623,17 @@ function fromPreviewProduct(product: PreviewProduct): Product {
     name: product.name,
     description: product.description,
     category: product.category,
-    type: product.type === "" ? "venda" : (product.type as "venda" | "locacao" | "servico"),
-    price: typeof product.price === "string" ? Number(product.price) : product.price,
-    status: ["pending", "approved", "rejected", "active", "inactive"].includes(product.status) ? (product.status as any) : "active",
+    type:
+      product.type === ""
+        ? "venda"
+        : (product.type as "venda" | "locacao" | "servico"),
+    price:
+      typeof product.price === "string" ? Number(product.price) : product.price,
+    status: ["pending", "approved", "rejected", "active", "inactive"].includes(
+      product.status
+    )
+      ? (product.status as any)
+      : "active",
     vendor: product.vendor,
     createdAt: product.createdAt,
     reviewedAt: product.reviewedAt,
@@ -478,7 +648,14 @@ export function ProductsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [editState, setEditState] = useState<{ open: boolean; product?: Product }>({ open: false });
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [editState, setEditState] = useState<{ open: boolean; product?: Product }>(
+    { open: false }
+  );
+  const [detailsState, setDetailsState] = useState<{ open: boolean; product?: Product }>(
+    { open: false }
+  );
 
   // Mock data - em produção viria de uma API
   const [products, setProducts] = useState<Product[]>([
@@ -494,6 +671,8 @@ export function ProductsManagement() {
       createdAt: "2024-01-20",
       sales: 0,
       views: 45,
+      rating: 4.7,
+      totalReviews: 12,
     },
     {
       id: "2",
@@ -509,6 +688,8 @@ export function ProductsManagement() {
       reviewedBy: "Admin",
       sales: 8,
       views: 156,
+      rating: 4.9,
+      totalReviews: 22,
     },
     {
       id: "3",
@@ -524,6 +705,8 @@ export function ProductsManagement() {
       reviewedBy: "Admin",
       sales: 15,
       views: 320,
+      rating: 4.5,
+      totalReviews: 30,
     },
     {
       id: "4",
@@ -540,6 +723,8 @@ export function ProductsManagement() {
       rejectionReason: "Conteúdo inadequado nas imagens de exemplo",
       sales: 0,
       views: 23,
+      rating: 2.0,
+      totalReviews: 2,
     },
     {
       id: "5",
@@ -553,6 +738,8 @@ export function ProductsManagement() {
       createdAt: "2024-01-10",
       sales: 0,
       views: 67,
+      rating: 4.2,
+      totalReviews: 5,
     },
   ]);
 
@@ -565,7 +752,9 @@ export function ProductsManagement() {
       statusFilter === "all" || product.status === statusFilter;
     const matchesCategory =
       categoryFilter === "all" || product.category === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
+    const matchesType =
+      typeFilter === "all" || product.type === typeFilter;
+    return matchesSearch && matchesStatus && matchesCategory && matchesType;
   });
 
   // Handlers agrupados
@@ -573,12 +762,15 @@ export function ProductsManagement() {
     setSearchTerm,
     setStatusFilter,
     setCategoryFilter,
+    setTypeFilter,
     handleAction: (
-      type: "delete" | "approve" | "reject" | "edit",
+      type: "delete" | "approve" | "reject" | "edit" | "details",
       product: Product
     ) => {
       if (type === "edit") {
         setEditState({ open: true, product });
+      } else if (type === "details") {
+        setDetailsState({ open: true, product });
       } else {
         setActionDialog({ isOpen: true, type, product });
       }
@@ -660,10 +852,20 @@ export function ProductsManagement() {
         setProducts((prev) => prev.filter((p) => p.id !== product.id));
         break;
       case "approve":
-        setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, status: "approved" } : p));
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === product.id ? { ...p, status: "approved" } : p
+          )
+        );
         break;
       case "reject":
-        setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, status: "rejected", rejectionReason: reason } : p));
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === product.id
+              ? { ...p, status: "rejected", rejectionReason: reason }
+              : p
+          )
+        );
         break;
     }
   };
@@ -687,32 +889,114 @@ export function ProductsManagement() {
         approved={approvedProducts}
         rejected={rejectedProducts}
       />
-      <ProductsFilterPanel
-        searchTerm={searchTerm}
-        setSearchTerm={handlers.setSearchTerm}
-        statusFilter={statusFilter}
-        setStatusFilter={handlers.setStatusFilter}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={handlers.setCategoryFilter}
-      />
+      {/* Controles e filtros */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-4 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Buscar produtos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="pending">Pendente</SelectItem>
+              <SelectItem value="approved">Aprovado</SelectItem>
+              <SelectItem value="rejected">Rejeitado</SelectItem>
+              <SelectItem value="active">Ativo</SelectItem>
+              <SelectItem value="inactive">Inativo</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              <SelectItem value="decoracao-infantil">Decoração Infantil</SelectItem>
+              <SelectItem value="decoracao-casamento">Decoração Casamento</SelectItem>
+              <SelectItem value="buffet">Buffet</SelectItem>
+              <SelectItem value="som">Som</SelectItem>
+              <SelectItem value="fotografia">Fotografia</SelectItem>
+              <SelectItem value="iluminacao">Iluminação</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-32">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="venda">Venda</SelectItem>
+              <SelectItem value="locacao">Locação</SelectItem>
+              <SelectItem value="servico">Serviço</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <div className="flex border rounded-lg">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="rounded-r-none"
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="rounded-l-none"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button
+            onClick={() => setEditState({ open: true, product: undefined })}
+            className="bg-fest-primary hover:bg-fest-primary/90 text-fest-black2"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Produto
+          </Button>
+        </div>
+      </div>
       {editState.open && editState.product ? (
         <ProductPreviewPage
           mode="edit"
           initialProduct={toPreviewProduct(editState.product)}
           onSave={(data) => {
-            setProducts((prev) => prev.map((p) => p.id === data.id ? fromPreviewProduct(data) : p));
+            setProducts((prev) =>
+              prev.map((p) => (p.id === data.id ? fromPreviewProduct(data) : p))
+            );
             setEditState({ open: false });
           }}
           onCancel={() => setEditState({ open: false })}
         />
       ) : (
         <>
-          <ProductsListPanel
-            products={filteredProducts}
-            getTypeBadge={handlers.getTypeBadge}
-            getStatusBadge={handlers.getStatusBadge}
-            handleAction={handlers.handleAction}
-          />
+          {viewMode === "table" ? (
+            <ProductsListPanel
+              products={filteredProducts}
+              getTypeBadge={handlers.getTypeBadge}
+              getStatusBadge={handlers.getStatusBadge}
+              handleAction={handlers.handleAction}
+            />
+          ) : (
+            <ProductsGridPanel
+              products={filteredProducts}
+              getTypeBadge={handlers.getTypeBadge}
+              getStatusBadge={handlers.getStatusBadge}
+              handleAction={handlers.handleAction}
+            />
+          )}
           {filteredProducts.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
@@ -728,6 +1012,27 @@ export function ProductsManagement() {
           )}
         </>
       )}
+      {/* Modal de detalhes do produto */}
+      <ProductDetailsModal
+        product={
+          detailsState.product
+            ? {
+                ...detailsState.product,
+                rating: detailsState.product.rating ?? 0,
+                totalReviews: detailsState.product.totalReviews ?? 0,
+              }
+            : null
+        }
+        isOpen={detailsState.open}
+        onClose={() => setDetailsState({ open: false })}
+        onEdit={(product) => {
+          setDetailsState({ open: false });
+          setEditState({ open: true, product });
+        }}
+        onApprove={(product) => handlers.handleAction("approve", product)}
+        onReject={(product) => handlers.handleAction("reject", product)}
+        onDelete={(product) => handlers.handleAction("delete", product)}
+      />
       <ActionDialog
         isOpen={actionDialog.isOpen}
         onClose={() => setActionDialog({ isOpen: false, type: "delete" })}
