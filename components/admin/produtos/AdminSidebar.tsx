@@ -16,12 +16,13 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import type { TabType } from "@/types/admin-tabs";
 
+
 interface AdminSidebarProps {
-  activeTab: TabType;
-  setActiveTab: (tab: TabType) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 }
@@ -64,14 +65,25 @@ const menuItems: MenuItem[] = [
   { id: "settings", label: "Configurações", icon: Settings },
 ];
 
-export function AdminSidebar({
-  activeTab,
-  setActiveTab,
-  sidebarOpen,
-  setSidebarOpen,
-}: AdminSidebarProps) {
-  // Estado inicial sempre igual entre SSR e client
+export function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+  const pathname = usePathname();
+
+  // Mapeamento de ids para rotas
+  const routeMap: Record<string, string> = {
+    overview: "/admin/dashboard/overview",
+    users: "/admin/dashboard/users",
+    products: "/admin/dashboard/products",
+    "products-list": "/admin/dashboard/products",
+    "products-add": "/admin/dashboard/products/add",
+    "products-edit": "/admin/dashboard/products/edit",
+    analytics: "/admin/dashboard/analytics",
+    categories: "/admin/dashboard/categories",
+    "categories-list": "/admin/dashboard/categories",
+    "categories-add": "/admin/dashboard/categories/add",
+    "categories-edit": "/admin/dashboard/categories/edit",
+    settings: "/admin/dashboard/settings",
+  };
 
   const toggleSubmenu = (menuId: string) => {
     setExpandedMenus((prev) =>
@@ -81,24 +93,10 @@ export function AdminSidebar({
     );
   };
 
-  const handleMenuClick = (item: MenuItem) => {
-    if (item.submenu) {
-      toggleSubmenu(item.id);
-    } else {
-      setActiveTab(item.id as TabType);
-      setSidebarOpen(false);
-    }
-  };
-
-  const handleSubmenuClick = (submenuId: string) => {
-    setActiveTab(submenuId as TabType);
-    setSidebarOpen(false);
-  };
-
-  const isSubmenuActive = (parentId: string) => {
-    const parentItem = menuItems.find((item) => item.id === parentId);
-    if (!parentItem?.submenu) return false;
-    return parentItem.submenu.some((sub) => sub.id === activeTab);
+  const isActive = (id: string) => {
+    const route = routeMap[id];
+    if (!route) return false;
+    return pathname === route || pathname.startsWith(route + "/");
   };
 
   return (
@@ -126,24 +124,23 @@ export function AdminSidebar({
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isExpanded = expandedMenus.includes(item.id);
-          const isActive = activeTab === item.id || isSubmenuActive(item.id);
-
+          const hasSubmenu = !!item.submenu;
           return (
             <div key={item.id} className="mb-1">
               {/* Menu Principal */}
-              <button
-                onClick={() => handleMenuClick(item)}
-                className={`w-full flex items-center justify-between px-3 py-3 text-left rounded-lg transition-colors ${
-                  isActive
-                    ? "bg-red-50 text-red-600 border-r-2 border-red-500"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-              >
-                <div className="flex items-center">
-                  <Icon className="h-5 w-5 mr-3" />
-                  {item.label}
-                </div>
-                {item.submenu && (
+              {hasSubmenu ? (
+                <button
+                  onClick={() => toggleSubmenu(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-3 text-left rounded-lg transition-colors ${
+                    isActive(item.id)
+                      ? "bg-red-50 text-red-600 border-r-2 border-red-500"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <Icon className="h-5 w-5 mr-3" />
+                    {item.label}
+                  </div>
                   <div className="ml-auto">
                     {isExpanded ? (
                       <ChevronDown className="h-4 w-4" />
@@ -151,8 +148,23 @@ export function AdminSidebar({
                       <ChevronRight className="h-4 w-4" />
                     )}
                   </div>
-                )}
-              </button>
+                </button>
+              ) : (
+                <Link
+                  href={routeMap[item.id]}
+                  className={`w-full flex items-center justify-between px-3 py-3 rounded-lg transition-colors ${
+                    isActive(item.id)
+                      ? "bg-red-50 text-red-600 border-r-2 border-red-500"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <div className="flex items-center">
+                    <Icon className="h-5 w-5 mr-3" />
+                    {item.label}
+                  </div>
+                </Link>
+              )}
 
               {/* Submenu */}
               {item.submenu && isExpanded && (
@@ -160,18 +172,19 @@ export function AdminSidebar({
                   {item.submenu.map((subItem) => {
                     const SubIcon = subItem.icon;
                     return (
-                      <button
+                      <Link
                         key={subItem.id}
-                        onClick={() => handleSubmenuClick(subItem.id)}
-                        className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors text-sm ${
-                          activeTab === subItem.id
+                        href={routeMap[subItem.id]}
+                        className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors text-sm ${
+                          isActive(subItem.id)
                             ? "bg-red-100 text-red-700 font-medium border-l-2 border-red-500"
                             : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                         }`}
+                        onClick={() => setSidebarOpen(false)}
                       >
                         <SubIcon className="h-4 w-4 mr-3" />
                         {subItem.label}
-                      </button>
+                      </Link>
                     );
                   })}
                 </div>
