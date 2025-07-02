@@ -1,4 +1,3 @@
-
 "use client";
 import type React from "react";
 import { AdminSidebar } from "@/components/admin/produtos/AdminSidebar";
@@ -6,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
