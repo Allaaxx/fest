@@ -6,7 +6,13 @@ import { CategoryForm } from "./category-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Package, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export interface Category {
   id: string;
@@ -78,18 +84,23 @@ export function CategoriesManagement({
   // Handlers agrupados (apenas para uso interno, se necessário)
   const handlers = {
     setSearchTerm: (value: string) => setSearchTerm(value),
-    setStatusFilter: (value: "all" | "active" | "inactive") => setStatusFilter(value),
-    onDelete: (id: string) => setCategories((prev) => prev.filter((c) => c.id !== id)),
+    setStatusFilter: (value: "all" | "active" | "inactive") =>
+      setStatusFilter(value),
+    onDelete: (id: string) =>
+      setCategories((prev) => prev.filter((c) => c.id !== id)),
   };
 
   // Filtros e busca
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
   const filteredCategories = categories.filter((category) => {
     const matchesSearch =
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || category.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || category.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -167,17 +178,36 @@ export function CategoriesManagement({
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="min-w-[120px]">
                       <Filter className="h-4 w-4 mr-2" />
-                      {statusFilter === "all" ? "Todos" : statusFilter === "active" ? "Ativo" : "Inativo"}
+                      {statusFilter === "all"
+                        ? "Todos"
+                        : statusFilter === "active"
+                          ? "Ativo"
+                          : "Inativo"}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handlers.setStatusFilter("all")}>Todos</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handlers.setStatusFilter("active")}>Ativo</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handlers.setStatusFilter("inactive")}>Inativo</DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handlers.setStatusFilter("all")}
+                    >
+                      Todos
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handlers.setStatusFilter("active")}
+                    >
+                      Ativo
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handlers.setStatusFilter("inactive")}
+                    >
+                      Inativo
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 {onAddCategory && (
-                  <Button onClick={onAddCategory} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button
+                    onClick={onAddCategory}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
                     Nova Categoria
                   </Button>
                 )}
@@ -208,8 +238,8 @@ export function CategoriesManagement({
           onCancel={onCancel ?? (() => {})}
         />
       )}
-      {mode === "edit" && (
-        category ? (
+      {mode === "edit" &&
+        (category ? (
           <CategoryForm
             category={category}
             isEditing={true}
@@ -227,13 +257,21 @@ export function CategoriesManagement({
         ) : (
           <Card>
             <CardContent className="p-8 text-center">
-              <h3 className="text-lg font-semibold mb-2">Nenhuma categoria selecionada para edição</h3>
-              <p className="text-gray-500 mb-4">Selecione uma categoria na lista para editar ou volte para a listagem.</p>
-              <Button onClick={onCancel ?? (() => {})} className="bg-blue-600 hover:bg-blue-700 text-white">Voltar para lista</Button>
+              <h3 className="text-lg font-semibold mb-2">
+                Nenhuma categoria selecionada para edição
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Selecione uma categoria na lista para editar ou volte para a
+                listagem.
+              </p>
+              <Link href="/admin/dashboard/categories" passHref>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Voltar para lista
+                </Button>
+              </Link>
             </CardContent>
           </Card>
-        )
-      )}
+        ))}
     </div>
   );
 }

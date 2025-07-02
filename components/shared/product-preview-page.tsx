@@ -167,12 +167,15 @@ function ProductEditPanel({
   );
 }
 
+import { useRouter } from "next/navigation";
+
 export default function ProductPreviewPage({
   mode,
   initialProduct,
   onSave,
   onCancel,
 }: ProductPreviewPageProps) {
+  const router = useRouter();
   // Se for modo edição e não houver produto, mostra mensagem amigável
   if (mode === "edit" && !initialProduct) {
     return (
@@ -184,15 +187,15 @@ export default function ProductPreviewPage({
           <p className="text-gray-500 mb-4">
             Selecione um produto na lista para editar ou volte para a listagem.
           </p>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="mt-4 px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium"
-            >
-              Voltar para lista
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={
+              onCancel || (() => router.push("/admin/dashboard/products"))
+            }
+            className="mt-4 px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          >
+            Voltar para lista
+          </button>
         </CardContent>
       </Card>
     );
