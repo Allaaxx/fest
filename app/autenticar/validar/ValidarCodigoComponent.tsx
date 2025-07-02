@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import OtpInputs from "@/components/ui/otp-inputs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -20,16 +20,17 @@ export default function ValidarCodigoComponent() {
   const [resendTimer, setResendTimer] = useState(0);
   const RESEND_INTERVAL = 120; // segundos
 
+  // Exibe o toast apenas UMA vez por navegação, mesmo em hot reload ou re-render
+  const toastShownRef = useRef(false);
   useEffect(() => {
-    if (toastParam === "register-success") {
-      toast.success(
-        "Cadastro realizado com sucesso! Verifique seu e-mail para validar a conta."
-      );
-    }
-    if (toastParam === "login-validate") {
-      toast.info(
-        "Seu e-mail ainda não foi autenticado. Verifique sua caixa de entrada."
-      );
+    if (!toastParam || toastShownRef.current) return;
+    if (toastParam === "register-success" || toastParam === "login-validate") {
+      toast.info("Seu e-mail ainda não foi autenticado. Verifique sua caixa de entrada.");
+      toastShownRef.current = true;
+      // Remove o parâmetro toast da URL sem recarregar
+      const url = new URL(window.location.href);
+      url.searchParams.delete("toast");
+      window.history.replaceState({}, document.title, url.toString());
     }
   }, [toastParam]);
 

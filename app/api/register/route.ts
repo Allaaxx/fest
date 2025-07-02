@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       { expiresIn: "15m" }
     );
 
-    return NextResponse.json({ token: tempToken });
+    return NextResponse.json({ success: true, token: tempToken });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

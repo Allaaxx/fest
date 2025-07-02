@@ -115,8 +115,10 @@ export default function LoginPage() {
         }
         return;
       }
-      toast.success("Cadastro realizado! Verifique seu e-mail para validar a conta.");
-      // Redirecionar ou mostrar instrução
+      // Redireciona para a tela de validação, sempre com toast informativo
+      if ('success' in result && result.token) {
+        router.push(`/autenticar/validar?token=${encodeURIComponent(result.token)}&toast=login-validate`);
+      }
     } catch (err: any) {
       toast.error(err?.message || "Erro ao registrar usuário.");
     } finally {

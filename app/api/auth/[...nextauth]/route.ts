@@ -32,20 +32,32 @@ export const authOptions: NextAuthOptions = {
         });
         try {
           await schema.validate(credentials);
-        } catch (err) {
-          return null; // Ou lance um erro customizado se quiser tratar diferente
+        } catch (err: any) {
+          // Retorna erro customizado para o frontend identificar erro de validação
+          const error = new Error("VALIDATION_ERROR");
+          (error as any).details = err.errors || [err.message];
+          throw error;
         }
 
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          const error = new Error("CREDENCIAIS_INVALIDAS");
+          throw error;
+        }
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
-        if (!user) return null;
+        if (!user) {
+          const error = new Error("EMAIL_NAO_ENCONTRADO");
+          throw error;
+        }
         const senhaCorreta = await bcrypt.compare(
           credentials.password,
           user.password
         );
-        if (!senhaCorreta) return null;
+        if (!senhaCorreta) {
+          const error = new Error("SENHA_INCORRETA");
+          throw error;
+        }
 
         // Se o e-mail não está verificado, força fluxo de validação
         if (!user.emailVerified) {
