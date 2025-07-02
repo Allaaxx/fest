@@ -21,7 +21,6 @@ type TabType =
   | "overview"
   | "users"
   | "products"
-  | "orders"
   | "analytics"
   | "categories"
   | "categories-list"
@@ -158,8 +157,6 @@ export default function AdminDashboard() {
         return "Usuários"
       case "products":
         return "Produtos"
-      case "orders":
-        return "Pedidos"
       case "analytics":
         return "Relatórios"
       case "categories-list":

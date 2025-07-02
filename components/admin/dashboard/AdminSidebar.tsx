@@ -21,7 +21,6 @@ type TabType =
   | "overview"
   | "users"
   | "products"
-  | "orders"
   | "analytics"
   | "categories"
   | "categories-list"
@@ -51,7 +50,6 @@ const menuItems: MenuItem[] = [
   { id: "overview", label: "Visão Geral", icon: Home },
   { id: "users", label: "Usuários", icon: Users },
   { id: "products", label: "Produtos", icon: Package },
-  { id: "orders", label: "Pedidos", icon: ShoppingBag },
   { id: "analytics", label: "Relatórios", icon: BarChart3 },
   {
     id: "categories",
