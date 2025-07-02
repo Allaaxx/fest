@@ -1,4 +1,3 @@
-
 "use client";
 import { AdminOverviewContent } from "@/components/admin/dashboard/AdminOverviewContent";
 import { ProductsManagement } from "@/components/admin/dashboard/products-management";
@@ -10,6 +9,10 @@ import { useState } from "react"
 import { AdminSidebar } from "@/components/admin/dashboard/AdminSidebar"
 import { CategoriesList } from "@/components/admin/dashboard/categories/categories-list"
 import { CategoryForm } from "@/components/admin/dashboard/categories/category-form"
+import ProductPreviewPanelAdd from "@/components/shared/product-preview-panel-add";
+import ProductPreviewPanelEdit from "@/components/shared/product-preview-panel-edit";
+import ProductImageCarousel from "@/components/shared/product-image-carousel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // O ProductsTab está definido neste próprio arquivo, não precisa importar
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,16 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DollarSign, Users, Package, ShoppingBag, TrendingUp, Menu } from "lucide-react"
 
-type TabType =
-  | "overview"
-  | "users"
-  | "products"
-  | "analytics"
-  | "categories"
-  | "categories-list"
-  | "categories-add"
-  | "categories-edit"
-  | "settings"
+import type { TabType } from "@/types/admin-tabs";
 
 interface Category {
   id?: string
@@ -43,20 +37,25 @@ interface Product {
   name: string
   description: string
   category: string
-  type: "venda" | "locacao" | "servico"
-  price: number
-  originalPrice?: number
-  stock?: number
+  type: "venda" | "locacao" | "servico" | ""
+  price: number | string
+  originalPrice?: number | string
+  stock?: number | string
   status: "active" | "inactive" | "draft"
   sales: number
   views: number
   rating: number
   createdAt: string
   image: string
+  images: File[]
+  features: string[]
   vendor: {
     name: string
     id: string
   }
+  availability?: boolean
+  delivery?: boolean
+  pickup?: boolean
 }
 
 export default function AdminDashboard() {
@@ -64,6 +63,7 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [selectedImage, setSelectedImage] = useState(0)
 
   const handleEditCategory = (category: Category) => {
     setEditingCategory(category)
@@ -101,10 +101,22 @@ export default function AdminDashboard() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
-        // Use seu componente de overview
         return <AdminOverviewContent />
       case "products":
+      case "products-list":
         return <ProductsManagement />
+      case "products-add": {
+        const ProductPreviewPage = require("@/components/shared/product-preview-page").default;
+        return (
+          <ProductPreviewPage mode="add" />
+        );
+      }
+      case "products-edit": {
+        const ProductPreviewPage = require("@/components/shared/product-preview-page").default;
+        return (
+          <ProductPreviewPage mode="edit" initialProduct={editingProduct || undefined} />
+        );
+      }
       case "categories-list":
         return <CategoriesList onEdit={handleEditCategory} onAdd={handleAddCategory} />
       case "categories-add":

@@ -17,16 +17,7 @@ import {
 import type React from "react";
 import { useState } from "react";
 
-type TabType =
-  | "overview"
-  | "users"
-  | "products"
-  | "analytics"
-  | "categories"
-  | "categories-list"
-  | "categories-add"
-  | "categories-edit"
-  | "settings";
+import type { TabType } from "@/types/admin-tabs";
 
 interface AdminSidebarProps {
   activeTab: TabType;
@@ -49,7 +40,16 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { id: "overview", label: "Visão Geral", icon: Home },
   { id: "users", label: "Usuários", icon: Users },
-  { id: "products", label: "Produtos", icon: Package },
+  {
+    id: "products",
+    label: "Produtos",
+    icon: Package,
+    submenu: [
+      { id: "products-list", label: "Listar Produtos", icon: List },
+      { id: "products-add", label: "Adicionar Produto", icon: Plus },
+      { id: "products-edit", label: "Editar Produto", icon: Edit },
+    ],
+  },
   { id: "analytics", label: "Relatórios", icon: BarChart3 },
   {
     id: "categories",

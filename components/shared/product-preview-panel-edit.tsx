@@ -136,7 +136,7 @@ export default function ProductPreviewPanelEdit({
   }
 
   return (
-    <div className="w-full lg:w-1/2 flex flex-col gap-6 sm:p-5 product-edit-panel">
+    
       <div className="flex flex-col gap-4 mt-5">
         <div className="shadow-lg p-4 bg-white rounded-lg flex flex-col">
           <div className="flex flex-row justify-around sm:gap-0 sm:items-center sm:justify-between card-component">
@@ -497,6 +497,5 @@ export default function ProductPreviewPanelEdit({
           </div>
         </div>
       </div>
-    </div>
   )
 }
