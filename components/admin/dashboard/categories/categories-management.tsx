@@ -18,7 +18,23 @@ export interface Category {
   image?: string;
 }
 
-export function CategoriesManagement() {
+interface CategoriesManagementProps {
+  mode: "list" | "add" | "edit";
+  category?: Category;
+  onEditCategory?: (category: Category) => void;
+  onAddCategory?: () => void;
+  onSaveCategory?: (category: Category) => void;
+  onCancel?: () => void;
+}
+
+export function CategoriesManagement({
+  mode,
+  category,
+  onEditCategory,
+  onAddCategory,
+  onSaveCategory,
+  onCancel,
+}: CategoriesManagementProps) {
   // Mock inicial, em produção viria de API
   const [categories, setCategories] = useState<Category[]>([
     {
@@ -59,36 +75,8 @@ export function CategoriesManagement() {
     },
   ]);
 
-  const [formState, setFormState] = useState<{
-    open: boolean;
-    editing?: boolean;
-    category?: Category;
-  }>({ open: false });
-
-  // Handlers agrupados
+  // Handlers agrupados (apenas para uso interno, se necessário)
   const handlers = {
-    onAdd: () => setFormState({ open: true, editing: false }),
-    onEdit: (category: Category) =>
-      setFormState({ open: true, editing: true, category }),
-    onCancel: () => setFormState({ open: false }),
-    onSave: (cat: Partial<Category>) => {
-      if (formState.editing && cat.id) {
-        setCategories((prev) =>
-          prev.map((c) => (c.id === cat.id ? { ...c, ...cat } : c))
-        );
-      } else {
-        setCategories((prev) => [
-          ...prev,
-          {
-            ...cat,
-            id: String(Date.now()),
-            createdAt: new Date().toISOString(),
-            productsCount: 0,
-          } as Category,
-        ]);
-      }
-      setFormState({ open: false });
-    },
     setSearchTerm: (value: string) => setSearchTerm(value),
     setStatusFilter: (value: "all" | "active" | "inactive") => setStatusFilter(value),
     onDelete: (id: string) => setCategories((prev) => prev.filter((c) => c.id !== id)),
@@ -160,9 +148,8 @@ export function CategoriesManagement() {
         </Card>
       </div>
 
-
       {/* Filtros e Busca */}
-      {!formState.open && (
+      {mode === "list" && (
         <>
           <Card>
             <CardContent className="p-6">
@@ -189,25 +176,63 @@ export function CategoriesManagement() {
                     <DropdownMenuItem onClick={() => handlers.setStatusFilter("inactive")}>Inativo</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                {onAddCategory && (
+                  <Button onClick={onAddCategory} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    Nova Categoria
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
           <CategoriesList
             categories={filteredCategories}
-            onEdit={handlers.onEdit}
+            onEdit={onEditCategory ?? (() => {})}
             onDelete={handlers.onDelete}
           />
         </>
       )}
 
-      {/* Formulário de categoria */}
-      {formState.open && (
+      {/* Formulário de categoria ou mensagem amigável se não houver categoria selecionada para edição */}
+      {mode === "add" && (
         <CategoryForm
-          category={formState.category}
-          isEditing={formState.editing}
-          onSave={handlers.onSave}
-          onCancel={handlers.onCancel}
+          isEditing={false}
+          onSave={(cat) => {
+            const catWithId = {
+              ...cat,
+              id: cat.id || String(Date.now()),
+              productsCount: cat.productsCount ?? 0,
+              createdAt: cat.createdAt ?? new Date().toISOString(),
+            };
+            (onSaveCategory ?? (() => {}))(catWithId);
+          }}
+          onCancel={onCancel ?? (() => {})}
         />
+      )}
+      {mode === "edit" && (
+        category ? (
+          <CategoryForm
+            category={category}
+            isEditing={true}
+            onSave={(cat) => {
+              const catWithId = {
+                ...cat,
+                id: cat.id || String(Date.now()),
+                productsCount: cat.productsCount ?? 0,
+                createdAt: cat.createdAt ?? new Date().toISOString(),
+              };
+              (onSaveCategory ?? (() => {}))(catWithId);
+            }}
+            onCancel={onCancel ?? (() => {})}
+          />
+        ) : (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <h3 className="text-lg font-semibold mb-2">Nenhuma categoria selecionada para edição</h3>
+              <p className="text-gray-500 mb-4">Selecione uma categoria na lista para editar ou volte para a listagem.</p>
+              <Button onClick={onCancel ?? (() => {})} className="bg-blue-600 hover:bg-blue-700 text-white">Voltar para lista</Button>
+            </CardContent>
+          </Card>
+        )
       )}
     </div>
   );
