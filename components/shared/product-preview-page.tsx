@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductImageCarousel from "@/components/shared/product-image-carousel";
 import ProductPreviewPanelAdd from "@/components/shared/product-preview-panel-add";
@@ -172,6 +173,31 @@ export default function ProductPreviewPage({
   onSave,
   onCancel,
 }: ProductPreviewPageProps) {
+  // Se for modo edição e não houver produto, mostra mensagem amigável
+  if (mode === "edit" && !initialProduct) {
+    return (
+      <Card className="max-w-xl mx-auto mt-12">
+        <CardContent className="p-8 text-center">
+          <h3 className="text-lg font-semibold mb-2">
+            Nenhum produto selecionado para edição
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Selecione um produto na lista para editar ou volte para a listagem.
+          </p>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="mt-4 px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            >
+              Voltar para lista
+            </button>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [productData, setProductData] = useState<Product>(
     initialProduct || {
       id: "",

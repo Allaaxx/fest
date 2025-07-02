@@ -1,6 +1,6 @@
 "use client"
 
-import { BookmarkPlus, DoorClosedIcon as Close, Save } from "lucide-react"
+import { BookmarkPlus, X, Save } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { CheckSquare, ExternalLink, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -302,7 +302,7 @@ export default function ProductPreviewPanelEdit({
                   className="bg-[#051922] text-[#f0739f] hover:text-[#051922] hover:bg-[#f0739f] transition-colors"
                   aria-label="Remover característica"
                 >
-                  <Close className="w-4 h-4" />
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             ))}
