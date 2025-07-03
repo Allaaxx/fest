@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -169,97 +169,36 @@ export function ProductsManagement() {
     product?: Product;
   }>({ isOpen: false });
 
-  // Mock data - em produção viria de uma API
-  const products: Product[] = [
-    {
-      id: "1",
-      name: "Decoração Rústica Completa",
-      description: "Kit completo de decoração rústica para festas",
-      category: "decoracao-infantil",
-      type: "locacao",
-      price: 1200,
-      status: "pending",
-      vendor: { name: "Maria Silva", id: "v1" },
-      createdAt: "2024-01-20",
-      sales: 0,
-      views: 45,
-      rating: 4.7,
-      totalReviews: 12,
-    },
-    {
-      id: "2",
-      name: "DJ Premium",
-      description: "Serviço de DJ profissional com equipamentos",
-      category: "som",
-      type: "servico",
-      price: 800,
-      status: "approved",
-      vendor: { name: "João Santos", id: "v2" },
-      createdAt: "2024-01-18",
-      reviewedAt: "2024-01-19",
-      reviewedBy: "Admin",
-      sales: 8,
-      views: 156,
-      rating: 4.9,
-      totalReviews: 22,
-    },
-    {
-      id: "3",
-      name: "Buffet Gourmet",
-      description: "Buffet completo para eventos especiais",
-      category: "buffet",
-      type: "servico",
-      price: 45,
-      status: "active",
-      vendor: { name: "Ana Costa", id: "v3" },
-      createdAt: "2024-01-15",
-      reviewedAt: "2024-01-16",
-      reviewedBy: "Admin",
-      sales: 15,
-      views: 320,
-      rating: 4.5,
-      totalReviews: 30,
-    },
-    {
-      id: "4",
-      name: "Fotografia Inadequada",
-      description: "Serviço de fotografia com conteúdo inadequado",
-      category: "fotografia",
-      type: "servico",
-      price: 1500,
-      status: "rejected",
-      vendor: { name: "Carlos Lima", id: "v4" },
-      createdAt: "2024-01-12",
-      reviewedAt: "2024-01-13",
-      reviewedBy: "Admin",
-      rejectionReason: "Conteúdo inadequado nas imagens de exemplo",
-      sales: 0,
-      views: 23,
-      rating: 2.0,
-      totalReviews: 2,
-    },
-    {
-      id: "5",
-      name: "Flores Tropicais",
-      description: "Arranjos florais tropicais para decoração",
-      category: "decoracao-casamento",
-      type: "venda",
-      price: 300,
-      status: "pending",
-      vendor: { name: "Lucia Ferreira", id: "v5" },
-      createdAt: "2024-01-10",
-      sales: 0,
-      views: 67,
-      rating: 4.2,
-      totalReviews: 5,
-    },
-  ];
+  // Busca produtos da API
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function fetchProducts() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/produtos");
+      if (!res.ok) throw new Error("Erro ao buscar produtos");
+      const data = await res.json();
+      setProducts(data);
+    } catch (err: any) {
+      setError(err.message || "Erro desconhecido");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Carrega produtos ao montar
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
+      product.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || product.status === statusFilter;
@@ -338,26 +277,40 @@ export function ProductsManagement() {
     setActionDialog({ isOpen: true, type, product });
   };
 
-  const confirmAction = (reason?: string) => {
+  const confirmAction = async (reason?: string) => {
     const { type, product } = actionDialog;
     if (!product) return;
 
-    console.log(`${type} product:`, product.id, reason);
-
-    // Aqui você implementaria a lógica real da API
-    switch (type) {
-      case "delete":
-        console.log("Excluindo produto:", product.id, "Motivo:", reason);
-        break;
-      case "approve":
-        console.log("Aprovando produto:", product.id);
-        break;
-      case "reject":
-        console.log("Rejeitando produto:", product.id, "Motivo:", reason);
-        break;
-      case "edit":
-        console.log("Editando produto:", product.id);
-        break;
+    try {
+      if (type === "delete") {
+        await fetch(`/api/produtos/${product.id}`, { method: "DELETE" });
+        setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      } else if (type === "approve") {
+        const res = await fetch(`/api/produtos/${product.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...product, status: "approved", reviewedAt: new Date(), reviewedBy: "Admin" }),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          setProducts((prev) => prev.map((p) => (p.id === product.id ? updated : p)));
+        }
+      } else if (type === "reject") {
+        const res = await fetch(`/api/produtos/${product.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...product, status: "rejected", reviewedAt: new Date(), reviewedBy: "Admin", rejectionReason: reason }),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          setProducts((prev) => prev.map((p) => (p.id === product.id ? updated : p)));
+        }
+      } else if (type === "edit") {
+        // Aqui você pode abrir um modal de edição ou implementar lógica de edição inline
+        // Exemplo: abrir ProductDetailsModal para edição
+      }
+    } catch (err) {
+      setError("Erro ao executar ação");
     }
   };
 
@@ -487,118 +440,130 @@ export function ProductsManagement() {
           <CardTitle>Moderação de Produtos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3">Produto</th>
-                  <th className="text-left p-3">Vendedor</th>
-                  <th className="text-left p-3">Categoria</th>
-                  <th className="text-left p-3">Tipo</th>
-                  <th className="text-left p-3">Preço</th>
-                  <th className="text-left p-3">Status</th>
-                  <th className="text-left p-3">Data</th>
-                  <th className="text-left p-3">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map((product) => (
-                  <tr key={product.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3">
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-gray-500 max-w-xs truncate">
-                          {product.description}
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">
+              Carregando produtos...
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center text-red-600">{error}</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3">Produto</th>
+                    <th className="text-left p-3">Vendedor</th>
+                    <th className="text-left p-3">Categoria</th>
+                    <th className="text-left p-3">Tipo</th>
+                    <th className="text-left p-3">Preço</th>
+                    <th className="text-left p-3">Status</th>
+                    <th className="text-left p-3">Data</th>
+                    <th className="text-left p-3">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map((product) => (
+                    <tr key={product.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-gray-500 max-w-xs truncate">
+                            {product.description}
+                          </div>
+                          {product.status === "rejected" &&
+                            product.rejectionReason && (
+                              <div className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                {product.rejectionReason}
+                              </div>
+                            )}
                         </div>
-                        {product.status === "rejected" &&
-                          product.rejectionReason && (
-                            <div className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                              <AlertTriangle className="h-3 w-3" />
-                              {product.rejectionReason}
-                            </div>
-                          )}
-                      </div>
-                    </td>
-                    <td className="p-3">{product.vendor.name}</td>
-                    <td className="p-3 capitalize">
-                      {product.category.replace("-", " ")}
-                    </td>
-                    <td className="p-3">{getTypeBadge(product.type)}</td>
-                    <td className="p-3 font-medium">
-                      {product.price.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </td>
-                    <td className="p-3">{getStatusBadge(product.status)}</td>
-                    <td className="p-3">
-                      <div className="text-sm">
-                        {new Date(product.createdAt).toLocaleDateString(
-                          "pt-BR"
-                        )}
-                      </div>
-                      {product.reviewedAt && (
-                        <div className="text-xs text-gray-500">
-                          Revisado em{" "}
-                          {new Date(product.reviewedAt).toLocaleDateString(
+                      </td>
+                      <td className="p-3">{product.vendor?.name}</td>
+                      <td className="p-3 capitalize">
+                        {product.category.replace("-", " ")}
+                      </td>
+                      <td className="p-3">{getTypeBadge(product.type)}</td>
+                      <td className="p-3 font-medium">
+                        {product.price.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </td>
+                      <td className="p-3">{getStatusBadge(product.status)}</td>
+                      <td className="p-3">
+                        <div className="text-sm">
+                          {new Date(product.createdAt).toLocaleDateString(
                             "pt-BR"
                           )}
                         </div>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleViewDetails(product)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalhes
-                          </DropdownMenuItem>
-                          {product.status === "pending" && (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() => handleAction("approve", product)}
-                                className="text-green-600"
-                              >
-                                <Check className="h-4 w-4 mr-2" />
-                                Aprovar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleAction("reject", product)}
-                                className="text-red-600"
-                              >
-                                <X className="h-4 w-4 mr-2" />
-                                Rejeitar
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          <DropdownMenuItem
-                            onClick={() => handleAction("edit", product)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleAction("delete", product)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        {product.reviewedAt && (
+                          <div className="text-xs text-gray-500">
+                            Revisado em{" "}
+                            {new Date(product.reviewedAt).toLocaleDateString(
+                              "pt-BR"
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleViewDetails(product)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ver Detalhes
+                            </DropdownMenuItem>
+                            {product.status === "pending" && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction("approve", product)
+                                  }
+                                  className="text-green-600"
+                                >
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Aprovar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction("reject", product)
+                                  }
+                                  className="text-red-600"
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Rejeitar
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => handleAction("edit", product)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleAction("delete", product)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

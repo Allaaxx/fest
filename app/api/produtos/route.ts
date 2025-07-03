@@ -1,60 +1,117 @@
-// CRUD de produtos (coleção)
-// GET: listar todos, POST: criar novo
 
-// Mock de produtos em memória (escopo do módulo)
-let produtos: any[] = [
-  {
-    id: "1",
-    name: "Decoração Rústica Completa",
-    description: "Kit completo de decoração rústica para festas",
-    category: "decoracao-infantil",
-    type: "locacao",
-    price: 1200,
-    status: "pending",
-    vendor: { name: "Maria Silva", id: "v1" },
-    createdAt: "2024-01-20",
-    sales: 0,
-    views: 45,
-    rating: 4.7,
-    totalReviews: 12,
-  },
-  {
-    id: "2",
-    name: "DJ Premium",
-    description: "Serviço de DJ profissional com equipamentos",
-    category: "som",
-    type: "servico",
-    price: 800,
-    status: "approved",
-    vendor: { name: "João Santos", id: "v2" },
-    createdAt: "2024-01-18",
-    reviewedAt: "2024-01-19",
-    reviewedBy: "Admin",
-    sales: 8,
-    views: 156,
-    rating: 4.9,
-    totalReviews: 22,
-  },
-];
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 
 export async function GET(request: Request) {
-  // Retorna todos os produtos
-  return new Response(JSON.stringify(produtos), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  // Busca todos os produtos com dados do vendedor (VendorProfile e User)
+  try {
+    const produtos = await prisma.product.findMany({
+      include: {
+        vendorProfile: {
+          include: {
+            user: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Mapeia para o formato esperado pelo frontend
+    const mapped = produtos.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      category: p.category,
+      type: p.type,
+      price: p.price,
+      status: p.status,
+      vendor: {
+        name: p.vendorProfile.companyName,
+        id: p.vendorProfile.id,
+      },
+      createdAt: p.createdAt,
+      reviewedAt: p.reviewedAt,
+      reviewedBy: p.reviewedBy,
+      rejectionReason: p.rejectionReason,
+      sales: p.sales,
+      views: p.views,
+      rating: p.rating,
+      totalReviews: p.totalReviews,
+    }));
+
+    return new Response(JSON.stringify(mapped), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Erro ao buscar produtos' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const novoProduto = {
-    ...body,
-    id: String(Date.now()),
-    createdAt: new Date().toISOString(),
-  };
-  produtos.push(novoProduto);
-  return new Response(JSON.stringify(novoProduto), {
-    status: 201,
-    headers: { "Content-Type": "application/json" },
-  });
+  try {
+    const body = await request.json();
+    // Espera-se que o body contenha vendorProfileId
+    const novoProduto = await prisma.product.create({
+      data: {
+        name: body.name,
+        description: body.description,
+        category: body.category,
+        type: body.type,
+        price: body.price,
+        status: body.status || 'pending',
+        vendorProfileId: body.vendorProfileId,
+        reviewedAt: body.reviewedAt ? new Date(body.reviewedAt) : undefined,
+        reviewedBy: body.reviewedBy,
+        rejectionReason: body.rejectionReason,
+        sales: body.sales || 0,
+        views: body.views || 0,
+        rating: body.rating || 0,
+        totalReviews: body.totalReviews || 0,
+      },
+      include: {
+        vendorProfile: {
+          include: { user: true },
+        },
+      },
+    });
+
+    // Mapeia para o formato esperado pelo frontend
+    const mapped = {
+      id: novoProduto.id,
+      name: novoProduto.name,
+      description: novoProduto.description,
+      category: novoProduto.category,
+      type: novoProduto.type,
+      price: novoProduto.price,
+      status: novoProduto.status,
+      vendor: {
+        name: novoProduto.vendorProfile.companyName,
+        id: novoProduto.vendorProfile.id,
+      },
+      createdAt: novoProduto.createdAt,
+      reviewedAt: novoProduto.reviewedAt,
+      reviewedBy: novoProduto.reviewedBy,
+      rejectionReason: novoProduto.rejectionReason,
+      sales: novoProduto.sales,
+      views: novoProduto.views,
+      rating: novoProduto.rating,
+      totalReviews: novoProduto.totalReviews,
+    };
+
+    return new Response(JSON.stringify(mapped), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Erro ao criar produto' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }
