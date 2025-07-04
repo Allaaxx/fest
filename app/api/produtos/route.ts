@@ -14,6 +14,7 @@ export async function GET(request: Request) {
             user: true,
           },
         },
+        category: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -23,7 +24,14 @@ export async function GET(request: Request) {
       id: p.id,
       name: p.name,
       description: p.description,
-      category: p.category,
+      category: p.category
+        ? {
+            id: p.category.id,
+            name: p.category.name,
+            slug: p.category.slug,
+          }
+        : null,
+      categoryId: p.categoryId,
       type: p.type,
       price: p.price,
       status: p.status,
@@ -61,7 +69,7 @@ export async function POST(request: Request) {
       data: {
         name: body.name,
         description: body.description,
-        category: body.category,
+        categoryId: body.categoryId,
         type: body.type,
         price: body.price,
         status: body.status || 'pending',
@@ -78,6 +86,7 @@ export async function POST(request: Request) {
         vendorProfile: {
           include: { user: true },
         },
+        category: true,
       },
     });
 
@@ -86,7 +95,14 @@ export async function POST(request: Request) {
       id: novoProduto.id,
       name: novoProduto.name,
       description: novoProduto.description,
-      category: novoProduto.category,
+      category: novoProduto.category
+        ? {
+            id: novoProduto.category.id,
+            name: novoProduto.category.name,
+            slug: novoProduto.category.slug,
+          }
+        : null,
+      categoryId: novoProduto.categoryId,
       type: novoProduto.type,
       price: novoProduto.price,
       status: novoProduto.status,

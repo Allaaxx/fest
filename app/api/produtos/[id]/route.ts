@@ -1,3 +1,18 @@
+import * as yup from "yup";
+// Schema de validação Yup para produto (backend)
+const productSchema = yup.object().shape({
+  name: yup.string().required("Nome do produto é obrigatório"),
+  description: yup.string().required("Descrição é obrigatória"),
+  categoryId: yup.string().required("Categoria é obrigatória"),
+  type: yup.string().oneOf(["venda", "locacao", "servico"], "Tipo inválido").required("Tipo é obrigatório"),
+  price: yup
+    .number()
+    .typeError("Preço deve ser um número")
+    .min(0, "Preço não pode ser negativo")
+    .required("Preço é obrigatório"),
+  vendorProfileId: yup.string().required("Vendedor é obrigatório"),
+  features: yup.array().of(yup.string().required("Característica não pode ser vazia")),
+});
 // Operações em produto específico
 // GET: obter, PUT: atualizar, DELETE: remover
 
@@ -16,6 +31,7 @@ export async function GET(
         vendorProfile: {
           include: { user: true },
         },
+        category: true,
       },
     });
     if (!produto) {
@@ -27,7 +43,14 @@ export async function GET(
       id: produto.id,
       name: produto.name,
       description: produto.description,
-      category: produto.category,
+      category: produto.category
+        ? {
+            id: produto.category.id,
+            name: produto.category.name,
+            slug: produto.category.slug,
+          }
+        : null,
+      categoryId: produto.categoryId,
       type: produto.type,
       price: produto.price,
       status: produto.status,
@@ -58,15 +81,25 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
+    // Validação com Yup
+    try {
+      await productSchema.validate(body, { abortEarly: false });
+    } catch (err: any) {
+      return new Response(
+        JSON.stringify({ error: "Dados inválidos", details: err.errors }),
+        { status: 400 }
+      );
+    }
     const produto = await prisma.product.update({
       where: { id: params.id },
       data: {
         name: body.name,
         description: body.description,
-        category: body.category,
+        categoryId: body.categoryId,
         type: body.type,
         price: body.price,
         status: body.status,
+        vendorProfileId: body.vendorProfileId,
         reviewedAt: body.reviewedAt ? new Date(body.reviewedAt) : undefined,
         reviewedBy: body.reviewedBy,
         rejectionReason: body.rejectionReason,
@@ -79,13 +112,21 @@ export async function PUT(
         vendorProfile: {
           include: { user: true },
         },
+        category: true,
       },
     });
     const mapped = {
       id: produto.id,
       name: produto.name,
       description: produto.description,
-      category: produto.category,
+      category: produto.category
+        ? {
+            id: produto.category.id,
+            name: produto.category.name,
+            slug: produto.category.slug,
+          }
+        : null,
+      categoryId: produto.categoryId,
       type: produto.type,
       price: produto.price,
       status: produto.status,

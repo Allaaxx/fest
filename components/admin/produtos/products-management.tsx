@@ -306,8 +306,16 @@ export function ProductsManagement() {
           setProducts((prev) => prev.map((p) => (p.id === product.id ? updated : p)));
         }
       } else if (type === "edit") {
-        // Aqui você pode abrir um modal de edição ou implementar lógica de edição inline
-        // Exemplo: abrir ProductDetailsModal para edição
+        // Exemplo de edição inline rápida (pode ser substituído por modal de edição avançada)
+        const res = await fetch(`/api/produtos/${product.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(product),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          setProducts((prev) => prev.map((p) => (p.id === product.id ? updated : p)));
+        }
       }
     } catch (err) {
       setError("Erro ao executar ação");

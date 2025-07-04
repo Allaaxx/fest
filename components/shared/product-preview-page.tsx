@@ -1,3 +1,21 @@
+import * as yup from "yup";
+// Schema de validação Yup para produto
+const productSchema = yup.object().shape({
+  name: yup.string().required("Nome do produto é obrigatório"),
+  description: yup.string().required("Descrição é obrigatória"),
+  category: yup.string().required("Categoria é obrigatória"),
+  type: yup.string().oneOf(["venda", "locacao", "servico"], "Tipo inválido").required("Tipo é obrigatório"),
+  price: yup
+    .number()
+    .typeError("Preço deve ser um número")
+    .min(0, "Preço não pode ser negativo")
+    .required("Preço é obrigatório"),
+  vendor: yup.object({
+    id: yup.string().required("Vendedor é obrigatório"),
+    name: yup.string().required("Nome do vendedor é obrigatório"),
+  }),
+  features: yup.array().of(yup.string().required("Característica não pode ser vazia")),
+});
 "use client";
 
 import { useState, useRef } from "react";
@@ -283,6 +301,34 @@ export default function ProductPreviewPage({
     },
   };
 
+  // Salvar produto (PUT na API)
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    setValidationErrors([]);
+    try {
+      await productSchema.validate(productData, { abortEarly: false });
+      const res = await fetch(`/api/produtos/${productData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(productData),
+      });
+      if (!res.ok) throw new Error("Erro ao salvar produto");
+      router.push("/admin/dashboard/products");
+    } catch (err: any) {
+      if (err.name === "ValidationError") {
+        setValidationErrors(err.errors);
+      } else {
+        setSaveError(err.message || "Erro ao salvar produto");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <section className="container mx-auto my-4 flex flex-col lg:flex-row">
       <ProductPreviewPanel
@@ -302,8 +348,18 @@ export default function ProductPreviewPage({
           removeFeature={handlers.removeFeature}
           handleImageUpload={handlers.handleImageUpload}
           removeImage={handlers.removeImage}
-          onSave={onSave}
+          onSave={handleSave}
         />
+        {validationErrors.length > 0 && (
+          <div className="text-red-600 text-center space-y-1">
+            {validationErrors.map((err, idx) => (
+              <div key={idx}>{err}</div>
+            ))}
+          </div>
+        )}
+        {saveError && (
+          <div className="text-red-600 text-center">{saveError}</div>
+        )}
         {onCancel && (
           <button
             type="button"
@@ -312,6 +368,9 @@ export default function ProductPreviewPage({
           >
             Cancelar
           </button>
+        )}
+        {saving && (
+          <div className="text-center text-gray-500">Salvando...</div>
         )}
       </div>
     </section>
