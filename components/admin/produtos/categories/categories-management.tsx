@@ -25,33 +25,21 @@ export interface Category {
   image?: string;
 }
 
-interface CategoriesManagementProps {
-  mode: "list" | "add" | "edit";
-  category?: Category;
-  onEditCategory?: (category: Category) => void;
-  onAddCategory?: () => void;
-  onSaveCategory?: (category: Category) => void;
-  onCancel?: () => void;
-}
-
-export function CategoriesManagement({
-  mode,
-  category,
-  onEditCategory,
-  onAddCategory,
-  onSaveCategory,
-  onCancel,
-}: CategoriesManagementProps) {
+export function CategoriesManagement() {
+  // Estado de modo e categoria selecionada para edição
+  const [mode, setMode] = useState<"list" | "add" | "edit">("list");
+  const [selectedCategory, setSelectedCategory] = useState<
+    Category | undefined
+  >(undefined);
   // Busca categorias reais da API
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
+  const fetchCategories = () => {
     setLoading(true);
     fetch("/api/categorias")
       .then((res) => res.json())
       .then((data) => {
-        // Adapta para o formato esperado pelo componente
         setCategories(
           data.map((cat: any) => ({
             id: cat.id,
@@ -59,7 +47,9 @@ export function CategoriesManagement({
             description: cat.description || "",
             status: cat.status || "active",
             productsCount: cat.products?.length || 0,
-            createdAt: cat.createdAt ? new Date(cat.createdAt).toISOString().slice(0, 10) : "",
+            createdAt: cat.createdAt
+              ? new Date(cat.createdAt).toISOString().slice(0, 10)
+              : "",
             image: "/placeholder.svg?height=40&width=40",
           }))
         );
@@ -70,6 +60,10 @@ export function CategoriesManagement({
         toast.error("Erro ao buscar categorias");
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
   // Handlers agrupados (apenas para uso interno, se necessário)
@@ -78,16 +72,40 @@ export function CategoriesManagement({
     setStatusFilter: (value: "all" | "active" | "inactive") =>
       setStatusFilter(value),
     onDelete: async (id: string) => {
-      // Remove da API e do estado local
       try {
         await fetch(`/api/categorias/${id}`, { method: "DELETE" });
         setCategories((prev) => prev.filter((c) => c.id !== id));
         toast.success("Categoria excluída com sucesso!");
       } catch {
-        // fallback: só remove localmente
         setCategories((prev) => prev.filter((c) => c.id !== id));
         toast.success("Categoria excluída localmente.");
       }
+    },
+    onEdit: (category: Category) => {
+      setSelectedCategory(category);
+      setMode("edit");
+    },
+    onAdd: () => {
+      setSelectedCategory(undefined);
+      setMode("add");
+    },
+    onSave: (cat: Category) => {
+      // Atualiza/adiciona categoria e faz refetch para garantir dados atualizados
+      setCategories((prev) => {
+        const exists = prev.find((c) => c.id === cat.id);
+        if (exists) {
+          return prev.map((c) => (c.id === cat.id ? { ...c, ...cat } : c));
+        }
+        return [{ ...cat }, ...prev];
+      });
+      setMode("list");
+      setSelectedCategory(undefined);
+      // Refaz a busca para garantir atualização
+      setTimeout(fetchCategories, 200); // pequeno delay para garantir update do backend
+    },
+    onCancel: () => {
+      setMode("list");
+      setSelectedCategory(undefined);
     },
   };
 
@@ -97,9 +115,12 @@ export function CategoriesManagement({
     "all" | "active" | "inactive"
   >("all");
   const filteredCategories = categories.filter((category) => {
+    if (!category || !category.name) return false;
     const matchesSearch =
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (category.description || "").toLowerCase().includes(searchTerm.toLowerCase());
+      (category.description || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || category.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -116,11 +137,11 @@ export function CategoriesManagement({
   return (
     <div className="space-y-8">
       {loading && (
-        <div className="text-center text-gray-500">Carregando categorias...</div>
+        <div className="text-center text-gray-500">
+          Carregando categorias...
+        </div>
       )}
-      {error && (
-        <div className="text-center text-red-600">{error}</div>
-      )}
+      {error && <div className="text-center text-red-600">{error}</div>}
       {/* Painel de estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -210,14 +231,12 @@ export function CategoriesManagement({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {onAddCategory && (
-                  <Button
-                    onClick={onAddCategory}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Nova Categoria
-                  </Button>
-                )}
+                <Button
+                  onClick={handlers.onAdd}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Nova Categoria
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -228,22 +247,21 @@ export function CategoriesManagement({
                   Nenhuma categoria encontrada
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Cadastre a primeira categoria para começar a organizar seus produtos.
+                  Cadastre a primeira categoria para começar a organizar seus
+                  produtos.
                 </p>
-                {onAddCategory && (
-                  <Button
-                    onClick={onAddCategory}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Nova Categoria
-                  </Button>
-                )}
+                <Button
+                  onClick={handlers.onAdd}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Nova Categoria
+                </Button>
               </CardContent>
             </Card>
           ) : (
             <CategoriesList
               categories={filteredCategories}
-              onEdit={onEditCategory ?? (() => {})}
+              onEdit={handlers.onEdit}
               onDelete={handlers.onDelete}
             />
           )}
@@ -261,16 +279,15 @@ export function CategoriesManagement({
               productsCount: cat.productsCount ?? 0,
               createdAt: cat.createdAt ?? new Date().toISOString(),
             };
-            (onSaveCategory ?? (() => {}))(catWithId);
-            // toast de sucesso já é disparado pelo backend e pelo CategoryForm
+            handlers.onSave(catWithId);
           }}
-          onCancel={onCancel ?? (() => {})}
+          onCancel={handlers.onCancel}
         />
       )}
       {mode === "edit" &&
-        (category ? (
+        (selectedCategory ? (
           <CategoryForm
-            category={category}
+            category={selectedCategory}
             isEditing={true}
             onSave={(cat) => {
               const catWithId = {
@@ -279,10 +296,9 @@ export function CategoriesManagement({
                 productsCount: cat.productsCount ?? 0,
                 createdAt: cat.createdAt ?? new Date().toISOString(),
               };
-              (onSaveCategory ?? (() => {}))(catWithId);
-              // toast de sucesso já é disparado pelo backend e pelo CategoryForm
+              handlers.onSave(catWithId);
             }}
-            onCancel={onCancel ?? (() => {})}
+            onCancel={handlers.onCancel}
           />
         ) : (
           <Card>
@@ -294,11 +310,12 @@ export function CategoriesManagement({
                 Selecione uma categoria na lista para editar ou volte para a
                 listagem.
               </p>
-              <Link href="/admin/dashboard/categories" passHref>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Voltar para lista
-                </Button>
-              </Link>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handlers.onCancel}
+              >
+                Voltar para lista
+              </Button>
             </CardContent>
           </Card>
         ))}

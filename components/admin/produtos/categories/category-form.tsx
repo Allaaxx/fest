@@ -152,6 +152,9 @@ export function CategoryForm({
             ? toast.success(data.message)
             : toast(data.message);
         }
+        // Limpar campos após criar categoria
+        setFormData({ name: "", description: "", status: "active", image: "" });
+        setImagePreview("");
       } else {
         // Edição: PUT na API
         const res = await fetch(`/api/categorias/${formData.id}`, {
@@ -301,12 +304,12 @@ export function CategoryForm({
                   <Switch
                     id="status"
                     checked={formData.status === "active"}
-                    onCheckedChange={(checked) =>
-                      handleInputChange(
-                        "status",
-                        checked ? "active" : "inactive"
-                      )
-                    }
+                    onCheckedChange={(checked: boolean) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        status: checked ? "active" : "inactive",
+                      }));
+                    }}
                   />
                 </div>
               </CardContent>
