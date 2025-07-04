@@ -7,6 +7,7 @@ const categorySchema = yup.object().shape({
   name: yup.string().required("Nome da categoria é obrigatório"),
   slug: yup.string().required("Slug é obrigatório"),
   description: yup.string().nullable(),
+  status: yup.string().oneOf(["active", "inactive"]).default("active"),
   parentId: yup.string().nullable(),
 });
 
@@ -41,18 +42,50 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         { status: 400 }
       );
     }
-    const categoria = await prisma.category.update({
-      where: { id: params.id },
-      data: {
-        name: body.name,
-        slug: body.slug,
-        description: body.description,
-        parentId: body.parentId ?? null,
-      },
-    });
-    return new Response(JSON.stringify(categoria), { status: 200 });
+    try {
+      const categoria = await prisma.category.update({
+        where: { id: params.id },
+        data: {
+          name: body.name,
+          slug: body.slug,
+          description: body.description,
+          status: body.status || "active",
+          parentId: body.parentId ?? null,
+        },
+      });
+      return new Response(
+        JSON.stringify({ success: true, message: "Categoria atualizada com sucesso!", categoria }),
+        { status: 200 }
+      );
+    } catch (prismaError: any) {
+      // Prisma erro de unicidade (slug ou name)
+      if (prismaError.code === 'P2002') {
+        let field = 'slug';
+        if (prismaError.meta?.target?.includes('name')) field = 'nome';
+        return new Response(
+          JSON.stringify({ error: `Já existe uma categoria com esse ${field}.` }),
+          { status: 409 }
+        );
+      }
+      // Prisma erro de violação de constraint customizada
+      if (prismaError.message?.includes('unique constraint') && prismaError.message?.includes('name')) {
+        return new Response(
+          JSON.stringify({ error: "Já existe uma categoria com esse nome." }),
+          { status: 409 }
+        );
+      }
+      // Erro genérico
+      return new Response(
+        JSON.stringify({ error: "Erro ao atualizar categoria", details: prismaError instanceof Error ? prismaError.message : prismaError }),
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Erro ao atualizar categoria" }), { status: 500 });
+    console.error("Erro ao atualizar categoria:", error);
+    return new Response(
+      JSON.stringify({ error: "Erro ao atualizar categoria", details: error instanceof Error ? error.message : error }),
+      { status: 500 }
+    );
   }
 }
 

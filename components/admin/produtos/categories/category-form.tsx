@@ -3,6 +3,14 @@
 import type React from "react";
 
 import { useState } from "react";
+import * as yup from "yup";
+// Schema de validação Yup para categoria (frontend)
+const categorySchema = yup.object().shape({
+  name: yup.string().required("Nome da categoria é obrigatório"),
+  description: yup.string().nullable(),
+  status: yup.string().oneOf(["active", "inactive"]).default("active"),
+});
+import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,13 +80,118 @@ export function CategoryForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      // Simular delay de API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onSave(formData);
-    } catch (error) {
-      console.error("Erro ao salvar categoria:", error);
+      // Validação frontend com Yup
+      await categorySchema.validate(formData, { abortEarly: false });
+    } catch (err: any) {
+      if (err.name === "ValidationError") {
+        toast(
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold">Corrija os seguintes erros:</span>
+            <ul className="list-disc list-inside text-sm text-red-600">
+              {err.errors.map((msg: string, idx: number) => (
+                <li key={idx}>{msg}</li>
+              ))}
+            </ul>
+          </div>,
+          { style: { background: "#fee2e2", color: "#991b1b" } }
+        );
+      } else {
+        toast(
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold">Erro de validação:</span>
+            <span className="text-sm text-red-600">
+              {err.message || "Erro de validação."}
+            </span>
+          </div>,
+          { style: { background: "#fee2e2", color: "#991b1b" } }
+        );
+      }
+      setIsLoading(false);
+      return;
+    }
+    try {
+      let savedCategory = formData;
+      const slug = formData.name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
+      if (!isEditing) {
+        // Criação: POST na API
+        const res = await fetch("/api/categorias", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            slug,
+            description: formData.description,
+            status: formData.status,
+            // image: formData.image, // se suportado, descomente
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          // Erro de unicidade ou outro erro customizado
+          if (res.status === 409) {
+            toast.error && typeof toast.error === "function"
+              ? toast.error(data.error)
+              : toast(data.error);
+          } else {
+            toast.error && typeof toast.error === "function"
+              ? toast.error(data.error)
+              : toast(data.error);
+          }
+          setIsLoading(false);
+          return;
+        }
+        savedCategory = data.categoria;
+        if (data.success && data.message) {
+          toast.success && typeof toast.success === "function"
+            ? toast.success(data.message)
+            : toast(data.message);
+        }
+      } else {
+        // Edição: PUT na API
+        const res = await fetch(`/api/categorias/${formData.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            slug,
+            description: formData.description,
+            status: formData.status,
+            image: formData.image,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if (res.status === 409) {
+            toast.error && typeof toast.error === "function"
+              ? toast.error(data.error)
+              : toast(data.error);
+          } else {
+            toast.error && typeof toast.error === "function"
+              ? toast.error(data.error)
+              : toast(data.error);
+          }
+          setIsLoading(false);
+          return;
+        }
+        savedCategory = data;
+        if (data.success && data.message) {
+          toast.success && typeof toast.success === "function"
+            ? toast.success(data.message)
+            : toast(data.message);
+        }
+      }
+      onSave(savedCategory);
+    } catch (error: any) {
+      toast.error && typeof toast.error === "function"
+        ? toast.error(error.message)
+        : toast(error.message);
+      // O erro HTTP (409, 500, etc) continuará aparecendo no console do navegador, mas não será mais logado manualmente aqui.
     } finally {
       setIsLoading(false);
     }
@@ -166,56 +279,6 @@ export function CategoryForm({
                     rows={4}
                     className="mt-1"
                   />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Imagem da Categoria</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {imagePreview ? (
-                    <div className="relative">
-                      <img
-                        src={imagePreview || "/placeholder.svg"}
-                        alt="Preview"
-                        className="w-full h-48 object-cover rounded-lg border-2 border-dashed border-gray-300"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={removeImage}
-                        className="absolute top-2 right-2"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-2">
-                        Clique para fazer upload da imagem
-                      </p>
-                      <p className="text-sm text-gray-400">PNG, JPG até 5MB</p>
-                    </div>
-                  )}
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <Label htmlFor="image-upload" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full">
-                      <Upload className="h-4 w-4 mr-2" />
-                      {imagePreview ? "Alterar Imagem" : "Fazer Upload"}
-                    </Button>
-                  </Label>
                 </div>
               </CardContent>
             </Card>

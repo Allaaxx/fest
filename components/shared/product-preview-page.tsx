@@ -1,10 +1,14 @@
+"use client";
 import * as yup from "yup";
 // Schema de validação Yup para produto
 const productSchema = yup.object().shape({
   name: yup.string().required("Nome do produto é obrigatório"),
   description: yup.string().required("Descrição é obrigatória"),
-  category: yup.string().required("Categoria é obrigatória"),
-  type: yup.string().oneOf(["venda", "locacao", "servico"], "Tipo inválido").required("Tipo é obrigatório"),
+  categoryId: yup.string().required("Categoria é obrigatória"),
+  type: yup
+    .string()
+    .oneOf(["venda", "locacao", "servico"], "Tipo inválido")
+    .required("Tipo é obrigatório"),
   price: yup
     .number()
     .typeError("Preço deve ser um número")
@@ -14,11 +18,12 @@ const productSchema = yup.object().shape({
     id: yup.string().required("Vendedor é obrigatório"),
     name: yup.string().required("Nome do vendedor é obrigatório"),
   }),
-  features: yup.array().of(yup.string().required("Característica não pode ser vazia")),
+  features: yup
+    .array()
+    .of(yup.string().required("Característica não pode ser vazia")),
 });
-"use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,7 +35,12 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  category: string;
+  categoryId: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
   type: "venda" | "locacao" | "servico" | "";
   price: number | string;
   originalPrice?: number | string;
@@ -140,6 +150,9 @@ function ProductEditPanel({
   handleImageUpload,
   removeImage,
   onSave,
+  categories = [],
+  loadingCategories = false,
+  errorCategories = null,
 }: {
   mode: Mode;
   productData: Product;
@@ -152,6 +165,9 @@ function ProductEditPanel({
   handleImageUpload: (files: FileList) => void;
   removeImage: (idx: number) => void;
   onSave?: (product: Product) => void;
+  categories?: { id: string; name: string; slug: string }[];
+  loadingCategories?: boolean;
+  errorCategories?: string | null;
 }) {
   if (mode === "add") {
     return (
@@ -165,6 +181,9 @@ function ProductEditPanel({
         onImageUpload={handleImageUpload}
         onRemoveImage={removeImage}
         onSave={() => onSave && onSave(productData)}
+        categories={categories}
+        loadingCategories={loadingCategories}
+        errorCategories={errorCategories}
       />
     );
   }
@@ -181,6 +200,9 @@ function ProductEditPanel({
       onImageUpload={handleImageUpload}
       onRemoveImage={removeImage}
       onSave={() => onSave && onSave(productData)}
+      categories={categories}
+      loadingCategories={loadingCategories}
+      errorCategories={errorCategories}
     />
   );
 }
@@ -224,7 +246,8 @@ export default function ProductPreviewPage({
       id: "",
       name: "",
       description: "",
-      category: "",
+      categoryId: "",
+      category: null,
       type: "",
       price: "",
       originalPrice: "",
@@ -243,6 +266,27 @@ export default function ProductPreviewPage({
       pickup: false,
     }
   );
+  // Hook para buscar categorias
+  type Category = { id: string; name: string; slug: string };
+  function useCategories() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    useEffect(() => {
+      setLoading(true);
+      fetch("/api/categorias")
+        .then((res) => res.json())
+        .then((data) => {
+          setCategories(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError("Erro ao buscar categorias");
+          setLoading(false);
+        });
+    }, []);
+    return { categories, loading, error };
+  }
   const [selectedImage, setSelectedImage] = useState(0);
 
   // Handlers agrupados em um único objeto para passar facilmente aos subcomponentes
@@ -301,6 +345,13 @@ export default function ProductPreviewPage({
     },
   };
 
+  // Busca categorias para o select
+  const {
+    categories,
+    loading: loadingCategories,
+    error: errorCategories,
+  } = useCategories();
+
   // Salvar produto (PUT na API)
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -349,6 +400,9 @@ export default function ProductPreviewPage({
           handleImageUpload={handlers.handleImageUpload}
           removeImage={handlers.removeImage}
           onSave={handleSave}
+          categories={categories}
+          loadingCategories={loadingCategories}
+          errorCategories={errorCategories}
         />
         {validationErrors.length > 0 && (
           <div className="text-red-600 text-center space-y-1">
@@ -369,9 +423,7 @@ export default function ProductPreviewPage({
             Cancelar
           </button>
         )}
-        {saving && (
-          <div className="text-center text-gray-500">Salvando...</div>
-        )}
+        {saving && <div className="text-center text-gray-500">Salvando...</div>}
       </div>
     </section>
   );

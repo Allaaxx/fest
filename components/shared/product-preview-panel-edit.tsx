@@ -22,6 +22,9 @@ export default function ProductPreviewPanelEdit({
   onImageUpload,
   onRemoveImage,
   onSave,
+  categories = [],
+  loadingCategories = false,
+  errorCategories = null,
 }: {
   productData: any
   formatCurrency: (value: string) => string
@@ -34,6 +37,9 @@ export default function ProductPreviewPanelEdit({
   onImageUpload: (files: FileList) => void
   onRemoveImage: (index: number) => void
   onSave: () => void
+  categories?: { id: string; name: string; slug: string }[];
+  loadingCategories?: boolean;
+  errorCategories?: string | null;
 }) {
   const editor = useEditor({
     extensions: [StarterKit, Link, Underline, TextAlign.configure({ types: ["heading", "paragraph"] })],
@@ -154,18 +160,23 @@ export default function ProductPreviewPanelEdit({
             <div className="flex flex-col xl:flex-row md:items-center md:gap-8 w-full">
               <h5 className="flex items-center w-full px-4 font-light text-[#051922] mb-2 md:mb-0">
                 Categoria:
-                <Select value={productData.category} onValueChange={(v) => onFieldEdit("category", v)}>
+                <Select
+                  value={productData.categoryId}
+                  onValueChange={(v) => onFieldEdit("categoryId", v)}
+                  disabled={loadingCategories}
+                >
                   <SelectTrigger className="w-full ml-3 bg-transparent">
-                    <SelectValue placeholder="Categoria" />
+                    <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Categoria"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="decoracao-infantil">Decoração Infantil</SelectItem>
-                    <SelectItem value="decoracao-casamento">Decoração Casamento</SelectItem>
-                    <SelectItem value="buffet">Buffet</SelectItem>
-                    <SelectItem value="moveis">Móveis</SelectItem>
-                    <SelectItem value="iluminacao">Iluminação</SelectItem>
-                    <SelectItem value="fotografia">Fotografia</SelectItem>
-                    <SelectItem value="som">Som</SelectItem>
+                    <SelectItem value="">Selecione uma categoria</SelectItem>
+                    {errorCategories ? (
+                      <SelectItem value="" disabled>{errorCategories}</SelectItem>
+                    ) : (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </h5>
