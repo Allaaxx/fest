@@ -23,6 +23,7 @@ export interface Category {
   productsCount: number;
   createdAt: string;
   image?: string;
+  parentId?: string | null;
 }
 
 export function CategoriesManagement() {
@@ -50,7 +51,8 @@ export function CategoriesManagement() {
             createdAt: cat.createdAt
               ? new Date(cat.createdAt).toISOString().slice(0, 10)
               : "",
-            image: "/placeholder.svg?height=40&width=40",
+            image: "/logo1.png?height=40&width=40",
+            parentId: cat.parentId ?? null,
           }))
         );
         setLoading(false);
@@ -272,6 +274,7 @@ export function CategoriesManagement() {
       {mode === "add" && (
         <CategoryForm
           isEditing={false}
+          categoriesList={categories}
           onSave={(cat) => {
             const catWithId = {
               ...cat,
@@ -289,6 +292,7 @@ export function CategoriesManagement() {
           <CategoryForm
             category={selectedCategory}
             isEditing={true}
+            categoriesList={categories}
             onSave={(cat) => {
               const catWithId = {
                 ...cat,

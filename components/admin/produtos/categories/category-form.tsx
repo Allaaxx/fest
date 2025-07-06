@@ -21,11 +21,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 import type { Category as CategoryType } from "./categories-management";
+import { useEffect } from "react";
 
 type Category = Omit<CategoryType, "id" | "productsCount" | "createdAt"> & {
   id?: string;
   productsCount?: number;
   createdAt?: string;
+} & {
+  parentId?: string | null;
 };
 
 interface CategoryFormProps {
@@ -33,21 +36,36 @@ interface CategoryFormProps {
   onSave: (category: Category) => void;
   onCancel: () => void;
   isEditing?: boolean;
+  categoriesList?: CategoryType[]; // Para popular o select de pais
 }
 
-export function CategoryForm({
-  category,
-  onSave,
-  onCancel,
-  isEditing = false,
-}: CategoryFormProps) {
+export function CategoryForm(props: CategoryFormProps) {
+  const {
+    category,
+    onSave,
+    onCancel,
+    isEditing = false,
+    categoriesList = [],
+  } = props;
   const [formData, setFormData] = useState<Category>({
     name: category?.name || "",
     description: category?.description || "",
     status: category?.status || "active",
     image: category?.image || "",
     ...category,
+    parentId: category?.parentId ? String(category.parentId) : "",
   });
+
+  // Atualiza parentId ao editar categoria
+  useEffect(() => {
+    if (category) {
+      setFormData((prev) => ({
+        ...prev,
+        parentId: category.parentId ? String(category.parentId) : "",
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
 
   const [imagePreview, setImagePreview] = useState<string>(
     category?.image || ""
@@ -128,6 +146,7 @@ export function CategoryForm({
             slug,
             description: formData.description,
             status: formData.status,
+            parentId: formData.parentId || null,
             // image: formData.image, // se suportado, descomente
           }),
         });
@@ -165,6 +184,7 @@ export function CategoryForm({
             slug,
             description: formData.description,
             status: formData.status,
+            parentId: formData.parentId || null,
             image: formData.image,
           }),
         });
@@ -289,6 +309,41 @@ export function CategoryForm({
 
           {/* Sidebar */}
           <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Categoria Pai</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="parentId">
+                  Selecione a categoria pai (opcional)
+                </Label>
+                <select
+                  id="parentId"
+                  className="w-full border rounded px-2 py-2 mt-1"
+                  value={formData.parentId ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      parentId: value === "" ? null : value,
+                    }));
+                  }}
+                >
+                  <option value="">Nenhuma (categoria principal)</option>
+                  {categoriesList
+                    .filter(
+                      (cat) =>
+                        !cat.parentId &&
+                        (!formData.id || cat.id !== formData.id)
+                    )
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle>Status</CardTitle>
