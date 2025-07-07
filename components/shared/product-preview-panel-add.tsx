@@ -1,6 +1,7 @@
 "use client";
 
 import { BookmarkPlus, Save, X } from "lucide-react";
+import { CategoryAutocomplete } from "./category-autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, ExternalLink, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,7 @@ export default function ProductPreviewPanelAdd({
     });
   };
 
+
   return (
     <div className="flex flex-col gap-4 mt-5">
       <div className="shadow-lg p-4 bg-white rounded-lg flex flex-col">
@@ -182,25 +184,15 @@ export default function ProductPreviewPanelAdd({
           <div className="flex flex-col xl:flex-row md:items-center md:gap-8 w-full">
             <h5 className="flex items-center w-full px-4 font-light text-[#051922] mb-2 md:mb-0">
               Categoria:
-              <Select
-                value={productData.categoryId || "placeholder"}
-                onValueChange={(v) => onFieldEdit("categoryId", v === "placeholder" ? "" : v)}
-                disabled={loadingCategories}
-              >
-                <SelectTrigger className="w-full ml-3 bg-transparent">
-                  <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Categoria"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="placeholder" disabled>Selecione uma categoria</SelectItem>
-                  {errorCategories ? (
-                    <SelectItem value="error" disabled>{errorCategories}</SelectItem>
-                  ) : (
-                    categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="relative w-full ml-3">
+                <CategoryAutocomplete
+                  categories={categories}
+                  value={productData.categoryId}
+                  onChange={(v: string) => onFieldEdit("categoryId", v)}
+                  loading={loadingCategories}
+                  error={errorCategories}
+                />
+              </div>
             </h5>
 
             <h5 className="flex items-center w-full px-4 font-light text-[#051922]">

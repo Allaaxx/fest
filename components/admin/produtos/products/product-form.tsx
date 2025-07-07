@@ -6,38 +6,54 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useRef } from "react";
 
 export interface ProductFormValues {
   id?: string;
   name: string;
   description: string;
-  category: string;
+  categoryId: string;
   type: "venda" | "locacao" | "servico";
   price: number;
 }
+
+import type { Category } from "../categories/categories-management";
 
 interface ProductFormProps {
   product?: ProductFormValues;
   onSave: (product: ProductFormValues) => void;
   onCancel: () => void;
+  categoriesList: Category[];
 }
 
-export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
+export function ProductForm({
+  product,
+  onSave,
+  onCancel,
+  categoriesList,
+}: ProductFormProps) {
   const [formData, setFormData] = useState<ProductFormValues>({
     name: product?.name || "",
     description: product?.description || "",
-    category: product?.category || "",
+    categoryId: product?.categoryId || "",
     type: product?.type || "venda",
     price: product?.price || 0,
     ...product,
   });
+
+  // Autocomplete categoria
+  const [categorySearch, setCategorySearch] = useState<string>("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selectedCategory = categoriesList.find(cat => cat.id === formData.categoryId);
+  // O valor do input: sempre o texto digitado, exceto ao selecionar uma sugestão
+  const inputValue = showSuggestions ? categorySearch : (selectedCategory ? selectedCategory.name : categorySearch);
+  const filteredCategories =
+    categorySearch.length > 0
+      ? categoriesList.filter((cat) =>
+          cat.name.toLowerCase().includes(categorySearch.toLowerCase())
+        )
+      : categoriesList;
 
   const handleChange = (field: keyof ProductFormValues, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -77,30 +93,83 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
               className="mt-1"
             />
           </div>
-          <div>
-            <Label htmlFor="category">Categoria</Label>
-            <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) => handleChange("category", e.target.value)}
-              className="mt-1"
-            />
+          <div className="relative">
+            <Label htmlFor="categoryId">Categoria</Label>
+            <div className="flex items-center gap-2 relative">
+              <Input
+                id="categoryId"
+                ref={inputRef}
+                autoComplete="off"
+                placeholder="Busque por categoria..."
+                value={inputValue}
+                onChange={e => {
+                  setCategorySearch(e.target.value);
+                  setShowSuggestions(true);
+                  // Se apagar tudo, remove seleção
+                  if (e.target.value === "") {
+                    setFormData(prev => ({ ...prev, categoryId: "" }));
+                  }
+                }}
+                onFocus={() => {
+                  setShowSuggestions(true);
+                  setCategorySearch("");
+                }}
+                required
+              />
+              {selectedCategory && (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600"
+                  title="Limpar seleção"
+                  tabIndex={-1}
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, categoryId: "" }));
+                    setCategorySearch("");
+                    setShowSuggestions(true);
+                    setTimeout(() => inputRef.current?.focus(), 100);
+                  }}
+                >
+                  ×
+                </Button>
+              )}
+              {showSuggestions && (
+                <div className="absolute z-10 bg-white border rounded w-full max-h-48 overflow-y-auto shadow-lg mt-1 left-0">
+                  {filteredCategories.length === 0 && (
+                    <div className="p-2 text-gray-500">Nenhuma categoria encontrada</div>
+                  )}
+                  {filteredCategories.map(cat => (
+                    <div
+                      key={cat.id}
+                      className={`p-2 cursor-pointer hover:bg-gray-100 ${cat.id === formData.categoryId ? "bg-gray-100" : ""}`}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, categoryId: cat.id }));
+                        setCategorySearch(cat.name);
+                        setShowSuggestions(false);
+                        setTimeout(() => inputRef.current?.blur(), 100);
+                      }}
+                    >
+                      {cat.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <Label htmlFor="type">Tipo</Label>
-            <Select
+            <select
+              id="type"
+              className="w-full border rounded px-2 py-2 mt-1"
               value={formData.type}
-              onValueChange={(v) => handleChange("type", v)}
+              onChange={(e) => handleChange("type", e.target.value)}
+              required
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="venda">Venda</SelectItem>
-                <SelectItem value="locacao">Locação</SelectItem>
-                <SelectItem value="servico">Serviço</SelectItem>
-              </SelectContent>
-            </Select>
+              <option value="venda">Venda</option>
+              <option value="locacao">Locação</option>
+              <option value="servico">Serviço</option>
+            </select>
           </div>
           <div>
             <Label htmlFor="price">Preço (R$)</Label>

@@ -43,6 +43,33 @@ import {
   Eye,
 } from "lucide-react";
 import { ProductDetailsModal } from "./product-details-modal";
+import { ProductForm } from "./products/product-form";
+import type { Category } from "./categories/categories-management";
+  // Estado para categorias e modal de novo produto
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  // Buscar categorias ao montar
+  useEffect(() => {
+    fetch("/api/categorias")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(
+          data.map((cat: any) => ({
+            id: cat.id,
+            name: cat.name,
+            description: cat.description || "",
+            status: cat.status || "active",
+            productsCount: cat.products?.length || 0,
+            createdAt: cat.createdAt
+              ? new Date(cat.createdAt).toISOString().slice(0, 10)
+              : "",
+            image: "/logo1.png?height=40&width=40",
+            parentId: cat.parentId ?? null,
+          }))
+        );
+      });
+  }, []);
 
 interface Product {
   id: string;
@@ -394,7 +421,44 @@ export function ProductsManagement() {
         </Card>
       </div>
 
+      {/* Botão Novo Produto */}
+      <div className="flex justify-end mb-4">
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setShowProductForm(true)}>
+          Novo Produto
+        </Button>
+      </div>
       {/* Controles e filtros */}
+      {/* Modal de cadastro de produto */}
+      {showProductForm && (
+        <Dialog open={showProductForm} onOpenChange={setShowProductForm}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Novo Produto</DialogTitle>
+            </DialogHeader>
+            <ProductForm
+              categoriesList={categories}
+              onSave={async (data) => {
+                setFormLoading(true);
+                try {
+                  const res = await fetch("/api/produtos", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...data, vendorProfileId: "admin" }), // ajuste vendorProfileId conforme necessário
+                  });
+                  if (res.ok) {
+                    const novo = await res.json();
+                    setProducts((prev) => [novo, ...prev]);
+                    setShowProductForm(false);
+                  }
+                } finally {
+                  setFormLoading(false);
+                }
+              }}
+              onCancel={() => setShowProductForm(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-4 flex-1">
           <div className="relative flex-1 max-w-sm">
