@@ -29,7 +29,7 @@ export function CategoryAutocomplete({
 
   return (
     <div className="relative w-full min-w-0">
-      <div className="flex items-center border rounded-lg shadow-sm bg-white focus-within:ring-2 focus-within:ring-[#f0739f] transition-all w-full min-w-0">
+      <div className="flex items-center border rounded-lg shadow-sm bg-white transition-all w-full min-w-0">
         <Input
           ref={inputRef}
           autoComplete="off"
