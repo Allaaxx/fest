@@ -64,6 +64,23 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    // Buscar categoria e validar allowedTypes
+    const categoria = await prisma.category.findUnique({
+      where: { id: body.categoryId },
+      select: { allowedTypes: true, name: true },
+    });
+    if (!categoria) {
+      return new Response(JSON.stringify({ error: 'Categoria não encontrada.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (!categoria.allowedTypes?.includes(body.type)) {
+      return new Response(
+        JSON.stringify({ error: `O tipo "${body.type}" não é permitido para a categoria "${categoria.name}".` }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
     // Espera-se que o body contenha vendorProfileId
     const novoProduto = await prisma.product.create({
       data: {

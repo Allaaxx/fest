@@ -9,6 +9,7 @@ const categorySchema = yup.object().shape({
   name: yup.string().required("Nome da categoria é obrigatório"),
   description: yup.string().nullable(),
   status: yup.string().oneOf(["active", "inactive"]).default("active"),
+  allowedTypes: yup.array().of(yup.string().oneOf(["venda", "locacao", "servico"])).min(1, "Selecione pelo menos um tipo permitido."),
 });
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Save } from "lucide-react";
@@ -27,7 +28,7 @@ type Category = Omit<CategoryType, "id" | "productsCount" | "createdAt"> & {
   id?: string;
   productsCount?: number;
   createdAt?: string;
-} & {
+  allowedTypes?: string[];
   parentId?: string | null;
 };
 
@@ -47,11 +48,12 @@ export function CategoryForm(props: CategoryFormProps) {
     isEditing = false,
     categoriesList = [],
   } = props;
-  const [formData, setFormData] = useState<Category>({
+  const [formData, setFormData] = useState<Category & { allowedTypes?: string[] }>({
     name: category?.name || "",
     description: category?.description || "",
     status: category?.status || "active",
     image: category?.image || "",
+    allowedTypes: category?.allowedTypes && category.allowedTypes.length > 0 ? category.allowedTypes : ["venda"],
     ...category,
     parentId: category?.parentId ? String(category.parentId) : "",
   });
@@ -147,6 +149,7 @@ export function CategoryForm(props: CategoryFormProps) {
             description: formData.description,
             status: formData.status,
             parentId: formData.parentId || null,
+            allowedTypes: formData.allowedTypes,
             // image: formData.image, // se suportado, descomente
           }),
         });
@@ -185,6 +188,7 @@ export function CategoryForm(props: CategoryFormProps) {
             description: formData.description,
             status: formData.status,
             parentId: formData.parentId || null,
+            allowedTypes: formData.allowedTypes,
             image: formData.image,
           }),
         });
@@ -302,6 +306,34 @@ export function CategoryForm(props: CategoryFormProps) {
                     rows={4}
                     className="mt-1"
                   />
+                </div>
+                <div>
+                  <Label>Tipos permitidos nesta categoria *</Label>
+                  <div className="flex gap-4 mt-2">
+                    {[
+                      { label: "Venda", value: "venda" },
+                      { label: "Locação", value: "locacao" },
+                      { label: "Serviço", value: "servico" },
+                    ].map((type) => (
+                      <label key={type.value} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.allowedTypes?.includes(type.value)}
+                          onChange={(e) => {
+                            setFormData((prev) => {
+                              const arr = prev.allowedTypes || [];
+                              if (e.target.checked) {
+                                return { ...prev, allowedTypes: [...arr, type.value] };
+                              } else {
+                                return { ...prev, allowedTypes: arr.filter((t) => t !== type.value) };
+                              }
+                            });
+                          }}
+                        />
+                        {type.label}
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>

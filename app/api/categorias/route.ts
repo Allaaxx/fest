@@ -10,6 +10,7 @@ const categorySchema = yup.object().shape({
   description: yup.string().nullable(),
   status: yup.string().oneOf(["active", "inactive"]).default("active"),
   parentId: yup.string().nullable(),
+  allowedTypes: yup.array().of(yup.string().oneOf(["venda", "locacao", "servico"])).min(1, "Selecione pelo menos um tipo permitido."),
 });
 
 // GET: lista todas as categorias
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
           description: body.description,
           status: body.status || "active",
           parentId: body.parentId ?? null,
+          allowedTypes: body.allowedTypes as any, // for prisma string[]
         },
       });
       return NextResponse.json(

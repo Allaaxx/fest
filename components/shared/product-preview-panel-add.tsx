@@ -41,7 +41,7 @@ export default function ProductPreviewPanelAdd({
   onImageUpload: (files: FileList) => void;
   onRemoveImage: (index: number) => void;
   onSave: () => void;
-  categories?: { id: string; name: string; slug: string }[];
+  categories?: { id: string; name: string; slug: string; allowedTypes?: string[] }[];
   loadingCategories?: boolean;
   errorCategories?: string | null;
 }) {
@@ -198,19 +198,38 @@ export default function ProductPreviewPanelAdd({
             <h5 className="flex items-center w-full px-4 font-light text-[#051922]">
               Tipo:
               <div className="ml-3 w-full">
-                <Select
-                  value={productData.type}
-                  onValueChange={(value) => onFieldEdit("type", value)}
-                >
-                  <SelectTrigger className="w-full m-1 bg-transparent">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="venda">Venda</SelectItem>
-                    <SelectItem value="locacao">Locação</SelectItem>
-                    <SelectItem value="servico">Serviço</SelectItem>
-                  </SelectContent>
-                </Select>
+                {(() => {
+                  const selectedCategory = categories.find(
+                    (cat) => cat.id === productData.categoryId
+                  );
+                  const allowedTypes = selectedCategory?.allowedTypes || [
+                    "venda",
+                    "locacao",
+                    "servico",
+                  ];
+                  const typeLabels: Record<string, string> = {
+                    venda: "Venda",
+                    locacao: "Locação",
+                    servico: "Serviço",
+                  };
+                  return (
+                    <Select
+                      value={productData.type}
+                      onValueChange={(value) => onFieldEdit("type", value)}
+                    >
+                      <SelectTrigger className="w-full m-1 bg-transparent">
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allowedTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {typeLabels[type] || type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  );
+                })()}
               </div>
             </h5>
           </div>
