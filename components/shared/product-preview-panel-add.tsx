@@ -181,7 +181,7 @@ export default function ProductPreviewPanelAdd({
         </div>
 
         <div className="mt-5 flex flex-col gap-4">
-          <div className="flex flex-col xl:flex-row md:items-center md:gap-8 w-full">
+          <div className="flex flex-col  md:items-center md:gap-8 w-full">
             <h5 className="flex items-center w-full px-4 font-light text-[#051922] mb-2 md:mb-0">
               Categoria:
               <div className="relative w-full ml-3">
