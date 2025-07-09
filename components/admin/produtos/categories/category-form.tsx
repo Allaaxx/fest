@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import type { Category as CategoryType } from "./categories-management";
 import { useEffect } from "react";
@@ -48,23 +49,28 @@ export function CategoryForm(props: CategoryFormProps) {
     isEditing = false,
     categoriesList = [],
   } = props;
-  const [formData, setFormData] = useState<Category & { allowedTypes?: string[] }>({
+  const [formData, setFormData] = useState<Category & { allowedTypes?: string[] }>(() => ({
+    ...category,
     name: category?.name || "",
     description: category?.description || "",
     status: category?.status || "active",
     image: category?.image || "",
-    allowedTypes: category?.allowedTypes && category.allowedTypes.length > 0 ? category.allowedTypes : ["venda"],
-    ...category,
+    allowedTypes: Array.isArray(category?.allowedTypes) ? category.allowedTypes : (category ? [] : ["venda"]),
     parentId: category?.parentId ? String(category.parentId) : "",
-  });
+  }));
 
-  // Atualiza parentId ao editar categoria
+  // Atualiza todo o formData ao editar categoria
   useEffect(() => {
     if (category) {
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
+        ...category,
+        name: category.name || "",
+        description: category.description || "",
+        status: category.status || "active",
+        image: category.image || "",
+        allowedTypes: Array.isArray(category.allowedTypes) ? category.allowedTypes : [],
         parentId: category.parentId ? String(category.parentId) : "",
-      }));
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
@@ -316,13 +322,12 @@ export function CategoryForm(props: CategoryFormProps) {
                       { label: "Serviço", value: "servico" },
                     ].map((type) => (
                       <label key={type.value} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={formData.allowedTypes?.includes(type.value)}
-                          onChange={(e) => {
+                          onCheckedChange={(checked) => {
                             setFormData((prev) => {
                               const arr = prev.allowedTypes || [];
-                              if (e.target.checked) {
+                              if (checked) {
                                 return { ...prev, allowedTypes: [...arr, type.value] };
                               } else {
                                 return { ...prev, allowedTypes: arr.filter((t) => t !== type.value) };

@@ -41,7 +41,12 @@ export default function ProductPreviewPanelAdd({
   onImageUpload: (files: FileList) => void;
   onRemoveImage: (index: number) => void;
   onSave: () => void;
-  categories?: { id: string; name: string; slug: string; allowedTypes?: string[] }[];
+  categories?: {
+    id: string;
+    name: string;
+    slug: string;
+    allowedTypes?: string[];
+  }[];
   loadingCategories?: boolean;
   errorCategories?: string | null;
 }) {
@@ -161,7 +166,6 @@ export default function ProductPreviewPanelAdd({
       currency: "BRL",
     });
   };
-
 
   return (
     <div className="flex flex-col gap-4 mt-5">

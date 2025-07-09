@@ -1,8 +1,6 @@
-
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
 
 export async function GET(request: Request) {
   // Busca todos os produtos com dados do vendedor (VendorProfile e User)
@@ -16,7 +14,7 @@ export async function GET(request: Request) {
         },
         category: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     // Mapeia para o formato esperado pelo frontend
@@ -51,12 +49,12 @@ export async function GET(request: Request) {
 
     return new Response(JSON.stringify(mapped), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Erro ao buscar produtos' }), {
+    return new Response(JSON.stringify({ error: "Erro ao buscar produtos" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
@@ -70,15 +68,20 @@ export async function POST(request: Request) {
       select: { allowedTypes: true, name: true },
     });
     if (!categoria) {
-      return new Response(JSON.stringify({ error: 'Categoria não encontrada.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: "Categoria não encontrada." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
     if (!categoria.allowedTypes?.includes(body.type)) {
       return new Response(
-        JSON.stringify({ error: `O tipo "${body.type}" não é permitido para a categoria "${categoria.name}".` }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          error: `O tipo "${body.type}" não é permitido para a categoria "${categoria.name}".`,
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
     // Espera-se que o body contenha vendorProfileId
@@ -89,7 +92,7 @@ export async function POST(request: Request) {
         categoryId: body.categoryId,
         type: body.type,
         price: body.price,
-        status: body.status || 'pending',
+        status: body.status || "pending",
         vendorProfileId: body.vendorProfileId,
         reviewedAt: body.reviewedAt ? new Date(body.reviewedAt) : undefined,
         reviewedBy: body.reviewedBy,
@@ -139,12 +142,12 @@ export async function POST(request: Request) {
 
     return new Response(JSON.stringify(mapped), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Erro ao criar produto' }), {
+    return new Response(JSON.stringify({ error: "Erro ao criar produto" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
